@@ -1,0 +1,28 @@
+{
+  "name": "api-products",
+  "version": "1.0.0",
+  "description": "API products",
+  "main": "index.js",
+  "scripts": {
+    "dist": "tsup src",
+    "start:dev": "tsx --env-file= src/config/.env src/config/server.ts",
+    "start:watch": "tsx watch --env-file=src/config/.env src/config/server.ts",
+    "start:dist": "npm run dist && node dist/src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.2",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "pg": "^8.16.0"
+  }
+}

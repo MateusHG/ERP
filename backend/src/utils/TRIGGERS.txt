@@ -1,0 +1,27 @@
+*** Função ***
+
+CREATE OR REPLACE FUNCTION atualizar_valor_bruto()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Atualiza o valor_bruto da venda com base na soma dos subtotais dos itens
+  UPDATE vendas
+  SET valor_bruto = (
+    SELECT COALESCE(SUM(valor_subtotal), 0)
+    FROM itens_venda
+    WHERE id_venda = NEW.id_venda
+  )
+  WHERE id_venda = NEW.id_venda;
+
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-------------------------------------------------------------------------------------------------
+
+*** Trigger ***
+
+CREATE TRIGGER trigger_atualiza_valor_bruto
+AFTER INSERT OR UPDATE OR DELETE
+ON itens_venda
+FOR EACH ROW
+EXECUTE FUNCTION atualizar_valor_bruto();

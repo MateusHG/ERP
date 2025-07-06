@@ -1,0 +1,31 @@
+CREATE TABLE vendas (
+id_venda SERIAL PRIMARY KEY,
+cliente_id INTEGER NOT NULL,
+data_emissao DATE,
+tipo_pagamento VARCHAR(50),
+desconto_comercial NUMERIC(10,2),
+desconto_financeiro NUMERIC(10,2),
+valor_bruto NUMERIC (10,2),
+valor_total NUMERIC (10,2) GENERATED ALWAYS AS ((valor_bruto - (desconto_comercial + desconto_financeiro))) STORED,
+status VARCHAR(10) NOT NULL,
+data_cadastro TIMESTAMP DEFAULT NOW(),
+data_atualizacao TIMESTAMP DEFAULT NOW(),
+
+FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+
+CONSTRAINT chk_tipo_pagamento CHECK (tipo_pagamento IN ('pix','boleto','cartao','transferencia','prazo'))
+);
+
+
+CREATE TABLE itens_venda (
+id_item SERIAL PRIMARY KEY,
+id_venda INTEGER NOT NULL,
+id_produto INTEGER NOT NULL,
+quantidade INTEGER NOT NULL,
+preco_unitario NUMERIC(10,2) NOT NULL,
+desconto_volume NUMERIC(10,2),
+valor_subtotal NUMERIC(10,2) GENERATED ALWAYS AS ((preco_unitario - desconto_volume) * quantidade) STORED,
+
+FOREIGN KEY (id_venda) REFERENCES vendas(id_venda)
+);
+
