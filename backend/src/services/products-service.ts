@@ -2,9 +2,9 @@ import { badRequest, internalServerError, notFound, ok } from "../utils/http-hel
 import * as productRepository from "../repositories/products-repository";
 import { productModel } from "../models/product-model";
 
-export const getProductsService = async () => {
+export const getProductsService = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }) => {
   try {
-    const products = await productRepository.searchAllProducts();
+    const products = await productRepository.searchAllProducts(filters);
     return ok(products);
 
   } catch (err) {

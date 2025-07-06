@@ -3,7 +3,14 @@ import { createProductService, deleteProductsByIdService, getProductsByIdService
 
 // GET
 export const getProducts = async (req: Request, res: Response) => {
-  const httpResponse = await getProductsService();
+  const filters = {
+    id: typeof req.query.id === 'string' ? Number(req.query.id) : undefined,
+    nome: req.query.nome as string,
+    categoria: req.query.categoria as string,
+    status: req.query.status as string,
+  };
+
+  const httpResponse = await getProductsService(filters);
   res.status(httpResponse.statusCode).json(httpResponse.body);
 };
 

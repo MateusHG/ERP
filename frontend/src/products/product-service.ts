@@ -10,6 +10,25 @@ export async function loadProductsAPI(): Promise<productModel[]> {
   return result.json();
 };
 
+//Monta a busca de produtos com filtro chamando o backend.
+export async function searchProductsWithFilterAPI(filters: { id?: string, nome?: string, categoria?: string, status?: string}) {
+  const params = new URLSearchParams();
+ 
+  if (filters.id) params.append("id", filters.id);
+  if (filters.nome) params.append("nome", filters.nome);
+  if (filters.categoria) params.append("categoria", filters.categoria);
+  if (filters.status) params.append("status", filters.status);
+
+  const response = await fetch(`http://localhost:3000/api/produtos?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar produtos.")
+  }
+
+  return await response.json();
+};
+
+
 //Pega um produto único pelo ID.
 export async function getProductByIdAPI(id: number): Promise<productModel> {
   const result = await fetch (`http://localhost:3000/api/produtos/${id}`);
@@ -45,7 +64,7 @@ export async function updateProductAPI(id: number, data: any): Promise<{ message
 
   //Verifica se a resposta foi um erro (ex: Bad Request).
   if (!response.ok) {
-    throw new Error(result.erro || "Erro ao atualizar o produto.");
+    throw new Error(result.message || result.erro || "Erro ao atualizar o produto.");
   }
 
   return result; // retorno da API no padrão { mensagem: "...", dados?: ... }

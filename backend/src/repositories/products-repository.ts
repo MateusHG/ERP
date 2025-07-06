@@ -1,8 +1,38 @@
 import db from "../config/db";
 import { productModel } from "../models/product-model";
 
-export const searchAllProducts = async (): Promise<productModel[]> => {
-  const result = await db.query(`SELECT * FROM produtos order by id`);
+export const searchAllProducts = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }): Promise<productModel[]> => {
+  let query = `SELECT * FROM produtos`;
+  const conditions: string[] = [];
+  const values: any[] = [];
+
+  if (filters.id) {
+    values.push(`${filters.id}%`);
+    conditions.push(`CAST(id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.nome) {
+    values.push(`%${filters.nome}%`);
+    conditions.push(`nome ILIKE $${values.length}`);
+  }
+
+  if (filters.categoria) {
+    values.push(`%${filters.categoria}%`);
+    conditions.push(`categoria ILIKE $${values.length}`);
+  }
+
+  if (filters.status) {
+    values.push(filters.status); // sem o %
+    conditions.push(`status = $${values.length}`);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join(" AND ");
+  }
+
+  query += ` ORDER BY id`;
+
+  const result = await db.query(query, values);
   return result.rows;
 };
 

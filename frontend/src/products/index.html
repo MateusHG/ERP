@@ -8,16 +8,17 @@
 </head>
 <body>
   <nav class="menu">
-    <button class="ativo">Produtos</button>
-    <button>Estoque</button>
-    <button>Fornecedores</button>
-    <button>Compras</button>
-    <button>Clientes</button>
-    <button>Vendas</button>
-    <button>Fiscal</button>
-    <button>Transporte</button>
-    <button>Serviços</button>
-    <button>Configurações</button>
+    <button class="ativo">
+      <img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+    <button><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+    <button><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+    <button><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+    <button><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+    <button><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+    <button><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+    <button><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+    <button><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+    <button><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
   </nav>
 
   <main>
@@ -87,15 +88,16 @@
           </form>
         </div> <!-- Fecha modal-content -->
       </div> <!-- Fecha new-product-modal -->
-
     </div>
 
     <div class="filtros">
-      <input type="text" placeholder="Buscar por nome...">
-      <input type="text" placeholder="Buscar por categoria...">
-      <select>
-        <option>Ativo</option>
-        <option>Inativo</option>
+      <input type="text" id="filtro-id" placeholder="Buscar por ID...">
+      <input type="text" id="filtro-nome" placeholder="Buscar por nome...">
+      <input type="text" id="filtro-categoria" placeholder="Buscar por categoria...">
+      <select id="filtro-status">
+        <option value="">Todos</option>
+        <option value="Ativo">Ativo</option>
+        <option value="Inativo">Inativo</option>
       </select>
     </div>
 
