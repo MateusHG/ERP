@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Open ERP</title>
+  <link rel="stylesheet" href="/dashboard/dashboard-style.css" />
+</head>
+<body>
+    <header class="dashboard-header">
+  <!-- Esquerda: Logo + Título -->
+  <div class="header-left">
+    <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
+    <div class="title-box">
+      <h1>Open ERP</h1>
+      <p class="subtitle">Bem-vindo de volta!</p>
+    </div>
+  </div>
+
+  <!-- Centro: Navegação com ícones -->
+  <nav class="menu">
+    <button><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
+    <button><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+    <button><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+    <button><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+    <button><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+    <button><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+    <button><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+    <button><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+    <button><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+    <button><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+    <button><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
+  </nav>
+
+  <!-- Direita: Usuário + Data + Logout -->
+  <div class="header-right">
+    <div class="datetime" id="datetime"></div>
+    <div class="user-info">
+      <span>Usuário: <strong id="logged-user">admin</strong></span>
+      <button id="logout-btn">Sair</button>
+    </div>
+  </div>
+</header>
+  
+  <header class="dashboard-header">
+  <div class="left">
+    <div>
+      <h1>Dashboards Iniciais <img src="/erpicons/dashboard.svg" alt="Dashboard-Icone"></h1>
+    </div>
+  </div>
+  <div class="right">
+    <div class="datetime" id="datetime"></div>
+    <div class="user-info">
+    </div>
+  </div>
+</header>
+
+  <main class="dashboard-main">
+    <section class="cards">
+      <div class="card">
+        <h3>Vendas (Mês)</h3>
+        <p>R$ 24.300</p>
+      </div>
+      <div class="card">
+        <h3>Compras (Mês)</h3>
+        <p>R$ 13.800</p>
+      </div>
+      <div class="card">
+        <h3>Estoque Crítico</h3>
+        <p>12 itens</p>
+      </div>
+      <div class="card">
+        <h3>Clientes Ativos</h3>
+        <p>87</p>
+      </div>
+    </section>
+
+    <section class="chart">
+      <h3>Faturamento (últimos 6 meses)</h3>
+      <img src="https://fakeimg.pl/600x300/ccccff/000/?text=Gráfico" alt="Gráfico de Faturamento">
+    </section>
+  </main>
+</body>
+</html>

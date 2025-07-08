@@ -31,6 +31,13 @@ export const badRequest = async (message: string): Promise<httpResponse> => {
   }
 };
 
+export const notAuthorized = async (message: string): Promise<httpResponse> => {
+  return {
+    statusCode: 401,
+    body: { message },
+  }
+}
+
 export const notFound = async (message: string): Promise<httpResponse> => {
   return {
     statusCode: 404,
