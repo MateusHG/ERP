@@ -1,5 +1,5 @@
-import * as purchaseItemsRepository from "../repositories/purchase-item-repository";
-import { purchaseItemModel } from "../models/purchase-model";
+import * as purchaseItemsRepository from "../purchases/purchase-item-repository";
+import { purchaseItemModel } from "../purchases/purchase-model";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 
 export const getPurchaseItemsService = async (purchaseId: number) => {

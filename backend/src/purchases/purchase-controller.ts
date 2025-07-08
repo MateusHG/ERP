@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createPurchaseService, deletePurchaseByIdService, getAllPurchasesService, getPurchaseByIdService, updatePurchaseByIdService } from "../services/purchase-service";
+import { createPurchaseService, deletePurchaseByIdService, getAllPurchasesService, getPurchaseByIdService, updatePurchaseByIdService } from "../purchases/purchase-service";
 
 
 export const getPurchases = async (req: Request, res: Response) => {

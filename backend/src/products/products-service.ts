@@ -1,6 +1,6 @@
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
-import * as productRepository from "../repositories/products-repository";
-import { productModel } from "../models/product-model";
+import * as productRepository from "../products/products-repository";
+import { productModel } from "../products/product-model";
 
 export const getProductsService = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }) => {
   try {

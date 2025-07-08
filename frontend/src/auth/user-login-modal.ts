@@ -27,8 +27,9 @@ form?.addEventListener('submit', async (e) => {
        return;
     }
 
-      const { token } = data;
+      const { token , user } = data;
       localStorage.setItem('token', token);
+      localStorage.setItem('username', username);
       console.log('Login bem-sucedido, redirecionando para dashboard...');
       window.location.href = '/dashboard/dashboard.html';
     } catch (err) {

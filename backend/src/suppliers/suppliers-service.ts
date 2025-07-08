@@ -1,5 +1,5 @@
-import { supplierModel } from "../models/supplier-model";
-import * as supplierRepository from "../repositories/suppliers-repository"
+import { supplierModel } from "../suppliers/supplier-model";
+import * as supplierRepository from "../suppliers/suppliers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
 export const getSuppliersService = async () => {

@@ -24,7 +24,7 @@ export async function loginController(req: Request, res: Response) {
       return res.status(result.statusCode).json(result.body);
     }
 
-    return res.status(200).json(result); // ← aqui está o ponto central
+    return res.status(200).json(result); // ← se der certo retorna aqui.
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno no servidor.' });
   }

@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { productModel } from "../models/product-model";
+import { productModel } from "../products/product-model";
 
 export const searchAllProducts = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }): Promise<productModel[]> => {
   let query = `SELECT * FROM produtos`;

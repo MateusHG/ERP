@@ -1,5 +1,5 @@
-import { salesItemModel, salesModel } from "../models/sales-model";
-import * as salesRepository from "../repositories/sales-repository";
+import { salesItemModel, salesModel } from "../sales/sales-model";
+import * as salesRepository from "../sales/sales-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 
 export const getAllSalesService = async () => {

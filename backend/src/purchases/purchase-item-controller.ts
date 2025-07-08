@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { deletePurchaseItemService, getPurchaseItemsService, postPurchaseItemService, updatePurchaseItemService } from "../services/purchase-item-service";
+import { deletePurchaseItemService, getPurchaseItemsService, postPurchaseItemService, updatePurchaseItemService } from "../purchases/purchase-item-service";
 
 export const getPurchaseItems = async (req: Request, res: Response) => {
   const purchaseId = Number(req.params.id);

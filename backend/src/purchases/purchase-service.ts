@@ -1,6 +1,6 @@
-import * as purchasesRepository from "../repositories/purchase-repository";
+import * as purchasesRepository from "../purchases/purchase-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
-import { purchaseItemModel, purchaseModel } from "../models/purchase-model";
+import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 
 export const getAllPurchasesService = async () => {
   try {

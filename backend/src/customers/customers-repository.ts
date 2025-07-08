@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { customerModel } from "../models/customer-model";
+import { customerModel } from "../customers/customer-model";
 
 export const searchAllCustomers = async (): Promise<customerModel[]> => {
   const result = await db.query(`SELECT * FROM clientes order by id`);

@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { supplierModel } from "../models/supplier-model";
+import { supplierModel } from "../suppliers/supplier-model";
 
 export const searchAllSuppliers = async (): Promise<supplierModel[]> => {
   const result = await db.query(`SELECT * FROM fornecedores order by id`);

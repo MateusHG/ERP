@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createSupplierService, deleteSupplierByIdService, getSupplierByIdService, getSuppliersService, updateSupplierByIdService } from "../services/suppliers-service";
+import { createSupplierService, deleteSupplierByIdService, getSupplierByIdService, getSuppliersService, updateSupplierByIdService } from "../suppliers/suppliers-service";
 
 export const getSuppliers = async (req: Request, res: Response) => {
   const httpResponse = await getSuppliersService();

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createProductService, deleteProductsByIdService, getProductsByIdService, getProductsService, updateProductByIdService } from "../services/products-service";
+import { createProductService, deleteProductsByIdService, getProductsByIdService, getProductsService, updateProductByIdService } from "../products/products-service";
 
 // GET
 export const getProducts = async (req: Request, res: Response) => {

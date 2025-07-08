@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deletePurchaseItem, getPurchaseItems, patchPurchaseItem, postPurchaseItem } from "../controllers/purchase-item-controller";
+import { deletePurchaseItem, getPurchaseItems, patchPurchaseItem, postPurchaseItem } from "../purchases/purchase-item-controller";
  
 const purchaseItemRouter = Router();
 

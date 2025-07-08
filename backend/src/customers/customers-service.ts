@@ -1,5 +1,5 @@
-import { customerModel } from "../models/customer-model";
-import * as customerRepository from "../repositories/customers-repository"
+import { customerModel } from "../customers/customer-model";
+import * as customerRepository from "../customers/customers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
 

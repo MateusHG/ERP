@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { purchaseItemModel } from "../models/purchase-model";
+import { purchaseItemModel } from "../purchases/purchase-model";
 
 
 export const searchAllPurchaseItems = async (purchaseId: number): Promise<purchaseItemModel[]> => {

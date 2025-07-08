@@ -38,6 +38,6 @@ export async function loginUserService(username: string, password: string) {
       return badRequest('Senha incorreta.');
 
     const token = generateToken({ id: user.id, username: user.username });
-    return { token };
+    return { username, token };
 };
 

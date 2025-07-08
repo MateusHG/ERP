@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { purchaseModel, purchaseItemModel } from "../models/purchase-model";
+import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
 
 //Serão duas tabelas de compra, compras e compra_itens, as consultas terão que ter inner/left join.
 export const searchAllPurchases = async (): Promise<purchaseModel[]> => {

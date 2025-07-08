@@ -1,12 +1,12 @@
 import express, {json} from "express";
 import cors from "cors";
-import suppliersRouter from "./routes/suppliers-routes";
-import productsRouter from "./routes/products-routes";
-import customerRouter from "./routes/customers-routes";
-import purchaseRouter from "./routes/purchase-routes";
-import purchaseItemRouter from "./routes/purchase-item-routes";
-import salesRouter from "./routes/sales-routes";
-import saleItemRouter from "./routes/sale-item-routes";
+import suppliersRouter from "./suppliers/suppliers-routes";
+import productsRouter from "./products/products-routes";
+import customerRouter from "./customers/customers-routes";
+import purchaseRouter from "./purchases/purchase-routes";
+import purchaseItemRouter from "./purchases/purchase-item-routes";
+import salesRouter from "./sales/sales-routes";
+import saleItemRouter from "./sales/sale-item-routes";
 import authRouter from "./auth/auth-routes";
 
 function createApp() {

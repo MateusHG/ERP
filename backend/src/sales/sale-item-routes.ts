@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteSaleItem, getSaleItems, patchSaleItem, postSaleItem } from "../controllers/sale-item-controller";
+import { deleteSaleItem, getSaleItems, patchSaleItem, postSaleItem } from "../sales/sale-item-controller";
 
 const saleItemRouter = Router();
 

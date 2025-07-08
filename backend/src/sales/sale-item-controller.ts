@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { deleteSaleItemService, getSaleItemsService, postSaleItemService, updateSaleItemService } from "../services/sale-item-service";
+import { deleteSaleItemService, getSaleItemsService, postSaleItemService, updateSaleItemService } from "../sales/sale-item-service";
 
 export const getSaleItems = async (req: Request, res: Response) => {
   const saleId = Number(req.params.id);

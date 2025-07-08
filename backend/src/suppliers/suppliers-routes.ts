@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getSupplierById, getSuppliers, postSupplier, deleteSupplierById, patchSupplierById } from "../controllers/suppliers-controller";
+import { getSupplierById, getSuppliers, postSupplier, deleteSupplierById, patchSupplierById } from "../suppliers/suppliers-controller";
 
 const suppliersRouter = Router();
 
