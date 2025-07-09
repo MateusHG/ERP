@@ -8,6 +8,7 @@ import purchaseItemRouter from "./purchases/purchase-item-routes";
 import salesRouter from "./sales/sales-routes";
 import saleItemRouter from "./sales/sale-item-routes";
 import authRouter from "./auth/auth-routes";
+import dashboardsRoutes from "./dashboards/dashboard-routes";
 
 function createApp() {
 const app = express();
@@ -16,6 +17,7 @@ app.use(cors());
 
 app.use(json());
 app.use('/api/auth', authRouter);
+app.use('/api/dashboard', dashboardsRoutes);
 app.use("/api/produtos", productsRouter);
 app.use("/api/fornecedores", suppliersRouter);
 app.use("/api/clientes", customerRouter);

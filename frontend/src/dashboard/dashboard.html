@@ -34,9 +34,9 @@
 
   <!-- Direita: Usuário + Data + Logout -->
   <div class="header-right">
-    <div class="datetime" id="datetime"></div>
     <div class="user-info">
-      <span>Usuário: <strong id="logged-user">admin</strong></span>
+    <div class="datetime" id="datetime"></div>
+      <span>Usuário: <strong id="logged-user"></strong></span>
       <button id="logout-btn">Sair</button>
     </div>
   </div>
@@ -46,8 +46,17 @@
   <div class="left">
     <div>
       <h1>Dashboards Iniciais <img src="/erpicons/dashboard.svg" alt="Dashboard-Icone"></h1>
+      <div class="filter-date-period">
+      <label for="initial-date">Período de:</label>
+      <input type="date" id="initial-date" name="initial_date">
+
+      <label for="final-date">até:</label>
+      <input type="date" id="final-date" name="final_date">
+
+      <button id="filter-btn">Filtrar</button>
     </div>
   </div>
+</div>
   <div class="right">
     </div>
   </div>
@@ -56,20 +65,24 @@
   <main class="dashboard-main">
     <section class="cards">
       <div class="card">
-        <h3>Vendas (Mês)</h3>
-        <p>R$ 24.300</p>
+        <h3>Vendas</h3>
+        <p id="total-sales"></p>
       </div>
       <div class="card">
-        <h3>Compras (Mês)</h3>
-        <p>R$ 13.800</p>
+        <h3>Compras</h3>
+        <p id="total-purchases"></p>
       </div>
       <div class="card">
         <h3>Estoque Crítico</h3>
-        <p>12 itens</p>
+        <p id="critical-inventory"></p>
       </div>
       <div class="card">
         <h3>Clientes Ativos</h3>
-        <p>87</p>
+        <p id="active-customers"></p>
+      </div>
+      <div class="card">
+        <h3>Fornecedores Ativos</h3>
+        <p id="active-suppliers"></p>
       </div>
     </section>
 

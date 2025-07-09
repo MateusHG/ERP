@@ -4,11 +4,12 @@ import { notAuthorized } from "../utils/http-helper";
 
 // Verifica o JWT antes de rotas protegidas.
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer')) {
-    return notAuthorized('Token não fornecido.');
+    const error = await notAuthorized('Token não fornecido.');
+    return res.status(error.statusCode).json(error.body);
   }
 
   const token = authHeader.split(' ')[1];
@@ -18,6 +19,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     req.user = user; //Adiciona o payload ao request
     next();
   } catch {
-    return notAuthorized('Token inválido ou expirado.');
+    const error = await notAuthorized('Token inválido ou expirado.');
+    return res.status(error.statusCode).json(error.body);
   }
 };
