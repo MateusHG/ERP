@@ -1,3 +1,10 @@
+import { initNavigation } from "./dashboard-navigation";
+import { formatValues, showSessionExpiredMessage } from "./dashboard-utils";
+
+window.addEventListener('DOMContentLoaded', () => {
+  initNavigation();
+});
+
 //Atualizar o dashboard ao clicar em filtrar.
 async function loadDashboardWithFilter(dataInicial: string, dataFinal: string, token: string | null) {
   try {
@@ -10,14 +17,35 @@ async function loadDashboardWithFilter(dataInicial: string, dataFinal: string, t
       }
     );
 
+    //Se o token expirar, chama a função que exibe um alerta informando o usuário, faz logout e redireciona para a página de login.
+    if (response.status === 401) {
+      showSessionExpiredMessage();
+      return;
+    }
+
     const data = await response.json();
-  
+
     //Preenche os cards com os dados da API.
-    (document.getElementById('total-sales') as HTMLElement).textContent = data.total_vendas;
-    (document.getElementById('total-purchases') as HTMLElement).textContent = data.total_compras;
-    (document.getElementById('critical-inventory') as HTMLElement).textContent = data.produtos_estoque_baixo;
+    (document.getElementById('total-sales-count') as HTMLElement).textContent = `Finalizadas: ${data.total_vendas_finalizadas ?? 0}`;
+    (document.getElementById('total-sales-value') as HTMLElement).textContent = `Total: ${formatValues(data.total_vendas_finalizadas_valores)}`;
+    (document.getElementById('total-sales-pending') as HTMLElement).textContent = `Vendas Pendentes: ${data.total_vendas_pendentes}`;
+
+    (document.getElementById('total-purchases-count') as HTMLElement).textContent = `Finalizadas: ${data.total_compras_finalizadas ?? 0}`;
+    (document.getElementById('total-purchases-value') as HTMLElement).textContent = `Total: ${formatValues(data.total_compras_valores)}`;
+    (document.getElementById('total-purchases-pending') as HTMLElement).textContent = `Compras Pendentes: ${data.total_compras_pendentes}`;
+
+    (document.getElementById('below-minimum') as HTMLElement).textContent = data.produtos_estoque_baixo;
+    (document.getElementById('between-limits') as HTMLElement).textContent = data.produtos_estoque_medio;
+    (document.getElementById('above-maximum') as HTMLElement).textContent = data.produtos_estoque_alto;
+
     (document.getElementById('active-customers') as HTMLElement).textContent = data.clientes_ativos;
+    (document.getElementById('inactive-customers') as HTMLElement).textContent = data.clientes_inativos;
+    (document.getElementById('new-monthly-customers') as HTMLElement).textContent = data.clientes_novos_mes;
+
+
     (document.getElementById('active-suppliers') as HTMLElement).textContent = data.fornecedores_ativos;
+    (document.getElementById('inactive-suppliers') as HTMLElement).textContent = data.fornecedores_inativos;
+    (document.getElementById('new-monthly-suppliers') as HTMLElement).textContent = data.fornecedores_novos_mes;
   
   } catch (err) {
     console.error('Erro ao carregar os dados do Dashboard:', err);
@@ -119,3 +147,4 @@ try {
 }
   
 });
+

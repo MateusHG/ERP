@@ -4,28 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Produtos Comerciais</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./product-style.css">
 </head>
-<body>
+<header class="products-header">
+  <!-- Esquerda: Logo + Título -->
+  <div class="header-left">
+    <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
+    <div class="title-box">
+      <h1>Open ERP</h1>
+      <p class="subtitle">Bem-vindo de volta!</p>
+    </div>
+  </div>
+
+  <!-- Centro: Navegação com ícones -->
   <nav class="menu">
-    <button class="ativo">
-      <img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
-    <button><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
-    <button><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
-    <button><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
-    <button><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
-    <button><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
-    <button><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
+    <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
+    <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+    <button id="inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+    <button id="suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+    <button id="purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+    <button id="customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+    <button id="sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+    <button id="receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+    <button id="logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+    <button id="services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+    <button id="config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
   </nav>
 
-  <main>
-    <div class="topo">
-      <h2>Produtos Comerciais</h2>
-      <button id="btn-new-product" class="btn-new-product">+ Novo Produto</button>
+  <!-- Direita: Usuário + Data + Logout -->
+  <div class="header-right">
+    <div class="user-info">
+    <div class="datetime" id="datetime"></div>
+      <span>Usuário: <strong id="logged-user"></strong></span>
+      <button id="logout-btn">Sair</button>
+    </div>
+  </div>
+</header>
+  
+  <header class="products-header">
+  <div class="left">
+    <div>
+      <h1>Produtos Comerciais <img src="/erpicons/products.svg" alt="Produtos-Icone"><button id="btn-new-product" class="btn-new-product">+ Novo Produto</button></h1>
+      <div class="filtros">
+      <input type="text" id="filtro-id" placeholder="Buscar por ID...">
+      <input type="text" id="filtro-nome" placeholder="Buscar por nome...">
+      <input type="text" id="filtro-categoria" placeholder="Buscar por categoria...">
+      <select id="filtro-status">
+        <option value="">Todos</option>
+        <option value="Ativo">Ativo</option>
+        <option value="Inativo">Inativo</option>
+      </select>
+    </div>
+    </div>
+  </div>
+</div>
+  <div class="right">
+    </div>
+  </div>
+</header>
 
+  <main>
       <!-- Modal: Novo Produto -->
       <div id="new-product-modal" class="modal hidden">
         <div class="modal-content">
@@ -88,17 +126,6 @@
           </form>
         </div> <!-- Fecha modal-content -->
       </div> <!-- Fecha new-product-modal -->
-    </div>
-
-    <div class="filtros">
-      <input type="text" id="filtro-id" placeholder="Buscar por ID...">
-      <input type="text" id="filtro-nome" placeholder="Buscar por nome...">
-      <input type="text" id="filtro-categoria" placeholder="Buscar por categoria...">
-      <select id="filtro-status">
-        <option value="">Todos</option>
-        <option value="Ativo">Ativo</option>
-        <option value="Inativo">Inativo</option>
-      </select>
     </div>
 
     <table id="tabela-produtos">

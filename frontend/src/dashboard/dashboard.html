@@ -19,17 +19,17 @@
 
   <!-- Centro: Navegação com ícones -->
   <nav class="menu">
-    <button><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
-    <button><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
-    <button><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
-    <button><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
-    <button><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
-    <button><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
-    <button><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
-    <button><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
+    <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
+    <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+    <button id="inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+    <button id="suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+    <button id="purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+    <button id="customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+    <button id="sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+    <button id="receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+    <button id="logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+    <button id="services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+    <button id="config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
   </nav>
 
   <!-- Direita: Usuário + Data + Logout -->
@@ -65,30 +65,46 @@
   <main class="dashboard-main">
     <section class="cards">
       <div class="card">
-        <h3>Vendas</h3>
-        <p id="total-sales"></p>
+        <h3>Vendas do Período</h3>
+        <p id="total-sales-count"></p>
+        <p id="total-sales-value"></p>
+        <p id="total-sales-pending"></p>
       </div>
       <div class="card">
-        <h3>Compras</h3>
-        <p id="total-purchases"></p>
+        <h3>Compras do Período</h3>
+        <p id="total-purchases-count"></p>
+        <p id="total-purchases-value"></p>
+        <p id="total-purchases-pending"></p>
       </div>
       <div class="card">
-        <h3>Estoque Crítico</h3>
-        <p id="critical-inventory"></p>
+        <h3>Estoque</h3>
+          <div class="inventory-status">
+          <p><span class="badge badge-red">Itens Abaixo do Mínimo:</span> <span id="below-minimum"></span></p>
+          <p><span class="badge badge-green">Itens Dentro da Média:</span> <span id="between-limits"></span></p>
+          <p><span class="badge badge-blue">Itens Acima do Máximo:</span> <span id="above-maximum"></span></p>
+        </div>
       </div>
       <div class="card">
-        <h3>Clientes Ativos</h3>
-        <p id="active-customers"></p>
+        <h3>Clientes</h3>
+          <div class="customers-status">
+          <p><span class="badge badge-green">Clientes Ativos:</span> <span id="active-customers"></span></p>
+          <p><span class="badge badge-red">Clientes Inativos:</span> <span id="inactive-customers"></span></p>
+          <p><span class="badge badge-blue">Novos no Mês:</span> <span id="new-monthly-customers"></span></p>
+        </div>
       </div>
       <div class="card">
-        <h3>Fornecedores Ativos</h3>
-        <p id="active-suppliers"></p>
+        <h3>Fornecedores</h3>
+        <div class="suppliers-status">
+          <p><span class="badge badge-green">Fornecedores Ativos:</span> <span id="active-suppliers"></span></p>
+          <p><span class="badge badge-red">Fornecedores Inativos:</span> <span id="inactive-suppliers"></span></p>
+          <p><span class="badge badge-blue">Novos no Mês:</span> <span id="new-monthly-suppliers"></span></p>
+        </div>
       </div>
     </section>
 
     <section class="chart">
       <h3>Faturamento (últimos 6 meses)</h3>
-      <img src="https://fakeimg.pl/600x300/ccccff/000/?text=Gráfico" alt="Gráfico de Faturamento">
+      <img src="https://quickchart.io/chart?c={type:'line',data:{labels:['Fev','Mar','Abr','Mai','Jun','Jul'],datasets:[{label:'R$',data:[15000,18000,12000,20000,17000,22000]}]}}" alt="Gráfico de Faturamento">
     </section>
   </main>
 
