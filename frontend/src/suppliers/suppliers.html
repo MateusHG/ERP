@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Produtos Comerciais</title>
-  <link rel="stylesheet" href="./product-style.css">
+  <title>Fornecedores</title>
+  <link rel="stylesheet" href="./suppliers-style.css">
 </head>
 <header class="products-header">
   <!-- Esquerda: Logo + Título -->
@@ -44,7 +44,7 @@
   <header class="products-header">
   <div class="left">
     <div>
-      <h1>Produtos Comerciais <img src="/erpicons/products.svg" alt="Produtos-Icone"><button id="btn-new-product" class="btn-new-product">+ Novo Produto</button></h1>
+      <h1>Fornecedores<img src="/erpicons/products.svg" alt="Produtos-Icone"><button id="btn-new-supplier" class="btn-new-supplier">+ Novo Fornecedor</button></h1>
       <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
       <input type="text" id="filtro-nome" placeholder="Buscar por nome...">
@@ -65,10 +65,10 @@
 
   <main>
       <!-- Modal: Novo Produto -->
-      <div id="new-product-modal" class="modal hidden">
+      <div id="new-supplier-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Novo Produto</h3>
-          <form id="new-product-form">
+          <h3>Novo Fornecedor</h3>
+          <form id="new-supplier-form">
             <div class="form-fields">
               <div class="form-group">
                 <label for="new-codigo">Código:</label>
@@ -128,26 +128,23 @@
       </div> <!-- Fecha new-product-modal -->
     </div>
 
-    <table id="tabela-produtos">
+    <table id="suppliers-table">
       <thead>
         <tr>
           <th>ID</th>
-          <th>Código</th>
-          <th>Nome</th>
-          <th>Descrição</th>
-          <th>Preço</th>
-          <th>Estoque</th>
-          <th>Categoria</th>
+          <th>Nome Fantasia</th>
+          <th>Razão Social</th>
+          <th>CNPJ</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th>Estado</th>
           <th>Status</th>
-          <th>Estoque Mín</th>
-          <th>Estoque Máx</th>
           <th>Data Cadastro</th>
           <th>Data Atualização</th>
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="produtos-tbody">
-        <!-- Você pode continuar com os outros produtos aqui -->
+      <tbody id="suppliers-tbody">
       </tbody>
     </table>
   </main>
@@ -171,10 +168,10 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Produto -->
+  <!-- Modal: Editar Fornecedor -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Produto</h3>
+      <h3>Editar Fornecedor</h3>
       <form id="edit-form">
         <div class="form-fields">
           <div class="form-group">
@@ -183,33 +180,38 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-codigo">Código:</label>
-            <input type="text" name="codigo" id="edit-codigo" required minlength="1" maxlength="11" />
+            <label for="edit-codigo">Razão Social:</label>
+            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
           </div>
 
           <div class="form-group">
-            <label for="edit-nome">Nome:</label>
-            <input type="text" name="nome" id="edit-nome" required minlength="1" maxlength="100" />
+            <label for="edit-nome">Nome Fantasia:</label>
+            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
           </div>
 
           <div class="form-group">
-            <label for="edit-descricao">Descrição:</label>
-            <input type="text" name="descricao" id="edit-descricao" required />
+            <label for="edit-descricao">CNPJ:</label>
+            <input type="text" name="cnpj" id="edit-cnpj" required />
           </div>
 
           <div class="form-group">
-            <label for="edit-preco">Preço:</label>
-            <input type="number" name="preco" id="edit-preco" required min="0" step="0.01" />
+            <label for="edit-ie">Inscrição Estadual:</label>
+            <input type="number" name="iestadual" id="edit-ie" min="0" />
           </div>
 
           <div class="form-group">
-            <label for="edit-estoque">Estoque:</label>
-            <input type="number" name="estoque" id="edit-estoque" required min="0" />
+            <label for="edit-telefone">Telefone:</label>
+            <input type="number" name="telefone" id="edit-telefone" required min="0" />
           </div>
 
           <div class="form-group">
-            <label for="edit-categoria">Categoria:</label>
-            <input type="text" name="categoria" id="edit-categoria" required minlength="1" maxlength="50" />
+            <label for="edit-categoria">Celular:</label>
+            <input type="number" name="celular" id="edit-celular" minlength="1" maxlength="50" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-email">E-mail:</label>
+            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
           </div>
 
           <div class="form-group">
@@ -221,14 +223,68 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-estoque-min">Estoque Mínimo:</label>
-            <input type="number" name="estoque_min" id="edit-estoque-min" required min="0" />
-          </div>
+                <label for="edit-cep">CEP:</label>
+                <input type="number" name="cep" id="edit-cep" />
+              </div>
 
-          <div class="form-group">
-            <label for="edit-estoque-max">Estoque Máximo:</label>
-            <input type="number" name="estoque_max" id="edit-estoque-max" required min="0" />
-          </div>
+              <div class="form-group">
+                <label for="edit-uf">UF:</label>
+                <select name="uf" id="edit-uf" required>
+                  <option value="">Selecione uma UF</option>
+                  <option value="AC">Acre (AC)</option>
+                  <option value="AL">Alagoas (AL)</option>
+                  <option value="AP">Amapá (AP)</option>
+                  <option value="AM">Amazonas (AM)</option>
+                  <option value="BA">Bahia (BA)</option>
+                  <option value="CE">Ceará (CE)</option>
+                  <option value="DF">Distrito Federal (DF)</option>
+                  <option value="ES">Espírito Santo (ES)</option>
+                  <option value="GO">Goiás (GO)</option>
+                  <option value="MA">Maranhão (MA)</option>
+                  <option value="MT">Mato Grosso (MT)</option>
+                  <option value="MS">Mato Grosso do Sul (MS)</option>
+                  <option value="MG">Minas Gerais (MG)</option>
+                  <option value="PA">Pará (PA)</option>
+                  <option value="PB">Paraíba (PB)</option>
+                  <option value="PR">Paraná (PR)</option>
+                  <option value="PE">Pernambuco (PE)</option>
+                  <option value="PI">Piauí (PI)</option>
+                  <option value="RJ">Rio de Janeiro (RJ)</option>
+                  <option value="RN">Rio Grande do Norte (RN)</option>
+                  <option value="RS">Rio Grande do Sul (RS)</option>
+                  <option value="RO">Rondônia (RO)</option>
+                  <option value="RR">Roraima (RR)</option>
+                  <option value="SC">Santa Catarina (SC)</option>
+                  <option value="SP">São Paulo (SP)</option>
+                  <option value="SE">Sergipe (SE)</option>
+                  <option value="TO">Tocantins (TO)</option>
+                </select>
+              </div>
+          
+              <div class="form-group">
+                <label for="edit-rua">Rua:</label>
+                <input type="text" name="rua" id="edit-rua" required />
+              </div>
+
+              <div class="form-group">
+                <label for="edit-numero">Nº:</label>
+                <input type="number" name="numero" id="edit-numero" required />
+              </div>
+
+              <div class="form-group">
+                <label for="edit-complemento">Complemento:</label>
+                <input type="text" name="complemento" id="edit-complemento" />
+              </div>
+            
+              <div class="form-group">
+                <label for="edit-bairro">Bairro:</label>
+                <input type="text" name="bairro" id="edit-bairro" required />
+              </div>
+
+              <div class="form-group">
+                <label for="edit-cidade">Cidade:</label>
+                <input type="text" name="cidade" id="edit-cidade" required />
+              </div>
 
           <div class="form-group">
             <label for="edit-data-cadastro">Data de Cadastro:</label>

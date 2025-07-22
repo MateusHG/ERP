@@ -1,10 +1,41 @@
 import db from "../config/db";
 import { supplierModel } from "../suppliers/supplier-model";
 
-export const searchAllSuppliers = async (): Promise<supplierModel[]> => {
-  const result = await db.query(`SELECT * FROM fornecedores order by id`);
+export const searchAllSuppliers = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }): Promise<supplierModel[]> => {
+  let query = `SELECT * FROM fornecedores`;
+  const conditions: string[] = [];
+  const values: any [] = [];
+
+  if (filters.id) {
+    values.push(`${filters.id}%`);
+    conditions.push(`CAST(id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.nome) {
+    values.push(`$${filters.nome}%`);
+    conditions.push(`nome ILIKE $${values.length}`);
+  }
+
+  if (filters.categoria) {
+    values.push(`%${filters.categoria}%`);
+    conditions.push(`categoria ILIKE $${values.length}`);
+  }
+
+  if (filters.status) {
+    values.push(`status = $${values.length}`);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join(" AND ");
+  }
+
+  query += ` ORDER BY id `;
+
+  const result = await db.query(query, values);
   return result.rows;
 };
+
+  
 
 export const searchSupplierById = async (id: number): Promise<supplierModel | null > => {
   const result = await db.query(`SELECT * FROM fornecedores where id = $1`, [id]);
@@ -12,13 +43,13 @@ export const searchSupplierById = async (id: number): Promise<supplierModel | nu
 };
 
 export const insertSupplier = async (supplier: Omit<supplierModel, 'id' | 'data_cadastro'| 'data_atualizacao'>): Promise<supplierModel> => {
-  const { razao_social, nome_fantasia, cnpj, inscricao_estadual, email, telefone, celular, rua, numero, complemento, bairro, cidade, estado, cep,  status } = supplier;
+  const { razao_social, nome_fantasia, cnpj, inscricao_estadual, email, telefone, celular, rua, numero, complemento, bairro, cidade, uf, cep,  status } = supplier;
 
   const result = await db.query(
     `INSERT INTO fornecedores (razao_social, nome_fantasia, cnpj, inscricao_estadual, email, telefone, celular, rua, numero, complemento, bairro, cidade, estado, cep, status)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *`,
-    [razao_social, nome_fantasia, cnpj, inscricao_estadual, email, telefone, celular, rua, numero, complemento, bairro, cidade, estado, cep, status]
+    [razao_social, nome_fantasia, cnpj, inscricao_estadual, email, telefone, celular, rua, numero, complemento, bairro, cidade, uf, cep, status]
   );
 
   return result.rows[0];

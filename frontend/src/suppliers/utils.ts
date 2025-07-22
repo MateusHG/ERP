@@ -72,3 +72,13 @@ export function showMessage(message: string): void {
 
   closeBtn.addEventListener("click", close);
 };
+
+//Pega os valores dos campos de filtro.
+export function getFilterValues() {
+  return {
+    id: (document.querySelector("#filtro-id") as HTMLInputElement)?.value || "",
+    nome: (document.querySelector("#filtro-nome") as HTMLInputElement)?.value || "",
+    categoria: (document.querySelector("#filtro-categoria") as HTMLInputElement)?.value || "",
+    status: (document.querySelector("#filtro-status") as HTMLSelectElement)?.value || "",
+  }
+};

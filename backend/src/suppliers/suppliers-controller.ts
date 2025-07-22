@@ -2,7 +2,14 @@ import { Request, Response } from "express";
 import { createSupplierService, deleteSupplierByIdService, getSupplierByIdService, getSuppliersService, updateSupplierByIdService } from "../suppliers/suppliers-service";
 
 export const getSuppliers = async (req: Request, res: Response) => {
-  const httpResponse = await getSuppliersService();
+  const filters = {
+    id: typeof req.query.id === 'string' ? Number(req.query.id): undefined,
+    nome: req.query.nome as string,
+    categoria: req.query.categoria as string,
+    status: req.query.status as string,
+  };
+
+  const httpResponse = await getSuppliersService(filters);
   res.status(httpResponse.statusCode).json(httpResponse.body);
 };
 

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fornecedores</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    thead {
+      background-color: #2c3e50;
+      color: white;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .status-ativo {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-inativo {
+      color: #999;
+      font-weight: bold;
+    }
+
+    .actions button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .actions button.edit {
+      color: #3498db;
+    }
+
+    .actions button.delete {
+      color: #e74c3c;
+    }
+
+    .actions button.reactivate {
+      color: #27ae60;
+    }
+
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 10px;
+        background: white;
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #555;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fornecedores</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>CNPJ</th>
+        <th>Telefone</th>
+        <th>E-mail</th>
+        <th>UF</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="Nome">Alfa Ltda</td>
+        <td data-label="CNPJ">12.345.678/0001-99</td>
+        <td data-label="Telefone">(11) 99999-0000</td>
+        <td data-label="E-mail">contato@alfa.com.br</td>
+        <td data-label="UF">SP</td>
+        <td data-label="Status" class="status-ativo">Ativo</td>
+        <td data-label="Ações" class="actions">
+          <button class="edit" title="Editar">✏️</button>
+          <button class="delete" title="Inativar">🗑️</button>
+        </td>
+      </tr>
+      <tr>
+        <td data-label="Nome">Beta Comércio</td>
+        <td data-label="CNPJ">98.765.432/0001-11</td>
+        <td data-label="Telefone">(21) 98888-1111</td>
+        <td data-label="E-mail">vendas@beta.com</td>
+        <td data-label="UF">RJ</td>
+        <td data-label="Status" class="status-inativo">Inativo</td>
+        <td data-label="Ações" class="actions">
+          <button class="edit" title="Editar">✏️</button>
+          <button class="reactivate" title="Reativar">↩️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

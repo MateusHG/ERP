@@ -2,9 +2,9 @@ import { supplierModel } from "../suppliers/supplier-model";
 import * as supplierRepository from "../suppliers/suppliers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
-export const getSuppliersService = async () => {
+export const getSuppliersService = async (filters: {id?: number, nome?: string, categoria?: string, status?: string}) => {
   try {
-    const suppliers = await supplierRepository.searchAllSuppliers();
+    const suppliers = await supplierRepository.searchAllSuppliers(filters);
     return ok(suppliers);
   
   } catch (err) {
@@ -71,7 +71,7 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
     if (data.razao_social) {
       const razaoAlreadyExists = await supplierRepository.verifyRazao(data.razao_social);
       if (razaoAlreadyExists && razaoAlreadyExists.id !== id) {
-        return badRequest('Já existe um cadastro com esta Razão Social.');
+        return badRequest('Já existe um cadastro com esta razão social.');
       }
     }
 
@@ -85,7 +85,7 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
     if (data.email) {
       const emailAlreadyExists = await supplierRepository.verifyEmail(data.email);
       if (emailAlreadyExists && emailAlreadyExists.id !== id) {
-        return badRequest('Já existe um cadastro com este Email.');
+        return badRequest('Já existe um cadastro com este e-mail.');
       }
     }
 
@@ -95,7 +95,7 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
       return notFound('Fornecedor não encontrado.')
     }
     
-    return ok(updatedSupplier);
+    return ok( { message: "Cadastro atualizado com sucesso." });
 
   } catch (err) {
     console.error(err);
@@ -110,7 +110,7 @@ export const deleteSupplierByIdService = async (id: number) => {
   if (!deleted) {
     return notFound('ID Não encontrado.')
 }
-  return ok({ mensagem: 'Fornecedor deletado com sucesso.'});
+  return ok({ message: 'Fornecedor deletado com sucesso.'});
 
 }  catch (err) {
    console.error(err);
