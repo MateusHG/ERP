@@ -73,12 +73,66 @@ export function showMessage(message: string): void {
   closeBtn.addEventListener("click", close);
 };
 
-//Pega os valores dos campos de filtro.
-export function getFilterValues() {
-  return {
-    id: (document.querySelector("#filtro-id") as HTMLInputElement)?.value || "",
-    nome: (document.querySelector("#filtro-nome") as HTMLInputElement)?.value || "",
-    categoria: (document.querySelector("#filtro-categoria") as HTMLInputElement)?.value || "",
-    status: (document.querySelector("#filtro-status") as HTMLSelectElement)?.value || "",
+//Pega os dados do cadastro atual, para comparar depois se houve alteração.
+export function getFormDataSnapshot(form: HTMLFormElement): Record<string, string> {
+  const data: Record<string, string> = {};
+  const elements = form.elements;
+
+  for (let i = 0; i < elements.length; i++) {
+    const el = elements[i] as HTMLInputElement | HTMLSelectElement;
+    if (el.name) {
+      data[el.name] = el.value.trim();
+    }
   }
+    return data;
+};
+
+//Valida se os dados originais foram alterados comparando com os atuais.
+export function isFormChanged(form: HTMLFormElement, originalData: Record<string, string>): boolean {
+  const currentData = getFormDataSnapshot(form);
+  const ignoreFields = ["data_cadastro, data_atualizacao"];
+
+  console.log("originalData:", originalData);
+  console.log("currentData:", currentData);
+
+  return Object.keys(originalData).some(key => {
+    if (ignoreFields.includes(key)) return false;
+
+    const orig = originalData[key]?.trim();
+    const curr = currentData[key]?.trim();
+
+    return orig !== curr;
+  })
+};
+
+//Formatação de número de telefone/celular.
+export function formatPhoneNumber(value: string): string {
+  //Remove tudo que não for dígito
+  value = value.replace(/\D/g, "");
+
+  //Formata o DDD
+  if (value.length > 2) {
+    value = "(" + value.substring(0, 2) + ") " + value.substring(2);
+  }
+
+  // Formata o restante com 9 dígitos.
+  if (value.length > 9) {
+    value = value.replace(/(\(\d{2}\) )(\d{4})(\d{4})/, "$1$2-$3");
+  } else if (value.length > 8) {
+     value = value.replace(/(\(\d{2}\) )(\d{4})(\d{4})/, "$1$2-$3");
+  }
+    return value;
+};
+
+//Formatação de CNPJ.
+export function formatCnpj(value: string): string {
+  //Remove tudo que não for número
+  const digits = value.replace(/\D/g, "").slice(0, 14); //Máximo 14 dígitos
+
+  //Aplica máscara, ex: 00.000.000/0000-00
+  return digits 
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
 };

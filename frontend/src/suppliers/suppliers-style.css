@@ -33,7 +33,7 @@ body {
       width: 24px;
     }
 
-    .products-header {
+    .suppliers-header {
       background: linear-gradient(260deg, #2e80eb, #74b9ff);
       color: white;
       padding: 20px;
@@ -42,6 +42,14 @@ body {
       align-items: center;
       flex-wrap: wrap;
       gap: 16px;
+}
+
+.left img {
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -6px;
+  height: 32px;
+
 }
 
 .header-left {
@@ -152,16 +160,6 @@ body {
       padding: 0 20px;
     }
 
-    .novo-produto {
-      background-color: #1a73e8;
-      color: white;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
     .filtros {
       display: flex;
       gap: 10px;
@@ -193,10 +191,14 @@ body {
     }
 
     th, td {
-     /* justify-content: space-between; */
       padding: 12px;
       text-align: center;
       font-size: 14px;
+    }
+
+    td:nth-child(4), /* Coluna do CNPJ */
+    td:nth-child(5)  /* Coluna do Telefone */ {
+      min-width: 130px;
     }
 
     tbody tr {
@@ -228,7 +230,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1100;
 }
 
 #confirm-box.hidden {
@@ -346,6 +348,26 @@ body {
   justify-content: space-between;
 }
 
+#submit-edit {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#cancel-edit {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 #edit-form {
   display: flex;
   flex-direction: column;
@@ -387,7 +409,7 @@ input[readonly] {
   cursor: not-allowed;
 }
 
-/* Box para cadastro de novo produto. */
+/* Box para cadastro de novo fornecedor. */
 #new-supplier-modal {
   position: fixed;
   top: 0;
@@ -405,7 +427,28 @@ input[readonly] {
   display: none;
 }
 
+#submit-new-supplier {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#cancel-new-supplier {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 #new-supplier-form {
   display: flex;
   flex-direction: column;
 }
+

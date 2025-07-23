@@ -80,3 +80,15 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     tbody.appendChild(tr);
   });
 };
+
+//Pega os valores dos campos de filtro.
+export function getFilterValues() {
+  return {
+    id: (document.querySelector("#filtro-id") as HTMLInputElement)?.value || "",
+    nome_fantasia: (document.querySelector("#filtro-nome-fantasia") as HTMLInputElement)?.value || "",
+    razao_social: (document.querySelector("#filtro-razao-social") as HTMLInputElement)?.value || "",
+    cnpj: (document.querySelector("#filtro-cnpj") as HTMLInputElement)?.value || "",
+    email: (document.querySelector("#filtro-email") as HTMLInputElement)?.value || "",
+    status: (document.querySelector("#filtro-status") as HTMLSelectElement)?.value || "",
+  };
+}

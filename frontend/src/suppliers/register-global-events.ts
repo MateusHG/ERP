@@ -1,4 +1,4 @@
-import { handleDeleteClick, handleEditClick, handleFilterChange } from "./suppliers-events";
+import { handleDeleteClick, handleEditClick, handleFilterChange, handleNewSupplierClick } from "./suppliers-events";
 
 export function registerGlobalEvents() {
   document.addEventListener("click", async (event) => {
@@ -16,17 +16,22 @@ export function registerGlobalEvents() {
       await handleNewSupplierClick(target);
     }
   });
-}
+
 
 // -------------------------
 // Eventos de filtro (input/select)
 // -------------------------
-const idInput = document.querySelector('#filtro-id');
-const nameInput = document.querySelector('#filtro-nome');
-const categoryInput = document.querySelector('#filtro-categoria');
-const statusSelect = document.querySelector('#filtro-status');
+  const idInput = document.querySelector('#filtro-id');
+  const nomeFantasiaInput = document.querySelector('#filtro-nome-fantasia');
+  const razaoSocialInput = document.querySelector('#filtro-razao-social');
+  const cnpjInput = document.querySelector('#filtro-cnpj');
+  const emailInput = document.querySelector('#filtro-email');
+  const statusSelect = document.querySelector('#filtro-status');
 
-if (idInput) idInput.addEventListener("input", handleFilterChange);
-if (nameInput) nameInput.addEventListener("input", handleFilterChange);
-if (categoryInput) categoryInput.addEventListener("input", handleFilterChange);
-if (statusSelect) statusSelect.addEventListener("change", handleFilterChange);
+  if (idInput) idInput.addEventListener("input", handleFilterChange);
+  if (nomeFantasiaInput) nomeFantasiaInput.addEventListener("input", handleFilterChange);
+  if (razaoSocialInput) razaoSocialInput.addEventListener("input", handleFilterChange);
+  if (cnpjInput) cnpjInput.addEventListener("input", handleFilterChange);
+  if (emailInput) emailInput.addEventListener("input", handleFilterChange);
+  if (statusSelect) statusSelect.addEventListener("change", handleFilterChange);
+};

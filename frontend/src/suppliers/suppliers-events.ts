@@ -1,28 +1,42 @@
+import { openNewSupplierModal } from "./new-supplier-modal";
 import { openEditModal } from "./supplier-edit-modal";
-import { renderSuppliersList } from "./suppliers-dom";
+import { getFilterValues, renderSuppliersList } from "./suppliers-dom";
 import { deleteSupplierAPI, loadSuppliersAPI, searchSuppliersWithFilterAPI } from "./suppliers-service";
-import { getFilterValues, showConfirm, showMessage } from "./utils";
+import { showConfirm, showMessage } from "./utils";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
   const idInput = document.querySelector('#filtro-id');
-  const nameInput = document.querySelector('#filtro-nome');
-  const categoryInput = document.querySelector('#filtro-categoria');
+  const nomeFantasiaInput = document.querySelector('#filtro-nome-fantasia');
+  const razaoSocialInput = document.querySelector('#filtro-razao-social');
+  const cnpjInput = document.querySelector('#filtro-cnpj');
+  const emailInput = document.querySelector('#filtro-email');
   const statusSelect = document.querySelector('#filtro-status');
 
-  [idInput, nameInput, categoryInput, statusSelect].forEach(element => {
+  [idInput, nomeFantasiaInput, razaoSocialInput, cnpjInput, emailInput].forEach(element => {
     element?.addEventListener("input", async () => {
       const filters = getFilterValues();
       const suppliers = await searchSuppliersWithFilterAPI(filters);
       renderSuppliersList(suppliers);
     });
   });
-};
+
+  // Campo select: usar 'change'
+  statusSelect?.addEventListener("change", async () => {
+    const filters = getFilterValues();
+    const suppliers = await searchSuppliersWithFilterAPI(filters);
+    renderSuppliersList(suppliers);
+  });
+}
 
 export async function handleFilterChange() {
   const filters = getFilterValues();
   const suppliers = await searchSuppliersWithFilterAPI(filters);
   renderSuppliersList(suppliers);
+};
+
+export async function handleNewSupplierClick(target: HTMLElement) {
+  openNewSupplierModal();
 };
 
 export async function handleEditClick(target: HTMLElement) {

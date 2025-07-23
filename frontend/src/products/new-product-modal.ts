@@ -1,7 +1,6 @@
 // Modal para criação de um produto novo.
 
 import { renderProductsList } from "./product-dom";
-import { openEditModal } from "./product-edit-modal";
 import { loadProductsAPI, postProductAPI } from "./product-service";
 import { showMessage } from "./utils";
 

@@ -1,12 +1,62 @@
 import { renderSuppliersList } from "./suppliers-dom";
 import { getSupplierByIdAPI, loadSuppliersAPI, updateSupplierAPI } from "./suppliers-service";
-import { formatData, showMessage } from "./utils";
+import { formatData, showMessage, showConfirm, getFormDataSnapshot, isFormChanged, formatPhoneNumber, formatCnpj } from "./utils";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
 
 let currentEditId: number | null = null;
+let originalFormData: Record<string, string> = {};
+
+//Listener para formatação de CNPJ.
+const cnpjInput = form.elements.namedItem("cnpj") as HTMLInputElement | null;
+
+if (cnpjInput) {
+  cnpjInput.addEventListener("input", (e) => {
+    const target = e.target as HTMLInputElement;
+    const cursorPosition = target.selectionStart ?? 0;
+    const oldLength = target.value.length;
+
+    target.value = formatCnpj(target.value);
+    
+    const newLength = target.value.length;
+    const difference = newLength - oldLength;
+    target.selectionStart = target.selectionEnd = cursorPosition + difference;
+  });
+};
+
+//Listener para formatação de número de telefone
+const phoneNumberInput = form.elements.namedItem("telefone") as HTMLInputElement | null;
+const cellNumberInput = form.elements.namedItem("celular") as HTMLInputElement | null;
+
+if (phoneNumberInput) {
+  phoneNumberInput.addEventListener("input", (e) => {
+    const target = e.target as HTMLInputElement;
+    const cursorPosition = target.selectionStart ?? 0;
+    const oldLength = target.value.length;
+
+    target.value = formatPhoneNumber(target.value);
+
+    const newLength = target.value.length;
+    const difference = newLength - oldLength;
+    target.selectionStart = target.selectionEnd = cursorPosition + difference; 
+  });
+}
+
+if (cellNumberInput) {
+  cellNumberInput.addEventListener("input", (e) => {
+    const target = e.target as HTMLInputElement;
+    const cursorPosition = target.selectionStart ?? 0;
+    const oldLength = target.value.length;
+
+    target.value = formatPhoneNumber(target.value);
+
+    const newLength = target.value.length;
+    const difference = newLength - oldLength;
+    target.selectionStart = target.selectionEnd = cursorPosition + difference;
+  });
+};
 
 export async function openEditModal(id: number) {
   currentEditId = id;
@@ -32,12 +82,18 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(supplier.data_cadastro);
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(supplier.data_atualizacao);
 
+  
   modal.classList.remove("hidden");
+  originalFormData = getFormDataSnapshot(form);
 }
 
-cancelBtn?.addEventListener("click", () => {
-  modal.classList.add("hidden");
-  currentEditId = null;
+cancelBtn?.addEventListener("click", async () => {
+  if (isFormChanged(form, originalFormData)) {
+    const confirmed = await showConfirm("Você tem alterações não salvas. Deseja realmente sair?");
+    if (!confirmed) return;
+}
+    modal.classList.add("hidden");
+    currentEditId = null;
 });
 
 form.addEventListener("submit", async (event) => {

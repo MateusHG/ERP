@@ -2,7 +2,9 @@ import { supplierModel } from "../suppliers/supplier-model";
 import * as supplierRepository from "../suppliers/suppliers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
-export const getSuppliersService = async (filters: {id?: number, nome?: string, categoria?: string, status?: string}) => {
+export const getSuppliersService = async (
+  filters: {id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string}
+) => {
   try {
     const suppliers = await supplierRepository.searchAllSuppliers(filters);
     return ok(suppliers);
@@ -34,8 +36,13 @@ export const getSupplierByIdService = async (id: number) => {
 
 export const createSupplierService = async (supplier: Omit<supplierModel, 'id' | 'data_cadastro' | 'data_atualizacao'>) => {
   try {
-    if (!supplier.razao_social || !supplier.cnpj || !supplier.email || !supplier.status) {
-      return badRequest('Campos obrigatórios estão ausentes: razao_social, cnpj, email ou status');
+    if (!supplier.razao_social || !supplier.nome_fantasia || !supplier.cnpj || !supplier.email || !supplier.status) {
+      return badRequest('Campos obrigatórios estão ausentes: razão social, nome fantasia, cnpj, email ou status');
+    }
+
+    const nomeAlreadyExists = await supplierRepository.verifyNomeFantasia(supplier.nome_fantasia);
+    if (nomeAlreadyExists) {
+      return badRequest('Nome fantasia já existe em outro cadastro.');
     }
 
     const razaoAlreadyExists = await supplierRepository.verifyRazao(supplier.razao_social);
@@ -66,6 +73,13 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
   try {
     if (Object.keys(data).length === 0) {
       return badRequest('Nenhum campo enviado para atualização.');
+    }
+
+    if (data.nome_fantasia) {
+      const nomeAlreadyExists = await supplierRepository.verifyNomeFantasia(data.nome_fantasia);
+      if (nomeAlreadyExists && nomeAlreadyExists.id !== id) {
+        return badRequest('Já existe um cadastro com o mesmo nome fantasia.')
+      }
     }
 
     if (data.razao_social) {

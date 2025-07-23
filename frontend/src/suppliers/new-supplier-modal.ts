@@ -1,62 +1,60 @@
-// Modal para criação de um produto novo.
+import { renderSuppliersList } from "./suppliers-dom";
+import { loadSuppliersAPI, postSupplierAPI } from "./suppliers-service";
+import { getFormDataSnapshot, isFormChanged, showConfirm, showMessage } from "./utils";
 
-import { renderProductsList } from "./suppliers-dom";
-import { openEditModal } from "./supplier-edit-modal";
-import { loadProductsAPI, postProductAPI } from "./suppliers-service";
-import { showMessage } from "./utils";
+const newSupplierModal = document.getElementById("new-supplier-modal")!;
+const form = document.getElementById("new-supplier-form") as HTMLFormElement;
+const submitBtn = document.getElementById("submit-new-supplier")!;
+const cancelBtn = document.getElementById("cancel-new-supplier")!;
 
-//Elementos
-const newProductModal = document.getElementById("new-product-modal")!;
-const form = document.getElementById("new-product-form") as HTMLFormElement;
-const submitBtn = document.getElementById("submit-new-product")!;
-const cancelBtn = document.getElementById("cancel-new-product")!;
+let originalFormData: Record<string, string> = {};
 
-// Abre o modal com os campos vazios.
-export function openNewProductModal() {
-
+// Abre o modal com os campos vazios;
+export function openNewSupplierModal() {
   form.reset(); // Reseta os campos do formulário.
-  
-  // Valores padrão já definidos
-  (form.elements.namedItem("status") as HTMLInputElement).value = "Ativo";
-  (form.elements.namedItem("estoque") as HTMLInputElement).value = "0";
-  (form.elements.namedItem("estoque_min") as HTMLInputElement).value = "0";
-  (form.elements.namedItem("estoque_max") as HTMLInputElement).value = "0";
-
-  //Abre o modal
-  newProductModal.classList.remove("hidden");
+  newSupplierModal.classList.remove("hidden");
+  originalFormData = getFormDataSnapshot(form);
 }
 
-  //Fecha o modal se clicar no botão de cancelar.
-  cancelBtn.addEventListener("click", () => {
-    newProductModal.classList.add("hidden");
+  cancelBtn.addEventListener("click", async () => {
+    if (isFormChanged(form, originalFormData)) {
+    const confirmed = await showConfirm("As informações serão perdidas, deseja realmente cancelar?");
+      if (!confirmed) return;
+    }
+      newSupplierModal.classList.add("hidden");
   });
 
-  //Envia o formulário ao clicar em criar.
   form.addEventListener("submit", async (e) => {
-    e.preventDefault(); //Evita o reload da página.
+    e.preventDefault(); // Evita reload da página
 
-    const newProductData = {
-      codigo: (form.elements.namedItem("codigo") as HTMLInputElement).value,
-      nome: (form.elements.namedItem("nome") as HTMLInputElement).value,
-      descricao: (form.elements.namedItem("descricao") as HTMLInputElement).value,
-      preco: parseFloat((form.elements.namedItem("preco") as HTMLInputElement).value),
-      estoque: parseInt((form.elements.namedItem("estoque") as HTMLInputElement).value),
-      categoria: (form.elements.namedItem("categoria") as HTMLInputElement).value,
-      status: (form.elements.namedItem("status") as HTMLSelectElement).value,
-      estoque_minimo: parseInt((form.elements.namedItem("estoque_min") as HTMLInputElement).value),
-      estoque_maximo: parseInt((form.elements.namedItem("estoque_max") as HTMLInputElement).value),
+  const newSupplierData = {
+    razao_social: (form.elements.namedItem("razao") as HTMLInputElement).value,
+    nome_fantasia: (form.elements.namedItem("fantasia") as HTMLInputElement).value,
+    cnpj: (form.elements.namedItem("cnpj") as HTMLInputElement).value,
+    inscricao_estadual: (form.elements.namedItem("iestadual") as HTMLInputElement).value,
+    telefone: (form.elements.namedItem("telefone") as HTMLInputElement).value,
+    celular: (form.elements.namedItem("celular") as HTMLInputElement).value,
+    email: (form.elements.namedItem("email") as HTMLInputElement).value,
+    status: (form.elements.namedItem("status") as HTMLSelectElement).value,
+    cep: (form.elements.namedItem("cep") as HTMLInputElement).value,
+    uf: (form.elements.namedItem("uf") as HTMLInputElement).value,
+    rua: (form.elements.namedItem("rua") as HTMLInputElement).value,
+    numero: parseInt((form.elements.namedItem("numero") as HTMLInputElement).value),
+    complemento: (form.elements.namedItem("complemento") as HTMLInputElement).value,
+    bairro: (form.elements.namedItem("bairro") as HTMLInputElement).value,
+    cidade: (form.elements.namedItem("cidade") as HTMLInputElement).value,
   };
 
   try {
-    const response = await postProductAPI(newProductData); //pega o formulário e envia para a API.
-    showMessage(response.message || 'Produto cadastrado com sucesso.'); // Retorna a mensagem do backend.
+    const response = await postSupplierAPI(newSupplierData);
+    showMessage(response.message || 'Fornecedor cadastrado com sucesso.');
 
-    newProductModal.classList.add("hidden"); // fecha o modal após enviar.
+    newSupplierModal.classList.add("hidden"); //Fecha o modal após enviar.
 
-    renderProductsList(await loadProductsAPI()); //Recarrega a lista atualizada de produtos.
-
+    renderSuppliersList(await loadSuppliersAPI()); //Recarrega a lista atualizada de fornecedores.
+  
   } catch (err: any) {
-    console.error("Erro ao criar produto:", err);
-    showMessage(err.message || "Erro desconhecido ao criar produto.")
-  };
-});
+    console.error("Erro ao cadastrar fornecedor:", err);
+    showMessage(err.message || "Erro desconhecido ao cadastrar fornecedor.")
+  }
+  });

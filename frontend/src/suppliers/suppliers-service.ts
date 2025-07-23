@@ -7,12 +7,14 @@ export async function loadSuppliersAPI(): Promise<supplierModel[]> {
 };
 
 //Monta a busca de produtos com filtro chamando o backend.
-export async function searchSuppliersWithFilterAPI(filters: {id?: string, nome?: string, categoria?: string, status?: string}) {
+export async function searchSuppliersWithFilterAPI(filters: {id?: string, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string}) {
   const params = new URLSearchParams();
 
   if (filters.id) params.append("id", filters.id);
-  if (filters.nome) params.append("nome", filters.nome);
-  if (filters.categoria) params.append("categoria", filters.categoria);
+  if (filters.nome_fantasia) params.append("nome_fantasia", filters.nome_fantasia);
+  if (filters.razao_social) params.append("razao_social", filters.razao_social);
+  if (filters.cnpj) params.append("cnpj", filters.cnpj);
+  if (filters.email) params.append("email", filters.email);
   if (filters.status) params.append("status", filters.status);
 
   const response = await fetch (`http://localhost:3000/api/fornecedores?${params.toString()}`);
@@ -29,6 +31,22 @@ export async function getSupplierByIdAPI(id: number): Promise<supplierModel> {
   if (!result.ok)
     throw new Error("Fornecedor não encontrado.");
   return await result.json();
+};
+
+export async function postSupplierAPI(newSupplierData: any) {
+  const response = await fetch(`http://localhost:3000/api/fornecedores`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newSupplierData)
+  });
+
+  const body = await response.json();
+
+  if (!response.ok) {
+    throw new Error(body.message || "Erro ao cadastrar fornecedor.");
+  }
+
+  return body;
 };
 
 export async function updateSupplierAPI(id: number, data: any): Promise<{ message: string }> {

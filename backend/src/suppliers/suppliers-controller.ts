@@ -4,8 +4,10 @@ import { createSupplierService, deleteSupplierByIdService, getSupplierByIdServic
 export const getSuppliers = async (req: Request, res: Response) => {
   const filters = {
     id: typeof req.query.id === 'string' ? Number(req.query.id): undefined,
-    nome: req.query.nome as string,
-    categoria: req.query.categoria as string,
+    nome_fantasia: req.query.nome_fantasia as string,
+    razao_social: req.query.razao_social as string,
+    cnpj: req.query.cnpj as string,
+    email: req.query.email as string,
     status: req.query.status as string,
   };
 
