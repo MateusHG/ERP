@@ -1,27 +1,22 @@
-import { initNavigation } from "./dashboard-navigation";
-import { formatValues, showSessionExpiredMessage } from "./dashboard-utils";
+import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
+import { formatValues } from "../utils/formatters";
+import { authorizedFetch } from "../utils/fetch-helper";
 
 window.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initHeaderData();
+  initLogout();
 });
 
 //Atualizar o dashboard ao clicar em filtrar.
-async function loadDashboardWithFilter(dataInicial: string, dataFinal: string, token: string | null) {
+async function loadDashboardWithFilter(dataInicial: string, dataFinal: string) {
   try {
-    const response = await fetch(
+    const response = await authorizedFetch(
       `http://localhost:3000/api/dashboard?data_inicial=${dataInicial}&data_final=${dataFinal}`,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        method: "GET"
       }
     );
-
-    //Se o token expirar, chama a função que exibe um alerta informando o usuário, faz logout e redireciona para a página de login.
-    if (response.status === 401) {
-      showSessionExpiredMessage();
-      return;
-    }
 
     const data = await response.json();
 
@@ -53,37 +48,10 @@ async function loadDashboardWithFilter(dataInicial: string, dataFinal: string, t
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const dateTimeElement = document.getElementById('datetime');
-  const loggedUser = document.getElementById('logged-user');
-  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement; 
   const initialDateInput = document.getElementById('initial-date') as HTMLInputElement;
   const finalDateInput = document.getElementById('final-date') as HTMLInputElement;
   const filterBtn = document.getElementById('filter-btn') as HTMLButtonElement;
 
-  const token = localStorage.getItem('token');
-  const username = localStorage.getItem('username');
-
-  // Atualiza a data atual no topo
-  if (dateTimeElement) {
-    setInterval(() => {
-      const now = new Date();
-      dateTimeElement.textContent = now.toLocaleDateString('pt-BR');
-    }, 1000);
-  }
-
-  // Exibe o nome do usuário logado.
-  if (loggedUser) {
-    loggedUser.textContent = username || 'Desconhecido.';
-  }
-
-  //Fazer logout
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.clear();
-      console.log('Saindo do sistema...');
-      window.location.href = '/auth/login.html';
-    });
-  }
 
   // Gera datas padrão para o mês atual
   const today = new Date();
@@ -111,25 +79,23 @@ if (initialDateInput && finalDateInput) {
 }
 
 // Primeira chamada com as datas padrão do mês atual
-await loadDashboardWithFilter(initialDateStr, finalDateStr, token);
+await loadDashboardWithFilter(initialDateStr, finalDateStr);
 
 //Clique no botão filtrar.
 if (filterBtn) {
   filterBtn.addEventListener('click', async () => {
     const newInitial = initialDateInput.value;
     const newFinal = finalDateInput.value;
-    await loadDashboardWithFilter(newInitial, newFinal, token);
+    await loadDashboardWithFilter(newInitial, newFinal);
   });
 }
 
 //Faz a requisição ao backend com os filtros de data.
 try {
-  const response = await fetch(
+  const response = await authorizedFetch(
     `http://localhost:3000/api/dashboard?data_inicial=${initialDateStr}&data_final=${finalDateStr}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      method: "GET"
     }
   );
 

@@ -1,8 +1,7 @@
 // Modal para criação de um produto novo.
-
 import { renderProductsList } from "./product-dom";
 import { loadProductsAPI, postProductAPI } from "./product-service";
-import { showMessage } from "./utils";
+import { showMessage } from "../utils/messages";
 
 //Elementos
 const newProductModal = document.getElementById("new-product-modal")!;

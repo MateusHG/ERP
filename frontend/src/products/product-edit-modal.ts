@@ -1,6 +1,7 @@
 import { renderProductsList } from "./product-dom";
 import { getProductByIdAPI, loadProductsAPI, updateProductAPI } from "./product-service";
-import { formatData, showMessage } from "./utils";
+import { formatData } from "../utils/formatters";
+import { showMessage } from "../utils/messages";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;

@@ -1,6 +1,8 @@
 import { renderSuppliersList } from "./suppliers-dom";
 import { getSupplierByIdAPI, loadSuppliersAPI, updateSupplierAPI } from "./suppliers-service";
-import { formatData, showMessage, showConfirm, getFormDataSnapshot, isFormChanged, formatPhoneNumber, formatCnpj } from "./utils";
+import { formatCnpj, formatPhoneNumber, formatData } from "../utils/formatters";
+import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
+import { showConfirm, showMessage } from "../utils/messages";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
@@ -131,6 +133,6 @@ form.addEventListener("submit", async (event) => {
     renderSuppliersList(await loadSuppliersAPI());
   
   } catch (err: any) {
-    showMessage(err.message || "Erro ao atualizar o produto.")
+    showMessage(err.message);
   }
 });

@@ -1,5 +1,6 @@
 import express, {json} from "express";
 import cors from "cors";
+import cookieParser from 'cookie-parser';
 import suppliersRouter from "./suppliers/suppliers-routes";
 import productsRouter from "./products/products-routes";
 import customerRouter from "./customers/customers-routes";
@@ -13,9 +14,13 @@ import dashboardsRoutes from "./dashboards/dashboard-routes";
 function createApp() {
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 app.use(json());
+app.use(cookieParser()); // Habilita o uso de cookies nas rotas.
 app.use('/api/auth', authRouter);
 app.use('/api/dashboard', dashboardsRoutes);
 app.use("/api/produtos", productsRouter);

@@ -1,9 +1,12 @@
 import supplierModel from "./supplier-model";
-import { formatData, initNavigation } from "./utils";
+import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
+import { formatData } from "../utils/formatters";
 
 //Navegação entre os módulos
 window.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initHeaderData();
+  initLogout();
 });
 
 window.addEventListener('DOMContentLoaded', async () => {

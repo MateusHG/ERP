@@ -1,41 +1,14 @@
 import productModel from "./product-model";
-import { formatData, initNavigation } from "./utils";
+import { formatData } from "../utils/formatters";
+import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
 
 window.addEventListener('DOMContentLoaded', () => {
   initNavigation();
+  initHeaderData();
+  initLogout();
 });
 
 // ** Funções de manipulação do DOM(Document Object Model), inserir, limpar, preencher formulário, etc. ** //
-window.addEventListener('DOMContentLoaded', async () => {
-  const dateTimeElement = document.getElementById('datetime');
-  const loggedUser = document.getElementById('logged-user');
-  const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement; 
-
-  const token = localStorage.getItem('token');
-  const username = localStorage.getItem('username');
-
-  // Atualiza a data atual no topo
-  if (dateTimeElement) {
-    setInterval(() => {
-      const now = new Date();
-      dateTimeElement.textContent = now.toLocaleDateString('pt-BR');
-    }, 1000);
-  }
-
-  // Exibe o nome do usuário logado.
-  if (loggedUser) {
-    loggedUser.textContent = username || 'Desconhecido.';
-  }
-
-  //Fazer logout
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      localStorage.clear();
-      console.log('Saindo do sistema...');
-      window.location.href = '/auth/login.html';
-    });
-  }
-});
 
 //Renderiza produtos na tela.
 export function renderProductsList(products: productModel[]): void {

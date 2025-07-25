@@ -1,31 +1,29 @@
 import { Request, Response } from 'express';
 import * as AuthService from './auth-service';
-import { httpResponse } from '../utils/http-helper';
+import { getUserByIdService } from './auth-service';
 
 export async function registerController(req: Request, res: Response) {
-  const { username, password } = req.body;
-
-  try {
-    const result = await AuthService.registerUserService(username, password);
-
-    return res.status(result.statusCode).json(result.body);
-  } catch (error) {
-    return res.status(500).json({ message: 'Erro interno no servidor.' });
-  }
-}
+  return AuthService.registerUserService(req, res);
+};
 
 export async function loginController(req: Request, res: Response) {
-  const { username, password } = req.body;
+  return AuthService.loginUserService(req, res);
+};
 
-  try {
-    const result: httpResponse | {token: string} = await AuthService.loginUserService(username, password);
-
-    if ('statusCode' in result) {
-      return res.status(result.statusCode).json(result.body);
-    }
-
-    return res.status(200).json(result); // ← se der certo retorna aqui.
-  } catch (error) {
-    return res.status(500).json({ message: 'Erro interno no servidor.' });
-  }
+export async function refreshTokenController(req: Request, res: Response) {
+  return AuthService.refreshTokenService(req, res);
 }
+
+export async function logoutController(req: Request, res: Response) {
+  return AuthService.logoutService(req, res);
+}
+
+export async function getUserInfo(req: Request, res: Response) {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Usuário não autenticado.'});
+  }
+  
+  const { id, username } = req.user;
+  
+  return res.status(200).json( { id, username });
+};

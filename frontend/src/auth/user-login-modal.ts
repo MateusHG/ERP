@@ -15,21 +15,20 @@ form?.addEventListener('submit', async (e) => {
     const response = await fetch('http://localhost:3000/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: "include", // envia cookies.
       body: JSON.stringify({ username, password }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.log('Erro recebido:', data.message); // <--- debug
        messageElement.textContent = data.message || 'Erro ao fazer login';
        messageElement.classList.remove('hidden');
        return;
     }
 
-      const { token , user } = data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('username', username);
+      sessionStorage.setItem('username', username);
+      
       console.log('Login bem-sucedido, redirecionando para dashboard...');
       window.location.href = '/dashboard/dashboard.html';
     } catch (err) {
@@ -37,4 +36,3 @@ form?.addEventListener('submit', async (e) => {
       messageElement.classList.remove('hidden');
     }
 });
-

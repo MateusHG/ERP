@@ -1,15 +1,16 @@
 import { Router } from "express";
 import { getSupplierById, getSuppliers, postSupplier, deleteSupplierById, patchSupplierById } from "../suppliers/suppliers-controller";
+import { authenticate } from "../auth/auth-middleware";
 
 const suppliersRouter = Router();
 
-suppliersRouter.get("/", getSuppliers);
-suppliersRouter.get("/:id", getSupplierById);
+suppliersRouter.get("/", authenticate, getSuppliers);
+suppliersRouter.get("/:id", authenticate, getSupplierById);
 
-suppliersRouter.post("/", postSupplier);
+suppliersRouter.post("/", authenticate, postSupplier);
 
-suppliersRouter.patch("/:id", patchSupplierById);
+suppliersRouter.patch("/:id", authenticate, patchSupplierById);
 
-suppliersRouter.delete("/:id", deleteSupplierById);
+suppliersRouter.delete("/:id", authenticate ,deleteSupplierById);
 
 export default suppliersRouter;

@@ -2,7 +2,7 @@ import { openNewSupplierModal } from "./new-supplier-modal";
 import { openEditModal } from "./supplier-edit-modal";
 import { getFilterValues, renderSuppliersList } from "./suppliers-dom";
 import { deleteSupplierAPI, loadSuppliersAPI, searchSuppliersWithFilterAPI } from "./suppliers-service";
-import { showConfirm, showMessage } from "./utils";
+import { showConfirm, showMessage } from "../utils/messages";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
@@ -62,4 +62,4 @@ export async function handleDeleteClick(target: HTMLElement) {
   } catch (error: any) {
     showMessage(error.message || 'Erro ao deletar fornecedor.')
   }
-}
+};

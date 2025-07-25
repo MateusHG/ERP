@@ -1,6 +1,6 @@
 import { deleteProductAPI, loadProductsAPI, searchProductsWithFilterAPI } from "./product-service";
 import { getFilterValues, renderProductsList } from "./product-dom";
-import { showConfirm, showMessage } from "./utils";
+import { showConfirm, showMessage } from "../utils/messages";
 import { openEditModal } from "./product-edit-modal";
 import { openNewProductModal } from "./new-product-modal";
 
