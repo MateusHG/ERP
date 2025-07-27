@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
 async function loadDashboardWithFilter(dataInicial: string, dataFinal: string) {
   try {
     const response = await authorizedFetch(
-      `http://localhost:3000/api/dashboard?data_inicial=${dataInicial}&data_final=${dataFinal}`,
+      `https://localhost:3000/api/dashboard?data_inicial=${dataInicial}&data_final=${dataFinal}`,
       {
         method: "GET"
       }
@@ -93,7 +93,7 @@ if (filterBtn) {
 //Faz a requisição ao backend com os filtros de data.
 try {
   const response = await authorizedFetch(
-    `http://localhost:3000/api/dashboard?data_inicial=${initialDateStr}&data_final=${finalDateStr}`,
+    `https://localhost:3000/api/dashboard?data_inicial=${initialDateStr}&data_final=${finalDateStr}`,
     {
       method: "GET"
     }

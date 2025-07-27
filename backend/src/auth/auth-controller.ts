@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import * as AuthService from './auth-service';
-import { getUserByIdService } from './auth-service';
 
 export async function registerController(req: Request, res: Response) {
   return AuthService.registerUserService(req, res);
@@ -20,10 +19,12 @@ export async function logoutController(req: Request, res: Response) {
 
 export async function getUserInfo(req: Request, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ message: 'Usuário não autenticado.'});
+    res.status(401).json({ message: 'Usuário não autenticado.'});
+    return;
   }
   
   const { id, username } = req.user;
   
-  return res.status(200).json( { id, username });
+  res.status(200).json( { id, username });
+  return;
 };

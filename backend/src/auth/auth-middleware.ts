@@ -24,7 +24,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
   if (!token) {
     const error = await notAuthorized("Token não fornecido.");
-    return res.status(error.statusCode).json(error.body);
+    return void res.status(error.statusCode).json(error.body);
   }
   
   try {
@@ -33,6 +33,8 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     next();
   } catch {
     const error = await notAuthorized('Token inválido ou expirado.');
-    return res.status(error.statusCode).json(error.body);
+    return void res.status(error.statusCode).json(error.body);
   }
 };
+
+export default authenticate;

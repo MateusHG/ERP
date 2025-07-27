@@ -2,7 +2,7 @@ import supplierModel from "./supplier-model";
 import { authorizedFetch } from "../utils/fetch-helper";
 
 export async function loadSuppliersAPI() {
-  const result = await authorizedFetch(`http://localhost:3000/api/fornecedores`, {
+  const result = await authorizedFetch(`https://localhost:3000/api/fornecedores`, {
     method: "GET"
   });
 
@@ -20,7 +20,7 @@ export async function searchSuppliersWithFilterAPI(filters: { id?: string, nome_
   if (filters.email) params.append("email", filters.email);
   if (filters.status) params.append("status", filters.status);
 
-  const response = await authorizedFetch(`http://localhost:3000/api/fornecedores?${params.toString()}`, {
+  const response = await authorizedFetch(`https://localhost:3000/api/fornecedores?${params.toString()}`, {
     method: "GET"
   });
 
@@ -28,7 +28,7 @@ export async function searchSuppliersWithFilterAPI(filters: { id?: string, nome_
 };
 
 export async function getSupplierByIdAPI(id: number): Promise<supplierModel> {
-  const result = await authorizedFetch(`http://localhost:3000/api/fornecedores/${id}`, {
+  const result = await authorizedFetch(`https://localhost:3000/api/fornecedores/${id}`, {
     method: "GET"
   });
 
@@ -36,7 +36,7 @@ export async function getSupplierByIdAPI(id: number): Promise<supplierModel> {
 };
 
 export async function postSupplierAPI(newSupplierData: any) {
-  const response = await authorizedFetch(`http://localhost:3000/api/fornecedores`, {
+  const response = await authorizedFetch(`https://localhost:3000/api/fornecedores`, {
     method: "POST",
     body: JSON.stringify(newSupplierData)
   });
@@ -46,7 +46,7 @@ export async function postSupplierAPI(newSupplierData: any) {
 };
 
 export async function updateSupplierAPI(id: number, data: any): Promise<{ message: string }> {
-  const response = await authorizedFetch(`http://localhost:3000/api/fornecedores/${id}`, {
+  const response = await authorizedFetch(`https://localhost:3000/api/fornecedores/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data)
   });
@@ -56,7 +56,7 @@ export async function updateSupplierAPI(id: number, data: any): Promise<{ messag
 };
 
 export async function deleteSupplierAPI(id: number): Promise<{ message: string }> {
-  const result = await authorizedFetch(`http://localhost:3000/api/fornecedores/${id}`, {
+  const result = await authorizedFetch(`https://localhost:3000/api/fornecedores/${id}`, {
     method: "DELETE"
   });
 

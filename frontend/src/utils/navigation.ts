@@ -30,7 +30,7 @@ export async function initHeaderData() {
   const loggedUser = document.getElementById('logged-user');
 
   try {
-    const response = await authorizedFetch('http://localhost:3000/api/auth/me-info', {
+    const response = await authorizedFetch('https://localhost:3000/api/auth/me-info', {
       method: 'GET',
       credentials: 'include'
     });
@@ -54,7 +54,7 @@ export async function initLogout() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       try {
-        const response = await authorizedFetch("http://localhost:3000/api/auth/logout", {
+        const response = await authorizedFetch("https://localhost:3000/api/auth/logout", {
           method: "POST"
         });
 

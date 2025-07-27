@@ -18,7 +18,7 @@ export async function authorizedFetch(url: string, options: RequestInit = {}): P
     if (!isRefreshing) {
       isRefreshing = true;
 
-      const refreshResponse = await fetch("http://localhost:3000/api/auth/refresh-token", {
+      const refreshResponse = await fetch("https://localhost:3000/api/auth/refresh-token", {
         method: "POST",
         credentials: "include"
       });

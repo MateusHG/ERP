@@ -1,13 +1,19 @@
 import { defineConfig } from "vite";
+import fs from "fs";
+import path from "path";
 
 export default defineConfig({
-  root: "src", // raiz do projeto
+  root: "src",
   build: {
-    outDir: "../dist", //distribuição
+    outDir: "../dist",
     emptyOutDir: true
   },
   server: {
-    open: '/auth/login.html', // abre a tela de login por padrão
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, "./certs/localhost-key.pem")),
+      cert: fs.readFileSync(path.resolve(__dirname, "./certs/localhost.pem")),
+    },
+    port: 5173,
+    open: '/auth/login.html'
   }
 });
-

@@ -12,7 +12,7 @@ form?.addEventListener('submit', async (e) => {
   messageElement.classList.add('hidden');
 
   try {
-    const response = await fetch('http://localhost:3000/api/auth/login', {
+    const response = await fetch('https://localhost:3000/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: "include", // envia cookies.

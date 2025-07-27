@@ -20,7 +20,8 @@ export const getProductsById = async (req: Request, res: Response) => {
 
   //Verifica se o ID enviado é um número, se tentar mandar letra retorna a mensagem de erro.
   if (isNaN(id)) {
-    return res.status(400).json({ erro: 'ID inválido.'})
+    res.status(400).json({ erro: 'ID inválido.'});
+    return;
   }
 
   const httpResponse = await getProductsByIdService(id);
@@ -46,7 +47,7 @@ export const patchProductById = async (req: Request, res: Response) => {
   const data = req.body;
 
   if (isNaN(id)) {
-    return res.status(400).json({erro: 'ID Inválido.'});
+    res.status(400).json({erro: 'ID Inválido.'});
   }
 
   const httpResponse = await updateProductByIdService(id, data);

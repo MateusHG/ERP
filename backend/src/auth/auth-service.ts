@@ -10,15 +10,18 @@ export async function registerUserService(req: Request, res: Response) {
   try {
     const userExists = await userRepository.checkUser(username);
     if (userExists) {
-      return res.status(400).json({ message: 'Usuário já cadastrado.'});
+      res.status(400).json({ message: 'Usuário já cadastrado.'});
+      return;
     }
 
     const hashedPassword = await hashPassword(password);
     await userRepository.createUser(username, hashedPassword);
 
-    return res.status(201).json({ message: 'Usuário cadastrado com sucesso.' });
+    res.status(201).json({ message: 'Usuário cadastrado com sucesso.' });
+    return;
   } catch {
-    return res.status(500).json( { message: 'Erro interno no servidor.'} )
+    res.status(500).json( { message: 'Erro interno no servidor.'} );
+    return;
   }
 };
 
@@ -28,7 +31,8 @@ export async function loginUserService(req: Request, res: Response) {
   try {
     const user = await userRepository.checkUser(username);
     if (!user || !(await comparePassword(password, user.password_hash))) {
-      return res.status(401).json({ message: 'Credenciais Inválidas.'});
+      res.status(401).json({ message: 'Credenciais Inválidas.'});
+      return;
     }
 
     const acessToken = await generateAcessToken({ id: user.id, username: user.username });
@@ -51,16 +55,19 @@ export async function loginUserService(req: Request, res: Response) {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({ message: 'Login realizado com sucesso.', acessToken});
+    res.status(200).json({ message: 'Login realizado com sucesso.', acessToken});
+    return;
   } catch {
-    return res.status(500).json({ message: 'Erro interno no servidor.'});
+    res.status(500).json({ message: 'Erro interno no servidor.'});
+    return;
   }
 };
 
 export async function refreshTokenService(req: Request, res: Response) {
   const refreshToken = req.cookies?.refreshToken;
   if (!refreshToken) {
-    return res.status(401).json({ message: 'Token ausente.' })
+    res.status(401).json({ message: 'Token ausente.' });
+    return;
   }
 
   try {
@@ -68,7 +75,8 @@ export async function refreshTokenService(req: Request, res: Response) {
 
     const storedToken = await userRepository.getRefreshToken(payload.id, refreshToken);
     if (!storedToken || new Date(storedToken.expires_at) < new Date()) {
-      return res.status(401).json({ message: 'Token inválido ou expirado.' });
+      res.status(401).json({ message: 'Token inválido ou expirado.' });
+      return;
     }
     
     const newAccessToken = generateAcessToken({ id: payload.id, username: payload.username});
@@ -80,9 +88,12 @@ export async function refreshTokenService(req: Request, res: Response) {
       maxAge: 15 * 60 * 1000
     });
 
-    return res.json({message: 'Token renovado com sucesso.' , newAccessToken});
+    res.json({message: 'Token renovado com sucesso.' , newAccessToken});
+    return; 
+  
   } catch {
-    return res.status(403).json({message: 'Refresh Token inválido.'});
+    res.status(403).json({message: 'Refresh Token inválido.'});
+    return;
   }
 };
 
@@ -96,7 +107,8 @@ export async function logoutService(req: Request, res: Response) {
 
   res.clearCookie('token');
   res.clearCookie('refreshToken');
-  return res.status(200).json({message: 'Logout realizado com sucesso.'});
+  res.status(200).json({message: 'Logout realizado com sucesso.'});
+  return
 };
 
 export async function getUserByIdService(id: number) {

@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { salesItemModel } from "../models/sales-model";
+import { salesItemModel } from "../sales/sales-model";
 
 export const searchAllSaleItems = async (saleId: number): Promise<salesItemModel[]> => {
   const result = await db.query(

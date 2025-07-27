@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getUserInfo, loginController, logoutController, refreshTokenController, registerController } from './auth-controller';
-import { authenticate } from './auth-middleware';
+import authenticate from './auth-middleware';
 
 //Rotas de cadastro/login de usuário.
 

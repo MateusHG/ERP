@@ -19,7 +19,8 @@ export const patchPurchaseItem = async (req: Request, res: Response) => {
   const purchaseItemId = Number(req.params.purchaseItemId);
   const updatedItem = req.body;
   const httpResponse = await updatePurchaseItemService(purchaseId, purchaseItemId, updatedItem);
-  return res.status(httpResponse.statusCode).json(httpResponse.body);
+  res.status(httpResponse.statusCode).json(httpResponse.body);
+  return;
 };
 
 export const deletePurchaseItem = async (req: Request, res: Response) => {
