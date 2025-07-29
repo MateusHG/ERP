@@ -9,6 +9,8 @@ export const getSuppliers = async (req: Request, res: Response) => {
     cnpj: req.query.cnpj as string,
     email: req.query.email as string,
     status: req.query.status as string,
+    limit: req.query.limit ? Number(req.query.limit): undefined,
+    orderBy: req.query.orderBy as string | undefined,
   };
 
   const httpResponse = await getSuppliersService(filters);

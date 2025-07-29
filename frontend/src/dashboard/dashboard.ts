@@ -1,5 +1,5 @@
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
-import { formatValues } from "../utils/formatters";
+import { formatCurrency } from "../utils/formatters";
 import { authorizedFetch } from "../utils/fetch-helper";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -22,11 +22,11 @@ async function loadDashboardWithFilter(dataInicial: string, dataFinal: string) {
 
     //Preenche os cards com os dados da API.
     (document.getElementById('total-sales-count') as HTMLElement).textContent = `Finalizadas: ${data.total_vendas_finalizadas ?? 0}`;
-    (document.getElementById('total-sales-value') as HTMLElement).textContent = `Total: ${formatValues(data.total_vendas_finalizadas_valores)}`;
+    (document.getElementById('total-sales-value') as HTMLElement).textContent = `Total: ${formatCurrency(data.total_vendas_finalizadas_valores)}`;
     (document.getElementById('total-sales-pending') as HTMLElement).textContent = `Vendas Pendentes: ${data.total_vendas_pendentes}`;
 
     (document.getElementById('total-purchases-count') as HTMLElement).textContent = `Finalizadas: ${data.total_compras_finalizadas ?? 0}`;
-    (document.getElementById('total-purchases-value') as HTMLElement).textContent = `Total: ${formatValues(data.total_compras_valores)}`;
+    (document.getElementById('total-purchases-value') as HTMLElement).textContent = `Total: ${formatCurrency(data.total_compras_valores)}`;
     (document.getElementById('total-purchases-pending') as HTMLElement).textContent = `Compras Pendentes: ${data.total_compras_pendentes}`;
 
     (document.getElementById('below-minimum') as HTMLElement).textContent = data.produtos_estoque_baixo;

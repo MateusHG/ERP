@@ -1,7 +1,7 @@
 export interface purchaseModel {
   id: number;
   fornecedor_id: number; //FK
-  data_emissao: Date;
+  data_emissao: string;
   tipo_pagamento: 'pix' | 'boleto' | 'cartao' | 'transferencia' | 'prazo';
   desconto_comercial?: number;   // acordos, promoções, contratos
   desconto_financeiro?: number;  // pagamento à vista, antecipado
@@ -10,7 +10,7 @@ export interface purchaseModel {
   status: 'pendente' | 'aprovado' | 'cancelado';
   data_cadastro: Date;
   data_atualizacao: Date;
-}
+};
 
 export interface purchaseItemModel {
   id: number;
@@ -20,5 +20,5 @@ export interface purchaseItemModel {
   preco_unitario: number;
   desconto_volume?: number;    // desconto por item por quantidade
   valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
-}
+};
 

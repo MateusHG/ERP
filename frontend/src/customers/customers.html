@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fornecedores</title>
-  <link rel="stylesheet" href="./suppliers-style.css">
+  <title>Clientes</title>
+  <link rel="stylesheet" href="./customers-style.css">
 </head>
-<header class="suppliers-header">
+<header class="customers-header">
   <!-- Esquerda: Logo + Título -->
   <div class="header-left">
     <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
@@ -41,10 +41,10 @@
   </div>
 </header>
   
-  <header class="suppliers-header">
+  <header class="customers-header">
   <div class="left">
     <div>
-      <h1>Fornecedores <img src="/erpicons/suppliers.svg" alt="Produtos-Icone"><button id="btn-new-supplier" class="btn-new-supplier">+ Novo Fornecedor</button></h1>
+      <h1>Clientes <img src="/erpicons/clients.svg" alt="Produtos-Icone"><button id="btn-new-customer" class="btn-new-customer">+ Novo Cliente</button></h1>
       <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
       <input type="text" id="filtro-nome-fantasia" placeholder="Buscar por Nome Fantasia...">
@@ -67,11 +67,11 @@
 </header>
 
   <main>
-      <!-- Modal: Novo Fornecedor -->
-      <div id="new-supplier-modal" class="modal hidden">
+      <!-- Modal: Novo Cliente -->
+      <div id="new-customer-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Novo Fornecedor</h3>
-          <form id="new-supplier-form">
+          <h3>Novo Cliente</h3>
+          <form id="new-customer-form">
         <div class="form-fields">
           <div class="form-group">
             <label for="edit-codigo">Razão Social:</label>
@@ -182,14 +182,14 @@
         </div>
 
         <div class="modal-buttons">
-          <button type="submit" id="submit-new-supplier">Salvar</button>
-          <button type="button" id="cancel-new-supplier">Cancelar</button>
+          <button type="submit" id="submit-new-customer">Salvar</button>
+          <button type="button" id="cancel-new-customer">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-    <table id="suppliers-table">
+    <table id="customers-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -205,7 +205,7 @@
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="suppliers-tbody">
+      <tbody id="customers-tbody">
       </tbody>
     </table>
   </main>
@@ -229,10 +229,10 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Fornecedor -->
+  <!-- Modal: Editar Cliente -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Fornecedor</h3>
+      <h3>Editar Cliente</h3>
       <form id="edit-form">
         <div class="form-fields">
           <div class="form-group">

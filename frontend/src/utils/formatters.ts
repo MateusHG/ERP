@@ -5,11 +5,16 @@ export function formatData(dataStr: string): string {
 };
 
 //Formatar os valores em reais;
-export const formatValues = (valor: string | null | undefined): string  => {
-  const number = parseFloat(valor ?? '0');
-  return number.toLocaleString('pt-BR', {
+export const formatCurrency = (value: number | string ): string  => {
+  if (value === undefined || value === null ) return "R$ 0,00";
+
+  const numberValue = typeof value === "string" ? parseFloat(value): value;
+
+  if (isNaN(numberValue)) return "R$ 0,00";
+  
+  return numberValue.toLocaleString('pt-BR', {
     style: 'currency',
-    currency: 'BRL',
+    currency: 'BRL'
   });
 };
 

@@ -6,6 +6,8 @@ export async function initNavigation() {
     'btn-dashboard': '/dashboard/dashboard.html',
     'btn-products': '/products/products.html',
     'btn-suppliers': '/suppliers/suppliers.html',
+    'btn-purchases': '/purchases/purchases.html',
+    'btn-customers': '/customers/customers.html',
   };
 
   Object.entries(routes).forEach(([btnId, path]) => {
@@ -61,7 +63,8 @@ export async function initLogout() {
         if (response.ok) {
           sessionStorage.clear();
           console.log("Logout realizado com sucesso.");
-          window.location.replace("/auth/login.html");
+          console.log("Redirecionando para:", `${window.location.origin}/auth/login.html`);
+          window.location.replace(`${window.location.origin}/auth/login.html`);
         } else {
           console.error("Erro ao fazer logout:", await response.text());
         }

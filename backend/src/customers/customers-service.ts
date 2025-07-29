@@ -3,9 +3,11 @@ import * as customerRepository from "../customers/customers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
 
-export const getCustomersService = async () => {
+export const getCustomersService = async (
+  filters: { id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string}
+) => {
   try {
-    const customers = await customerRepository.searchAllCustomers();
+    const customers = await customerRepository.searchAllCustomers(filters);
     return ok(customers);
 
 }   catch (err) {
@@ -140,7 +142,7 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
 
     const updatedCustomer = await customerRepository.updateCustomer(id, data);
     //Se tudo der certo retorna ok com os dados do cliente.
-    return ok(updatedCustomer);
+    return ok( {message: "Cadastro atualizado com sucesso." });
 
   } catch (err) {
     console.error(err);
@@ -155,7 +157,7 @@ export const deleteCustomerByIdService = async (id: number) => {
   if (!deleted) {
     return notFound('ID Não encontrado.')
   }
-    return ok({ mensagem: 'Cliente deletado com sucesso.' });
+    return ok({ message: 'Cliente deletado com sucesso.' });
 
 }   catch (err) {
     console.error(err);

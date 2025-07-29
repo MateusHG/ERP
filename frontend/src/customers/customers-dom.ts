@@ -1,4 +1,4 @@
-import supplierModel from "./supplier-model";
+import supplierModel from "./customer-model";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
 import { formatCnpj, formatData } from "../utils/formatters";
 
@@ -9,13 +9,13 @@ window.addEventListener('DOMContentLoaded', () => {
   initLogout();
 });
 
-export function renderSuppliersList(suppliers: supplierModel[]): void {
-  const tbody = document.getElementById("suppliers-tbody") as HTMLTableSectionElement | null;
+export function renderCustomersList(customers: supplierModel[]): void {
+  const tbody = document.getElementById("customers-tbody") as HTMLTableSectionElement | null;
   if (!tbody) return;
 
   tbody.innerHTML = ""
 
-  suppliers.forEach(supplier => {
+  customers.forEach(customer => {
     const tr = document.createElement("tr");
 
     const textCell = (value: string | number | null | undefined): HTMLTableCellElement => {
@@ -24,16 +24,16 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
       return td;
     };
 
-    tr.appendChild(textCell(supplier.id));
-    tr.appendChild(textCell(supplier.nome_fantasia));
-    tr.appendChild(textCell(supplier.razao_social));
-    tr.appendChild(textCell(supplier.cnpj));
-    tr.appendChild(textCell(supplier.telefone));
-    tr.appendChild(textCell(supplier.email));
-    tr.appendChild(textCell(supplier.uf));
-    tr.appendChild(textCell(supplier.status));
-    tr.appendChild(textCell(formatData(supplier.data_cadastro)));
-    tr.appendChild(textCell(formatData(supplier.data_atualizacao)));
+    tr.appendChild(textCell(customer.id));
+    tr.appendChild(textCell(customer.nome_fantasia));
+    tr.appendChild(textCell(customer.razao_social));
+    tr.appendChild(textCell(customer.cnpj));
+    tr.appendChild(textCell(customer.telefone));
+    tr.appendChild(textCell(customer.email));
+    tr.appendChild(textCell(customer.uf));
+    tr.appendChild(textCell(customer.status));
+    tr.appendChild(textCell(formatData(customer.data_cadastro)));
+    tr.appendChild(textCell(formatData(customer.data_atualizacao)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
@@ -41,12 +41,12 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-edit";
     btnEdit.textContent = "✏️";
-    btnEdit.dataset.id = supplier.id.toString();
+    btnEdit.dataset.id = customer.id.toString();
 
     const btnDelete = document.createElement("button");
     btnDelete.className = "btn-delete";
     btnDelete.textContent = "❌";
-    btnDelete.dataset.id = supplier.id.toString();
+    btnDelete.dataset.id = customer.id.toString();
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

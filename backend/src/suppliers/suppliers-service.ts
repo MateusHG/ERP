@@ -3,7 +3,7 @@ import * as supplierRepository from "../suppliers/suppliers-repository"
 import { badRequest, internalServerError, notFound, ok } from "../utils/http-helper";
 
 export const getSuppliersService = async (
-  filters: {id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string}
+  filters: {id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string, limit?: number, orderBy?: string,}
 ) => {
   try {
     const suppliers = await supplierRepository.searchAllSuppliers(filters);

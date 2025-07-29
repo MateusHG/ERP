@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fornecedores</title>
-  <link rel="stylesheet" href="./suppliers-style.css">
+  <title>Compras</title>
+  <link rel="stylesheet" href="./purchases-style.css">
 </head>
-<header class="suppliers-header">
+<header class="purchases-header">
   <!-- Esquerda: Logo + Título -->
   <div class="header-left">
     <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
@@ -41,21 +41,27 @@
   </div>
 </header>
   
-  <header class="suppliers-header">
+  <header class="purchases-header">
   <div class="left">
     <div>
-      <h1>Fornecedores <img src="/erpicons/suppliers.svg" alt="Produtos-Icone"><button id="btn-new-supplier" class="btn-new-supplier">+ Novo Fornecedor</button></h1>
+      <h1>Compras <img src="/erpicons/purchase.svg" alt="Produtos-Icone"><button id="btn-new-purchase" class="btn-new-purchase">+ Nova Compra</button></h1>
+      <div class="filter-date-period">
+      <label for="initial-date">Período de:</label>
+      <input type="date" id="initial-date" name="initial_date">
+
+      <label for="final-date">até:</label>
+      <input type="date" id="final-date" name="final_date">
+
+      <button id="filter-btn">Filtrar Data</button>
+
       <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
-      <input type="text" id="filtro-nome-fantasia" placeholder="Buscar por Nome Fantasia...">
-      <input type="text" id="filtro-razao-social" placeholder="Buscar por Razão Social...">
-      <input type="text" id="filtro-cnpj" placeholder="Buscar por CNPJ...">
-      <input type="text" id="filtro-email" placeholder="Buscar por E-mail...">
+      <input type="text" id="filtro-nome-fornecedor" placeholder="Buscar por Fornecedor...">
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
         <option value="">Todos</option>
-        <option value="Ativo">Ativo</option>
-        <option value="Inativo">Inativo</option>
+        <option value="Pendentes">Pendentes</option>
+        <option value="Finalizadas">Finalizadas</option>
       </select>
     </div>
     </div>
@@ -67,145 +73,90 @@
 </header>
 
   <main>
-      <!-- Modal: Novo Fornecedor -->
-      <div id="new-supplier-modal" class="modal hidden">
+      <!-- Modal: Nova Compra -->
+      <div id="new-purchase-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Novo Fornecedor</h3>
-          <form id="new-supplier-form">
+          <h3>Nova Compra</h3>
+          <form id="new-purchase-form">
         <div class="form-fields">
           <div class="form-group">
-            <label for="edit-codigo">Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
+            <label for="fornecedor-search">Fornecedor:</label>
+            <input id="fornecedor-search" name="fornecedor" type="text" autocomplete="off" />
+            <input type="hidden" id="fornecedor-id" name="fornecedor_id" />
+            <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
-            <label for="edit-nome">Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
+            <label for="edit-data-emissao">Data da Emissão:</label>
+            <input type="date" name="data-emissao" id="edit-data-emissao" required />
           </div>
 
           <div class="form-group">
-            <label for="edit-descricao">CNPJ:</label>
-            <input type="text" name="cnpj" id="edit-cnpj" required />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-ie">Inscrição Estadual:</label>
-            <input type="number" name="iestadual" id="edit-ie" min="0" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
+            <label for="edit-tipo-pagamento">Tipo de Pagamento:</label>
+            <select name="tipo-pagamento" id="edit-tipo-pagamento" required >
+              <option value="" disabled selected>Selecione o tipo de pagamento....</option>
+              <option value="pix">Pix</option>
+              <option value="boleto">Boleto Bancário</option>
+              <option value="cartao-credito">Cartão de Crédito</option>
+              <option value="transferencia-bancaria">Transferência Bancária (TED/DOC)</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="carteira-digital">Carteira Digital</option>
+            </select>
           </div>
 
           <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Pendente">Finalizado</option>
             </select>
           </div>
 
           <div class="form-group">
-                <label for="edit-cep">CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
-              </div>
+            <label for="edit-desconto-financeiro">Desconto Financeiro:</label>
+            <input type="number" name="desconto-financeiro" id="edit-desconto-financeiro" min="0" />
+          </div>
 
-              <div class="form-group">
-                <label for="edit-uf">UF:</label>
-                <select name="uf" id="edit-uf" required>
-                  <option value="">Selecione uma UF</option>
-                  <option value="AC">Acre (AC)</option>
-                  <option value="AL">Alagoas (AL)</option>
-                  <option value="AP">Amapá (AP)</option>
-                  <option value="AM">Amazonas (AM)</option>
-                  <option value="BA">Bahia (BA)</option>
-                  <option value="CE">Ceará (CE)</option>
-                  <option value="DF">Distrito Federal (DF)</option>
-                  <option value="ES">Espírito Santo (ES)</option>
-                  <option value="GO">Goiás (GO)</option>
-                  <option value="MA">Maranhão (MA)</option>
-                  <option value="MT">Mato Grosso (MT)</option>
-                  <option value="MS">Mato Grosso do Sul (MS)</option>
-                  <option value="MG">Minas Gerais (MG)</option>
-                  <option value="PA">Pará (PA)</option>
-                  <option value="PB">Paraíba (PB)</option>
-                  <option value="PR">Paraná (PR)</option>
-                  <option value="PE">Pernambuco (PE)</option>
-                  <option value="PI">Piauí (PI)</option>
-                  <option value="RJ">Rio de Janeiro (RJ)</option>
-                  <option value="RN">Rio Grande do Norte (RN)</option>
-                  <option value="RS">Rio Grande do Sul (RS)</option>
-                  <option value="RO">Rondônia (RO)</option>
-                  <option value="RR">Roraima (RR)</option>
-                  <option value="SC">Santa Catarina (SC)</option>
-                  <option value="SP">São Paulo (SP)</option>
-                  <option value="SE">Sergipe (SE)</option>
-                  <option value="TO">Tocantins (TO)</option>
-                </select>
-              </div>
-          
-              <div class="form-group">
-                <label for="edit-rua">Rua:</label>
-                <input type="text" name="rua" id="edit-rua" required />
-              </div>
+          <div class="form-group">
+            <label for="edit-desconto-comercial">Desconto Comercial:</label>
+            <input type="number" name="desconto-comercial" id="edit-desconto-comercial" min="0" />
+          </div>
 
-              <div class="form-group">
-                <label for="edit-numero">Nº:</label>
-                <input type="number" name="numero" id="edit-numero" required />
-              </div>
+          <div class="form-group">
+            <label for="valor-bruto">Valor Bruto:</label>
+            <input type="number" name="valor-bruto" id="valor-bruto" min="0" readonly/>
+          </div>
 
-              <div class="form-group">
-                <label for="edit-complemento">Complemento:</label>
-                <input type="text" name="complemento" id="edit-complemento" />
-              </div>
-            
-              <div class="form-group">
-                <label for="edit-bairro">Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-cidade">Cidade:</label>
-                <input type="text" name="cidade" id="edit-cidade" required />
-              </div>
+          <div class="form-group">
+            <label for="valor-total">Valor Total:</label>
+            <input type="number" name="valor-total" id="valor-total" min="0" readonly/>
+          </div>
         </div>
 
         <div class="modal-buttons">
-          <button type="submit" id="submit-new-supplier">Salvar</button>
-          <button type="button" id="cancel-new-supplier">Cancelar</button>
+          <button type="submit" id="submit-new-purchase">Salvar</button>
+          <button type="button" id="cancel-new-purchase">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-    <table id="suppliers-table">
+    <table id="purchase-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Nome Fantasia</th>
-          <th>Razão Social</th>
-          <th>CNPJ</th>
-          <th>Telefone</th>
-          <th>E-mail</th>
-          <th>Estado</th>
+          <th>Data Emissão</th>
+          <th>ID Compra</th>
+          <th>Fornecedor</th>
+          <th>Tipo Pagamento</th>
+          <th>Desconto Comercial</th>
+          <th>Desconto Financeiro</th>
+          <th>Valor Bruto</th>
+          <th>Valor Total</th>
           <th>Status</th>
-          <th>Data Cadastro</th>
-          <th>Data Atualização</th>
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="suppliers-tbody">
+      <tbody id="purchases-tbody">
       </tbody>
     </table>
   </main>

@@ -2,7 +2,7 @@ import db from "../config/db";
 import { supplierModel } from "../suppliers/supplier-model";
 
 export const searchAllSuppliers = async (
-  filters: { id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string }):
+  filters: { id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string, limit?: number, orderBy?: string }):
    Promise<supplierModel[]> => {
   let query = `SELECT * FROM fornecedores`;
   const conditions: string[] = [];
@@ -42,7 +42,17 @@ export const searchAllSuppliers = async (
     query += ` WHERE ` + conditions.join(" AND ");
   }
 
-  query += ` ORDER BY id DESC `;
+   // Aplicar ORDER BY dinâmico (com validação simples)
+  if (filters.orderBy && ['id', 'nome_fantasia', 'razao_social'].includes(filters.orderBy)) {
+    query += ` ORDER BY ${filters.orderBy} ASC`;
+  } else {
+    query += ` ORDER BY id DESC`;
+  }
+
+  // Aplicar LIMIT se informado e válido
+  if (filters.limit && Number.isInteger(filters.limit) && filters.limit > 0) {
+    query += ` LIMIT ${filters.limit}`;
+  }
 
   const result = await db.query(query, values);       /* Debug dos campos que estão chegando no backend. */
   return result.rows;                                 /* console.log("Filtros recebidos:", filters); */
@@ -50,7 +60,6 @@ export const searchAllSuppliers = async (
                                                       /* console.log("Values:", values); */
 };
 
-  
 
 export const searchSupplierById = async (id: number): Promise<supplierModel | null > => {
   const result = await db.query(`SELECT * FROM fornecedores where id = $1`, [id]);

@@ -1,34 +1,11 @@
 import db from "../config/db";
 import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
 
-//Serão duas tabelas de compra, compras e compra_itens, as consultas terão que ter inner/left join.
-export const searchAllPurchases = async (): Promise<purchaseModel[]> => {
+export const searchAllPurchases = async (): Promise<purchaseModel> => {
   const result = await db.query(
-    `SELECT
-	  c.id AS compra_id,
-      c.fornecedor_id,
-	  c.data_emissao,
-      c.tipo_pagamento,
-      c.desconto_comercial,
-      c.desconto_financeiro,
-      c.valor_bruto,
-      c.valor_total,
-      c.status,
-      c.data_cadastro,
-      c.data_atualizacao,
-      
-      ic.id AS item_id,
-      ic.produto_id,
-      ic.quantidade,
-      ic.preco_unitario,
-      ic.desconto_volume,
-      ic.valor_subtotal
-    FROM 
-      compras c
-    INNER JOIN 
-      itens_compra ic ON c.id = ic.compra_id`);
-
-  return result.rows;
+    `SELECT * FROM compras`);
+  
+    return result.rows;
 }; 
 
 export const searchPurchaseById = async (id: number): Promise<purchaseModel | null> => {

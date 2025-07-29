@@ -18,6 +18,8 @@ export interface customerModel {
   uf: string;
   cep: string;
   status: 'ativo' | 'inativo';
-  data_cadastro: Date;
-  data_atualizacao: Date;
+  data_cadastro: string;
+  data_atualizacao: string;
 }
+
+export default customerModel;

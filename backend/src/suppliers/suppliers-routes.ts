@@ -4,13 +4,16 @@ import { authenticate } from "../auth/auth-middleware";
 
 const suppliersRouter = Router();
 
-suppliersRouter.get("/", authenticate, getSuppliers);
-suppliersRouter.get("/:id", authenticate, getSupplierById);
+//Protege todas as rotas com o middleware.
+suppliersRouter.use(authenticate);
 
-suppliersRouter.post("/", authenticate, postSupplier);
+suppliersRouter.get("/", getSuppliers);
+suppliersRouter.get("/:id", getSupplierById);
 
-suppliersRouter.patch("/:id", authenticate, patchSupplierById);
+suppliersRouter.post("/", postSupplier);
 
-suppliersRouter.delete("/:id", authenticate ,deleteSupplierById);
+suppliersRouter.patch("/:id", patchSupplierById);
+
+suppliersRouter.delete("/:id" ,deleteSupplierById);
 
 export default suppliersRouter;
