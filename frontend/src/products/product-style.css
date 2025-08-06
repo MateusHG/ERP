@@ -228,7 +228,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1100;
 }
 
 #confirm-box.hidden {
@@ -406,4 +406,50 @@ input[readonly] {
 #new-product-form {
   display: flex;
   flex-direction: column;
+}
+
+#submit-new-product {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#cancel-new-product {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-buttons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#submit-edit {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#cancel-edit {
+  margin-top: 16px;
+  padding: 8px 16px;
+  border: none;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
 }

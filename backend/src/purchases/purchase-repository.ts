@@ -1,10 +1,35 @@
 import db from "../config/db";
 import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
 
-export const searchAllPurchases = async (): Promise<purchaseModel> => {
-  const result = await db.query(
-    `SELECT * FROM compras`);
-  
+export const searchAllPurchases = async (
+  filters: { id?: number, fornecedor_id?: number, status?: string}
+): Promise<purchaseModel[]> => {
+  let query = `SELECT * FROM compras`;
+  const conditions: string[] = [];
+  const values: any[] = [];
+
+  if (filters.id) {
+    values.push(`${filters.id}%`);
+    conditions.push(`CAST(id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.fornecedor_id) {
+    values.push(`${filters.fornecedor_id}%`);
+    conditions.push(`CAST(fornecedor_id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.status) {
+    values.push(`${filters.status}`);
+    conditions.push(`status = $${values.length}`);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join (" AND ");
+  }
+
+  query += ` ORDER BY id DESC`;
+
+  const result = await db.query(query, values);
     return result.rows;
 }; 
 
@@ -39,8 +64,6 @@ export const searchPurchaseById = async (id: number): Promise<purchaseModel | nu
 
   return result.rows[0];
 };
-
-
 
 //Omite os valores que  não são necessários declarar no INSERT, os mesmos são gerados automaticamente pelo banco de dados.
 interface newPurchaseInput extends Omit<purchaseModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> {

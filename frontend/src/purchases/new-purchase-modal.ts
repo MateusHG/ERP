@@ -1,8 +1,9 @@
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
 import { renderPurchasesList } from "./purchases-dom";
-import { loadPurchasesAPI } from "./purchases-service";
+import { loadPurchasesAPI, postPurchaseAPI } from "./purchases-service";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
+import { formatCurrency, setupCurrencyInputs } from "../utils/formatters";
 
 const newPurchaseModal = document.getElementById("new-purchase-modal")!;
 const form = document.getElementById("new-purchase-form") as HTMLFormElement;
@@ -18,7 +19,12 @@ export function openNewPurchaseModal() {
   form.reset(); // Reseta os campos do formulário.
   newPurchaseModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
-  
+
+  const todayISO = new Date().toISOString().split("T")[0];
+  const dateInput = document.getElementById("edit-data-emissao") as HTMLInputElement;
+  dateInput.value = todayISO;
+
+  setupCurrencyInputs();
 }
 
   cancelBtn.addEventListener("click", async () => {
@@ -33,21 +39,12 @@ export function openNewPurchaseModal() {
     e.preventDefault(); // Evita reload da página
 
   const newPurchaseData = {
-    razao_social: (form.elements.namedItem("razao") as HTMLInputElement).value,
-    nome_fantasia: (form.elements.namedItem("fantasia") as HTMLInputElement).value,
-    cnpj: (form.elements.namedItem("cnpj") as HTMLInputElement).value,
-    inscricao_estadual: (form.elements.namedItem("iestadual") as HTMLInputElement).value,
-    telefone: (form.elements.namedItem("telefone") as HTMLInputElement).value,
-    celular: (form.elements.namedItem("celular") as HTMLInputElement).value,
-    email: (form.elements.namedItem("email") as HTMLInputElement).value,
-    status: (form.elements.namedItem("status") as HTMLSelectElement).value,
-    cep: (form.elements.namedItem("cep") as HTMLInputElement).value,
-    uf: (form.elements.namedItem("uf") as HTMLInputElement).value,
-    rua: (form.elements.namedItem("rua") as HTMLInputElement).value,
-    numero: parseInt((form.elements.namedItem("numero") as HTMLInputElement).value),
-    complemento: (form.elements.namedItem("complemento") as HTMLInputElement).value,
-    bairro: (form.elements.namedItem("bairro") as HTMLInputElement).value,
-    cidade: (form.elements.namedItem("cidade") as HTMLInputElement).value,
+    fornecedor: (form.elements.namedItem("fornecedor") as HTMLInputElement).value,
+    data_emissao: (form.elements.namedItem("data-emissao") as HTMLInputElement).value,
+    tipo_pagamento: (form.elements.namedItem("tipo-pagamento") as HTMLInputElement).value,
+    status: (form.elements.namedItem("status") as HTMLInputElement).value,
+    desconto_financeiro: (form.elements.namedItem("desconto-financeiro") as HTMLInputElement).value,
+    desconto_comercial: (form.elements.namedItem("desconto-comercial") as HTMLInputElement).value,
   };
 
   try {
@@ -56,10 +53,10 @@ export function openNewPurchaseModal() {
 
     newPurchaseModal.classList.add("hidden"); //Fecha o modal após enviar.
 
-    renderPurchasesList(await loadPurchasesAPI()); //Recarrega a lista atualizada de fornecedores.
+    renderPurchasesList(await loadPurchasesAPI()); //Recarrega a lista atualizada de compras.
   
   } catch (err: any) {
     console.error("Erro ao cadastrar fornecedor:", err);
-    showMessage(err.message || "Erro desconhecido ao cadastrar fornecedor.")
+    showMessage(err.message || "Erro desconhecido ao cadastrar compra.")
   }
   });

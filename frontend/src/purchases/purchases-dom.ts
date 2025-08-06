@@ -61,7 +61,7 @@ export function renderPurchasesList(purchases: purchaseModel[]): void {
 export function getFilterValues() {
   return {
     id: (document.querySelector("#filtro-id") as HTMLInputElement)?.value || "",
-    nome_fantasia: (document.querySelector("#filtro-nome-fornecedor") as HTMLInputElement)?.value || "",
+    fornecedor_id: (document.querySelector("#filtro-nome-fornecedor") as HTMLInputElement)?.value || "",
     status: (document.querySelector("#filtro-status") as HTMLSelectElement)?.value || "",
   };
 };

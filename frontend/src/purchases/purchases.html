@@ -60,8 +60,8 @@
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
         <option value="">Todos</option>
-        <option value="Pendentes">Pendentes</option>
-        <option value="Finalizadas">Finalizadas</option>
+        <option value="Pendente">Pendente</option>
+        <option value="Finalizado">Finalizado</option>
       </select>
     </div>
     </div>
@@ -81,7 +81,7 @@
         <div class="form-fields">
           <div class="form-group">
             <label for="fornecedor-search">Fornecedor:</label>
-            <input id="fornecedor-search" name="fornecedor" type="text" autocomplete="off" />
+            <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
             <input type="hidden" id="fornecedor-id" name="fornecedor_id" />
             <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
           </div>
@@ -114,23 +114,49 @@
 
           <div class="form-group">
             <label for="edit-desconto-financeiro">Desconto Financeiro:</label>
-            <input type="number" name="desconto-financeiro" id="edit-desconto-financeiro" min="0" />
+            <input type="text" name="desconto-financeiro" id="edit-desconto-financeiro"/>
           </div>
 
           <div class="form-group">
             <label for="edit-desconto-comercial">Desconto Comercial:</label>
-            <input type="number" name="desconto-comercial" id="edit-desconto-comercial" min="0" />
+            <input type="text" name="desconto-comercial" id="edit-desconto-comercial"/>
           </div>
 
           <div class="form-group">
             <label for="valor-bruto">Valor Bruto:</label>
-            <input type="number" name="valor-bruto" id="valor-bruto" min="0" readonly/>
+            <input type="text" name="valor-bruto" id="valor-bruto" readonly/>
           </div>
 
           <div class="form-group">
             <label for="valor-total">Valor Total:</label>
-            <input type="number" name="valor-total" id="valor-total" min="0" readonly/>
+            <input type="text" name="valor-total" id="valor-total" readonly/>
           </div>
+        </div>
+
+        <h4>Itens da Compra<button type="button" id="add-item-btn" class="add-item-btn">+ Adicionar</button></h4>
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th>ID Produto</th>
+              <th>Código</th>
+              <th>Nome Produto</th>
+              <th>Quantidade</th>
+              <th>Preço Unitário</th>
+              <th>Desconto Volume</th>
+              <th>Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="items-body">
+            <!-- Linhas serão injetadas aqui. -->
+          </tbody>
+          <tbody></tbody>
+        </table>
+
+        <div class="purchase-summary">
+          <div>Subtotal: <span id="subtotal"></span></div>
+          <div>Descontos: <span id="discounts"></span></div>
+          <div><strong>Total: <span id="final-total"></span></strong></div>
         </div>
 
         <div class="modal-buttons">

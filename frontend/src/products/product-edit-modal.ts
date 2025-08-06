@@ -1,13 +1,15 @@
 import { renderProductsList } from "./product-dom";
 import { getProductByIdAPI, loadProductsAPI, updateProductAPI } from "./product-service";
 import { formatData } from "../utils/formatters";
-import { showMessage } from "../utils/messages";
+import { showConfirm, showMessage } from "../utils/messages";
+import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit")!;
 
 let currentEditId: number | null = null;
+let originalFormData: Record<string, string> = {};
 
 export async function openEditModal(id: number) {
   currentEditId = id;
@@ -27,12 +29,18 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(product.data_cadastro);
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(product.data_atualizacao);
   
-  // Exibe o modal
+
   modal.classList.remove("hidden");
+  originalFormData = getFormDataSnapshot(form);
 }
 
 //Cancela a edição do produto.
-cancelBtn.addEventListener("click", () => {
+cancelBtn.addEventListener("click", async () => {
+  if (isFormChanged(form, originalFormData)) {
+    const confirmed = await showConfirm("Você tem alterações não salvas. Deseja realmente sair?");
+    if (!confirmed) return;
+
+  }
   modal.classList.add("hidden");
   currentEditId = null;
 });

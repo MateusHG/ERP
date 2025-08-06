@@ -3,7 +3,8 @@ import { getFilterValues } from "./purchases-dom";
 import { showConfirm, showMessage } from "../utils/messages";
 import { renderPurchasesList } from "./purchases-dom";
 import { openNewPurchaseModal } from "./new-purchase-modal";
-import { loadPurchasesAPI } from "./purchases-service";
+import { loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-service";
+import { createEditableRow } from "./purchase-item-dom";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
@@ -60,4 +61,10 @@ export async function handleDeleteClick(target: HTMLElement) {
   } catch (error: any) {
     showMessage(error.message || 'Erro ao deletar compra.')
   }
+};
+
+export async function handleNewPurchaseItemClick(target: HTMLElement) {
+  const itemsBody = document.getElementById("items-body")! as HTMLTableSectionElement;
+  const row = createEditableRow();
+  itemsBody.appendChild(row);
 };

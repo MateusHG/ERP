@@ -8,6 +8,7 @@ export interface purchaseModel {
   valor_bruto?: number;           // soma dos itens sem desconto
   valor_total?: number;           // valor final após descontos aplicados
   status: 'pendente' | 'aprovado' | 'cancelado';
+  itens: [];
   data_cadastro: Date;
   data_atualizacao: Date;
 };

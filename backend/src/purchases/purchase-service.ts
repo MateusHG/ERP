@@ -2,9 +2,11 @@ import * as purchasesRepository from "../purchases/purchase-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 
-export const getAllPurchasesService = async () => {
+export const getAllPurchasesService = async (
+  filters: {id?: number, fornecedor_id?: number, status?: string}
+) => {
   try {
-    const purchases = await purchasesRepository.searchAllPurchases();
+    const purchases = await purchasesRepository.searchAllPurchases(filters);
     return ok(purchases);
 
   } catch (err) {

@@ -1,4 +1,4 @@
-import { handleDeleteClick, handleEditClick, handleFilterChange, handleNewPurchaseClick } from "./purchases-events";
+import { handleDeleteClick, handleEditClick, handleFilterChange, handleNewPurchaseClick, handleNewPurchaseItemClick } from "./purchases-events";
 
 export function registerGlobalEvents() {
   document.addEventListener("click", async (event) => {
@@ -14,9 +14,11 @@ export function registerGlobalEvents() {
     
     } else if (target.classList.contains("btn-new-purchase")) {
       await handleNewPurchaseClick(target);
+
+    } else if (target.classList.contains("add-item-btn")) {
+      await handleNewPurchaseItemClick(target);
     }
   });
-
 
 // -------------------------
 // Eventos de filtro (input/select)
