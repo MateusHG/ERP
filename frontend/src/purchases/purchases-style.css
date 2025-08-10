@@ -529,7 +529,7 @@ input[readonly] {
   box-sizing: border-box;
 }
 
-.purchase-summary {
+.purchase-items-summary {
   margin-top: 12px;
   display: flex;
   gap: 16px;

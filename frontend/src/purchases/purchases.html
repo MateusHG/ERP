@@ -107,19 +107,32 @@
           <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
-              <option value="Pendente">Pendente</option>
-              <option value="Pendente">Finalizado</option>
+              <option value="Criado">Em Aberto</option>
+              <option value="Aguardando">Aguardando Aprovação</option>
+              <option value="Aprovado">Aprovado</option>
+              <option value="Recebido">Recebido</option>
+              <option value="Cancelado">Cancelado</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="edit-desconto-financeiro">Desconto Financeiro:</label>
-            <input type="text" name="desconto-financeiro" id="edit-desconto-financeiro"/>
+            <input type="text" name="desconto-financeiro" id="desconto-financeiro"/>
           </div>
 
           <div class="form-group">
             <label for="edit-desconto-comercial">Desconto Comercial:</label>
-            <input type="text" name="desconto-comercial" id="edit-desconto-comercial"/>
+            <input type="text" name="desconto-comercial" id="desconto-comercial"/>
+          </div>
+
+          <div class="form-group">
+            <label for="desconto-itens">Desconto Volume:</label>
+            <input type="text" name="desconto-itens" id="desconto-itens" readonly/>
+          </div>
+
+          <div class="form-group">
+            <label for="descontos-totais">Descontos Totais:</label>
+            <input type="text" name="descontos-totais" id="descontos-totais" readonly/>
           </div>
 
           <div class="form-group">
@@ -142,7 +155,7 @@
               <th>Nome Produto</th>
               <th>Quantidade</th>
               <th>Preço Unitário</th>
-              <th>Desconto Volume</th>
+              <th>Desconto por Volume</th>
               <th>Total</th>
               <th>Ações</th>
             </tr>
@@ -153,10 +166,10 @@
           <tbody></tbody>
         </table>
 
-        <div class="purchase-summary">
-          <div>Subtotal: <span id="subtotal"></span></div>
-          <div>Descontos: <span id="discounts"></span></div>
-          <div><strong>Total: <span id="final-total"></span></strong></div>
+        <div class="purchase-items-summary">
+          <div>Subtotal: <span id="subtotal-items"></span></div>
+          <div>Descontos: <span id="total-items-discount"></span></div>
+          <div><strong>Total: <span id="total-items-final"></span></strong></div>
         </div>
 
         <div class="modal-buttons">

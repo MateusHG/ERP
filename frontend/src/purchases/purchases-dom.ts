@@ -16,7 +16,6 @@ export function renderPurchasesList(purchases: purchaseModel[]): void {
   tbody.innerHTML = ""
 
   purchases.forEach(purchase => {
-    console.log(purchase);
 
     const tr = document.createElement("tr");
 

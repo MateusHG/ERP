@@ -4,6 +4,7 @@ import { renderPurchasesList } from "./purchases-dom";
 import { loadPurchasesAPI, postPurchaseAPI } from "./purchases-service";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { formatCurrency, setupCurrencyInputs } from "../utils/formatters";
+import { setupPurchaseEvents } from "./purchases-events";
 
 const newPurchaseModal = document.getElementById("new-purchase-modal")!;
 const form = document.getElementById("new-purchase-form") as HTMLFormElement;
@@ -11,6 +12,7 @@ const submitBtn = document.getElementById("submit-new-purchase")!;
 const cancelBtn = document.getElementById("cancel-new-purchase")!;
 
 setupSupplierAutoComplete("fornecedor-search", "fornecedor-id", "fornecedor-suggestions");
+setupPurchaseEvents();
 
 let originalFormData: Record<string, string> = {};
 

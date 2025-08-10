@@ -1,38 +1,46 @@
 import { formatCurrency } from "../utils/formatters";
 
-export function updatePurchaseSummary() {
-  const itemsBody = document.getElementById("items-body")!;
-  const rows = Array.from(itemsBody.querySelectorAll("tr"));
-  let subtotal = 0;
+document.addEventListener("itemsUpdated", (e: any) => {
+  console.log("Evento itemsUpdated recebido:", e.detail);
+  updateTotalPurchaseDisplay();
+});
 
-  rows.forEach(row => {
-    const totalCell = row.querySelector(".item-line-total") as HTMLElement;
-    if (!totalCell) return;
+export function calcTotalPurchase(
+  totalItemsWithDiscount: number,
+  descontoFinanceiro: number,
+  descontoComercial: number,
+): number {
+  return totalItemsWithDiscount - descontoComercial - descontoFinanceiro;
+}
 
-    const text = totalCell.textContent || "";
-    const numeric = parseFloat(
-      text
-        .replace(/\./g, "")
-        .replace(",", ".")
-        .replace(/[^\d\.]/g, "")
-    );
+export function updateTotalPurchaseDisplay() {
+  const totalItemsWithDiscount = parseFloat(
+    (document.getElementById("total-items-final")?.textContent?.replace(/[^\d.,-]/g, "").replace(",", ".") || "0")
+  );
 
-    if (!isNaN(numeric)) subtotal += numeric;
+  const descontoFinanceiro = parseFloat(
+    (document.getElementById("desconto-financeiro") as HTMLInputElement)?.value || "0"
+  );
+
+  const descontoComercial = parseFloat(
+    (document.getElementById("desconto-comercial") as HTMLInputElement)?.value || "0"
+  );
+
+
+  console.log({
+    totalItemsWithDiscount,
+    descontoFinanceiro,
+    descontoComercial,
   });
 
-  const valorBrutoInput = document.getElementById("valor-bruto") as HTMLInputElement | null;
-  const valorTotalInput = document.getElementById("valor-total") as HTMLInputElement | null;
-  const subtotalSpan = document.getElementById("subtotal") as HTMLInputElement | null;
-  const discountSpan = document.getElementById("discounts") as HTMLInputElement | null;
+  const totalCabecalho = calcTotalPurchase(
+    totalItemsWithDiscount,
+    descontoFinanceiro,
+    descontoComercial
+  );
 
-  const descontoFinanceiro = parseFloat((document.getElementById("edit-desconto-financeiro") as HTMLInputElement)?.value) || 0;
-  const descontoComercial = parseFloat((document.getElementById("edit-desconto-comercial") as HTMLInputElement)?.value) || 0;
-  const totalDescontos = descontoFinanceiro + descontoComercial;
-
-  const valorTotal = subtotal - totalDescontos;
-
-  if (valorBrutoInput) valorBrutoInput.value = subtotal.toFixed(2);
-  if (valorTotalInput) valorTotalInput.value = valorTotal.toFixed(2);
-  if (subtotalSpan) subtotalSpan.textContent = formatCurrency(subtotal);
-  if (discountSpan) discountSpan.textContent = formatCurrency(totalDescontos);
-};
+  const valorTotalEl = document.getElementById("valor-total");
+  if (valorTotalEl) {
+    valorTotalEl.textContent = formatCurrency(totalCabecalho);
+  }
+}

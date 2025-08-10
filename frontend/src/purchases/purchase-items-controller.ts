@@ -1,7 +1,8 @@
+import { showConfirm } from "../utils/messages";
 import { formatCurrency } from "../utils/formatters";
-import { updatePurchaseSummary } from "./purchase-summary";
+import { recalcLine, updatePurchaseItemSummary } from "./purchase-item-summary";
 
-// ✅ Atualiza o estado de visualização ou edição de uma linha
+// Atualiza o estado de visualização ou edição de uma linha.
 export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
   const inputs = tr.querySelectorAll("input"); // corrigido para "input" minúsculo
   inputs.forEach((input) => {
@@ -17,20 +18,7 @@ export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
   btnEdit.disabled = !isView;
 }
 
-// ✅ Recalcula o total da linha
-export function recalcLine(tr: HTMLTableRowElement) {
-  const quantity = parseFloat((tr.querySelector('[name="item-quantity"]') as HTMLInputElement)?.value) || 0;
-  const unit = parseFloat((tr.querySelector('[name="item-unit-price"]') as HTMLInputElement)?.value) || 0;
-  const discount = parseFloat((tr.querySelector('[name="item-discount-volume"]') as HTMLInputElement)?.value) || 0;
-
-  const gross = quantity * unit;
-  const total = Math.max(0, gross - discount);
-
-  const totalCell = tr.querySelector(".item-line-total") as HTMLElement;
-  totalCell.textContent = formatCurrency(total);
-}
-
-// ✅ Aplica os eventos aos botões e inputs da linha
+// Aplica os eventos aos botões e inputs da linha.
 export function setupItemRowEvents(tr: HTMLTableRowElement) {
   setViewMode(tr, false);
   recalcLine(tr);
@@ -49,20 +37,23 @@ export function setupItemRowEvents(tr: HTMLTableRowElement) {
   btnSave.addEventListener("click", () => {
     recalcLine(tr);
     setViewMode(tr, true);
-    updatePurchaseSummary();
+    updatePurchaseItemSummary();
   });
 
   btnEdit.addEventListener("click", () => {
     setViewMode(tr, false);
   });
 
-  btnRemove.addEventListener("click", () => {
+  btnRemove.addEventListener("click", async () => {
+    const confirm = await showConfirm("Confirma a remoção do item?")
+    if (!confirm) return;
+
     tr.remove();
-    updatePurchaseSummary();
+    updatePurchaseItemSummary();
   });
 }
 
-// ✅ Coleta todos os dados das linhas preenchidas
+// Coleta todos os dados das linhas preenchidas.
 export async function collectPurchaseItems() {
   const itemsBody = document.getElementById("items-body")!;
   const rows = Array.from(itemsBody.querySelectorAll("tr"));

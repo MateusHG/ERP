@@ -5,6 +5,8 @@ import { renderPurchasesList } from "./purchases-dom";
 import { openNewPurchaseModal } from "./new-purchase-modal";
 import { loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-service";
 import { createEditableRow } from "./purchase-item-dom";
+import { updatePurchaseItemSummary } from "./purchase-item-summary";
+import { updateTotalPurchaseDisplay } from "./purchase-summary";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
@@ -68,3 +70,36 @@ export async function handleNewPurchaseItemClick(target: HTMLElement) {
   const row = createEditableRow();
   itemsBody.appendChild(row);
 };
+
+export function setupPurchaseEvents() {
+  // Atualiza resumo quando os inputs dos itens mudam
+  const itemsBody = document.getElementById("items-body");
+  if (itemsBody) {
+    itemsBody.addEventListener("input", (e) => {
+      const target = e.target as HTMLInputElement;
+      if (
+        target.name === "item-quantity" ||
+        target.name === "item-unit-price" ||
+        target.name === "item-discount-volume"
+      ) {
+        updatePurchaseItemSummary();
+      }
+    });
+  }
+
+  ["desconto-financeiro", "desconto-comercial"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", () => {
+        document.dispatchEvent(new CustomEvent("itemsUpdated", {detail: {}}));
+        updateTotalPurchaseDisplay();
+      });
+    }
+  });
+
+  document.addEventListener("itemsUpdated", () => {
+    updateTotalPurchaseDisplay();
+  });
+}
+
+setupPurchaseEvents();

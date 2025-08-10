@@ -37,8 +37,11 @@ export function parseCurrency(value: string): number {
 const currencyInputIds = [
   "edit-desconto-financeiro",
   "edit-desconto-comercial",
+  "desconto-itens",
+  "descontos-totais",
   "valor-bruto",
   "valor-total",
+
 ];
 
 // Aplica a máscara (formatação) no input mantendo o cursor próximo da posição correta

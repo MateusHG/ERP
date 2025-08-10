@@ -1,5 +1,6 @@
 import { attachItemAutoComplete } from "../utils/autocomplete";
 import { formatCurrency } from "../utils/formatters";
+import { setupItemRowEvents } from "./purchase-items-controller";
 
 // Manipulação de DOM para os itens da compra.
 
@@ -28,7 +29,6 @@ export function createEditableRow(): HTMLTableRowElement {
   tr.appendChild(tdName);
 
   attachItemAutoComplete(inputName, (item) => {
-    console.log("Item selecionado; ", item);
     const row = inputName.closest("tr")!;
     const inputProductId = row.querySelector('input[name="item-product-id"]') as HTMLInputElement;
     const inputCode = row.querySelector('input[name="item-code"]') as HTMLInputElement;
@@ -79,6 +79,9 @@ export function createEditableRow(): HTMLTableRowElement {
   tdActions.appendChild(btnEdit);
   tdActions.appendChild(btnRemove);
   tr.appendChild(tdActions);
+
+  //Chama o controller para aplicar os eventos.
+  setupItemRowEvents(tr);
 
   return tr;
 };
