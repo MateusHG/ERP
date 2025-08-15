@@ -1,8 +1,9 @@
 import { formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
-import { loadPurchasesAPI } from "./purchases-service";
+import { getItemsByPurchaseIdAPI, getPurchaseByIdAPI, loadPurchasesAPI } from "./purchases-service";
 import { renderPurchasesList } from "./purchases-dom";
+import { addItemRowTo, createEditableRow } from "./purchase-item-dom";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
@@ -14,28 +15,44 @@ let originalFormData: Record<string, string> = {};
 export async function openEditModal(id: number) {
   currentEditId = id;
 
-  const supplier = await getPurchaseByIdAPI(id);
+  const purchase = await getPurchaseByIdAPI(id);
+  console.log("Compra:", purchase);
 
-  (form.elements.namedItem("id") as HTMLInputElement).value = supplier.id.toString();
-  (form.elements.namedItem("razao") as HTMLInputElement).value = supplier.razao_social;
-  (form.elements.namedItem("fantasia") as HTMLInputElement).value = supplier.nome_fantasia || "";
-  (form.elements.namedItem("cnpj") as HTMLInputElement).value = supplier.cnpj.toString();
-  (form.elements.namedItem("iestadual") as HTMLInputElement).value = supplier.inscricao_estadual;
-  (form.elements.namedItem("telefone") as HTMLInputElement).value = supplier.telefone || "";
-  (form.elements.namedItem("celular") as HTMLInputElement).value = supplier.celular || "";
-  (form.elements.namedItem("email") as HTMLInputElement).value = supplier.email;
-  (form.elements.namedItem("status") as HTMLInputElement).value = supplier.status;
-  (form.elements.namedItem("cep") as HTMLInputElement).value = supplier.cep;
-  (form.elements.namedItem("uf") as HTMLSelectElement).value = supplier.uf ?? "";
-  (form.elements.namedItem("rua") as HTMLInputElement).value = supplier.rua;
-  (form.elements.namedItem("numero") as HTMLInputElement).value = supplier.numero;
-  (form.elements.namedItem("complemento") as HTMLInputElement).value = supplier.complemento;
-  (form.elements.namedItem("bairro") as HTMLInputElement).value = supplier.bairro;
-  (form.elements.namedItem("cidade") as HTMLInputElement).value = supplier.cidade;
-  (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(supplier.data_cadastro);
-  (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(supplier.data_atualizacao);
+  // Seleciona os inputs dentro do modal de edição
+  const inputFornecedorId = modal.querySelector<HTMLInputElement>('input[name="fornecedor-id"]')!;
+  const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="data-emissao"]')!;
+  const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="tipo-pagamento"]')!;
+  const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="desconto-financeiro"]')!;
+  const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="desconto-comercial"]')!;
+  const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="status"]')!;
 
-  
+  // Preenche os campos
+  inputFornecedorId.value = String(purchase.fornecedor_id);
+  inputDataEmissao.value = formatData(purchase.data_emissao);
+  inputTipoPagamento.value = purchase.tipo_pagamento || "";
+  inputDescontoFinanceiro.value = String(purchase.desconto_financeiro || 0);
+  inputDescontoComercial.value = String(purchase.desconto_comercial || 0);
+  inputStatus.value = purchase.status || "";
+
+  // Carrega os itens da compra
+  const items = await getItemsByPurchaseIdAPI(id);
+  console.log("Itens da compra:", items);
+
+  const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLTableSectionElement;
+  itemsBody.innerHTML = "";
+
+  items.forEach(item => {
+    addItemRowTo(itemsBody, {
+      produto_id: item.produto_id,
+      produto_codigo: item.produto_codigo || "",
+      produto_nome: item.produto_nome || "",
+      quantidade: item.quantidade,
+      preco_unitario: item.preco_unitario,
+      desconto_volume: item.desconto_volume || "0.00",
+      valor_subtotal: item.valor_subtotal
+    });
+  });
+
   modal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 }
@@ -55,24 +72,14 @@ form.addEventListener("submit", async (event) => {
 
   const formData = new FormData(form);
 
-  const updatedPurchaseData = {
-    razao_social: formData.get("razao")?.toString().trim() || "",
-    nome_fantasia: formData.get("fantasia")?.toString().trim() || "",
-    cnpj: formData.get("cnpj")?.toString().trim() || "",
-    inscricao_estadual: formData.get("iestadual")?.toString().trim() || "",
-    telefone: formData.get("telefone")?.toString().trim() || "",
-    celular: formData.get("celular")?.toString().trim() || "",
-    email: formData.get("email")?.toString().trim() || "",
-    status: formData.get("status")?.toString().trim() || "Ativo",
-    cep: formData.get("cep")?.toString().trim() || "",
-    uf: formData.get("uf")?.toString().trim() || "",
-    rua: formData.get("rua")?.toString().trim() || "",
-    numero: formData.get("numero")?.toString().trim() || "",
-    complemento: formData.get("complemento")?.toString().trim() || "",
-    bairro: formData.get("bairro")?.toString().trim() || "",
-    cidade: formData.get("cidade")?.toString().trim() || "",
-    data_cadastro: formData.get("data_cadastro")?.toString().trim() || "",
-    data_atualizacao: formData.get("data_atualizacao")?.toString().trim() || "",
+    const updatedPurchaseData = {
+      fornecedor_id: formData.get("fornecedor-id")?.toString() || "",
+      data_emissao: formData.get("data-emissao")?.toString() || "",
+      tipo_pagamento: formData.get("tipo-pagamento")?.toString() || "",
+      desconto_financeiro: Number(formData.get("desconto-financeiro") || 0),
+      desconto_comercial: Number(formData.get("desconto-comercial") || 0),
+      status: formData.get("status")?.toString() || "",
+    // Itens da compra podem ser enviados separados ou em outra rota
   };
 
   try {
@@ -80,9 +87,8 @@ form.addEventListener("submit", async (event) => {
     showMessage(response.message);
 
     modal.classList.add("hidden");
-    
     renderPurchasesList(await loadPurchasesAPI());
-  
+
   } catch (err: any) {
     showMessage(err.message);
   }

@@ -7,7 +7,7 @@ export async function setupSupplierAutoComplete(
   suggestionsId: string
 ) {
   const input = document.getElementById(inputId) as HTMLInputElement;
-  const hiddenInput = document.getElementById(hiddenInputId) as HTMLInputElement | null;
+  const hiddenInput = document.getElementById(hiddenInputId) as HTMLInputElement;
   const suggestions = document.getElementById(suggestionsId) as HTMLUListElement;
 
   if (!input || !hiddenInput || !suggestions) {
@@ -42,7 +42,7 @@ export async function setupSupplierAutoComplete(
         li.addEventListener("mousedown", (e) => {
           e.preventDefault();
           input.value = supplier.nome_fantasia;
-          input.dataset.id = String(supplier.id)
+          hiddenInput.value = String(supplier.id); //Salva o ID para o backend.
           selectedSupplierName = supplier.nome_fantasia;
           suggestions.classList.add("hidden");
         });
@@ -104,7 +104,12 @@ export function attachItemAutoComplete(input: HTMLInputElement, onSelect: (item:
     const term = input.value.trim();
     if (!term) return;
 
-    const suggestions = await fetchProductSuggestions(term); // implementa a API
+    const filters: { id?: string, codigo?: string, nome?: string} = {};
+    if (input.name === "item-product-id") filters.id = term;
+    else if (input.name === "item-code") filters.codigo = term;
+    else filters.nome = term;
+
+    const suggestions = await fetchProductSuggestions(filters); // implementa a API
 
     if (!suggestions.length) return;
 
@@ -122,13 +127,23 @@ export function attachItemAutoComplete(input: HTMLInputElement, onSelect: (item:
 
     suggestions.forEach((item: any) => {
       const li = document.createElement("li");
-      li.textContent = `${item.codigo} - ${item.nome}`;
+      li.textContent = `${item.id} - ${item.codigo} - ${item.nome}`;
       li.style.padding = "4px";
       li.style.cursor = "pointer";
 
       li.addEventListener("click", () => {
         onSelect(item);
-        input.value = item.nome;
+
+        if(input.name === "item-code") {
+          input.value = item.codigo;
+
+        } else if (input.name === "item-product-id") {
+          input.value = item.id;
+          
+        } else {
+          input.value = item.nome;
+        }
+
         closeSuggestions();
       });
 

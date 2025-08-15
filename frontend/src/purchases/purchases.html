@@ -47,10 +47,10 @@
       <h1>Compras <img src="/erpicons/purchase.svg" alt="Produtos-Icone"><button id="btn-new-purchase" class="btn-new-purchase">+ Nova Compra</button></h1>
       <div class="filter-date-period">
       <label for="initial-date">Período de:</label>
-      <input type="date" id="initial-date" name="initial_date">
+      <input type="date" id="initial-date" name="initial-date">
 
       <label for="final-date">até:</label>
-      <input type="date" id="final-date" name="final_date">
+      <input type="date" id="final-date" name="final-date">
 
       <button id="filter-btn">Filtrar Data</button>
 
@@ -60,8 +60,11 @@
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
         <option value="">Todos</option>
-        <option value="Pendente">Pendente</option>
-        <option value="Finalizado">Finalizado</option>
+        <option value="aberto">Em Aberto</option>
+        <option value="aguardando">Aguardando Aprovação</option>
+        <option value="aprovado">Aprovado</option>
+        <option value="recebido">Recebido</option>
+        <option value="cancelado">Cancelado</option>
       </select>
     </div>
     </div>
@@ -82,18 +85,18 @@
           <div class="form-group">
             <label for="fornecedor-search">Fornecedor:</label>
             <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
-            <input type="hidden" id="fornecedor-id" name="fornecedor_id" />
+            <input type="hidden" id="fornecedor-id" name="new-fornecedor-id" />
             <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
             <label for="edit-data-emissao">Data da Emissão:</label>
-            <input type="date" name="data-emissao" id="edit-data-emissao" required />
+            <input type="date" name="data-emissao" id="new-data-emissao" required />
           </div>
 
           <div class="form-group">
             <label for="edit-tipo-pagamento">Tipo de Pagamento:</label>
-            <select name="tipo-pagamento" id="edit-tipo-pagamento" required >
+            <select name="tipo-pagamento" id="new-tipo-pagamento" required >
               <option value="" disabled selected>Selecione o tipo de pagamento....</option>
               <option value="pix">Pix</option>
               <option value="boleto">Boleto Bancário</option>
@@ -106,47 +109,47 @@
 
           <div class="form-group">
             <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
-              <option value="Criado">Em Aberto</option>
-              <option value="Aguardando">Aguardando Aprovação</option>
-              <option value="Aprovado">Aprovado</option>
-              <option value="Recebido">Recebido</option>
-              <option value="Cancelado">Cancelado</option>
+            <select name="status" id="new-status" required >
+              <option value="aberto">Em Aberto</option>
+              <option value="aguardando">Aguardando Aprovação</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="recebido">Recebido</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="edit-desconto-financeiro">Desconto Financeiro:</label>
-            <input type="text" name="desconto-financeiro" id="desconto-financeiro"/>
+            <input type="text" name="desconto-financeiro" id="new-desconto-financeiro"/>
           </div>
 
           <div class="form-group">
             <label for="edit-desconto-comercial">Desconto Comercial:</label>
-            <input type="text" name="desconto-comercial" id="desconto-comercial"/>
+            <input type="text" name="desconto-comercial" id="new-desconto-comercial"/>
           </div>
 
           <div class="form-group">
             <label for="desconto-itens">Desconto Volume:</label>
-            <input type="text" name="desconto-itens" id="desconto-itens" readonly/>
+            <input type="text" name="desconto-itens" id="new-desconto-itens" readonly/>
           </div>
 
           <div class="form-group">
             <label for="descontos-totais">Descontos Totais:</label>
-            <input type="text" name="descontos-totais" id="descontos-totais" readonly/>
+            <input type="text" name="descontos-totais" id="new-descontos-totais" readonly/>
           </div>
 
           <div class="form-group">
             <label for="valor-bruto">Valor Bruto:</label>
-            <input type="text" name="valor-bruto" id="valor-bruto" readonly/>
+            <input type="text" name="valor-bruto" id="new-valor-bruto" readonly/>
           </div>
 
           <div class="form-group">
             <label for="valor-total">Valor Total:</label>
-            <input type="text" name="valor-total" id="valor-total" readonly/>
+            <input type="text" name="valor-total" id="new-valor-total" readonly/>
           </div>
         </div>
 
-        <h4>Itens da Compra<button type="button" id="add-item-btn" class="add-item-btn">+ Adicionar</button></h4>
+        <h4>Itens da Compra<button type="button" id="add-item-new-purchase-modal" class="add-item-btn">+ Adicionar</button></h4>
         <table id="items-table">
           <thead>
             <tr>
@@ -160,10 +163,9 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="items-body">
+          <tbody id="items-body-new-purchase-modal">
             <!-- Linhas serão injetadas aqui. -->
           </tbody>
-          <tbody></tbody>
         </table>
 
         <div class="purchase-items-summary">
@@ -219,137 +221,106 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Fornecedor -->
+  <!-- Modal: Editar Compra -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Fornecedor</h3>
+      <h3>Editar Compra</h3>
       <form id="edit-form">
         <div class="form-fields">
           <div class="form-group">
-            <label for="edit-id">ID:</label>
-            <input type="number" name="id" id="edit-id" readonly />
+            <label for="fornecedor-search">Fornecedor:</label>
+            <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
+            <input type="hidden" id="fornecedor-id" name="fornecedor-id" />
+            <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
-            <label for="edit-codigo">Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
+            <label for="edit-data-emissao">Data da Emissão:</label>
+            <input type="date" name="data-emissao" id="edit-data-emissao" required />
           </div>
 
           <div class="form-group">
-            <label for="edit-nome">Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-descricao">CNPJ:</label>
-            <input type="text" name="cnpj" id="edit-cnpj" required />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-ie">Inscrição Estadual:</label>
-            <input type="number" name="iestadual" id="edit-ie" min="0" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" minlength="1" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
+            <label for="edit-tipo-pagamento">Tipo de Pagamento:</label>
+            <select name="tipo-pagamento" id="edit-tipo-pagamento" required >
+              <option value="" disabled selected>Selecione o tipo de pagamento....</option>
+              <option value="pix">Pix</option>
+              <option value="boleto">Boleto Bancário</option>
+              <option value="cartao-credito">Cartão de Crédito</option>
+              <option value="transferencia-bancaria">Transferência Bancária (TED/DOC)</option>
+              <option value="dinheiro">Dinheiro</option>
+              <option value="carteira-digital">Carteira Digital</option>
+            </select>
           </div>
 
           <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="aberto">Em Aberto</option>
+              <option value="aguardando">Aguardando Aprovação</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="recebido">Recebido</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </div>
 
           <div class="form-group">
-                <label for="edit-cep">CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-uf">UF:</label>
-                <select name="uf" id="edit-uf" required>
-                  <option value="">Selecione uma UF</option>
-                  <option value="AC">Acre (AC)</option>
-                  <option value="AL">Alagoas (AL)</option>
-                  <option value="AP">Amapá (AP)</option>
-                  <option value="AM">Amazonas (AM)</option>
-                  <option value="BA">Bahia (BA)</option>
-                  <option value="CE">Ceará (CE)</option>
-                  <option value="DF">Distrito Federal (DF)</option>
-                  <option value="ES">Espírito Santo (ES)</option>
-                  <option value="GO">Goiás (GO)</option>
-                  <option value="MA">Maranhão (MA)</option>
-                  <option value="MT">Mato Grosso (MT)</option>
-                  <option value="MS">Mato Grosso do Sul (MS)</option>
-                  <option value="MG">Minas Gerais (MG)</option>
-                  <option value="PA">Pará (PA)</option>
-                  <option value="PB">Paraíba (PB)</option>
-                  <option value="PR">Paraná (PR)</option>
-                  <option value="PE">Pernambuco (PE)</option>
-                  <option value="PI">Piauí (PI)</option>
-                  <option value="RJ">Rio de Janeiro (RJ)</option>
-                  <option value="RN">Rio Grande do Norte (RN)</option>
-                  <option value="RS">Rio Grande do Sul (RS)</option>
-                  <option value="RO">Rondônia (RO)</option>
-                  <option value="RR">Roraima (RR)</option>
-                  <option value="SC">Santa Catarina (SC)</option>
-                  <option value="SP">São Paulo (SP)</option>
-                  <option value="SE">Sergipe (SE)</option>
-                  <option value="TO">Tocantins (TO)</option>
-                </select>
-              </div>
-          
-              <div class="form-group">
-                <label for="edit-rua">Rua:</label>
-                <input type="text" name="rua" id="edit-rua" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-numero">Nº:</label>
-                <input type="number" name="numero" id="edit-numero" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-complemento">Complemento:</label>
-                <input type="text" name="complemento" id="edit-complemento" />
-              </div>
-            
-              <div class="form-group">
-                <label for="edit-bairro">Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-cidade">Cidade:</label>
-                <input type="text" name="cidade" id="edit-cidade" required />
-              </div>
-
-          <div class="form-group">
-            <label for="edit-data-cadastro">Data de Cadastro:</label>
-            <input type="text" name="data_cadastro" id="edit-data-cadastro" readonly />
+            <label for="edit-desconto-financeiro">Desconto Financeiro:</label>
+            <input type="text" name="desconto-financeiro" id="edit-desconto-financeiro"/>
           </div>
 
           <div class="form-group">
-            <label for="edit-data-atualizacao">Data Última Atualização:</label>
-            <input type="text" name="data_atualizacao" id="edit-data-atualizacao" readonly />
+            <label for="edit-desconto-comercial">Desconto Comercial:</label>
+            <input type="text" name="desconto-comercial" id="edit-desconto-comercial"/>
+          </div>
+
+          <div class="form-group">
+            <label for="desconto-itens">Desconto Volume:</label>
+            <input type="text" name="desconto-itens" id="edit-desconto-itens" readonly/>
+          </div>
+
+          <div class="form-group">
+            <label for="descontos-totais">Descontos Totais:</label>
+            <input type="text" name="descontos-totais" id="edit-descontos-totais" readonly/>
+          </div>
+
+          <div class="form-group">
+            <label for="valor-bruto">Valor Bruto:</label>
+            <input type="text" name="valor-bruto" id="edit-valor-bruto" readonly/>
+          </div>
+
+          <div class="form-group">
+            <label for="valor-total">Valor Total:</label>
+            <input type="text" name="valor-total" id="edit-valor-total" readonly/>
           </div>
         </div>
 
+        <h4>Itens da Compra<button type="button" id="add-item-edit-modal" class="add-item-btn">+ Adicionar</button></h4>
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th>ID Produto</th>
+              <th>Código</th>
+              <th>Nome Produto</th>
+              <th>Quantidade</th>
+              <th>Preço Unitário</th>
+              <th>Desconto por Volume</th>
+              <th>Total</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="items-body-edit-modal">
+            <!-- Linhas serão injetadas aqui. -->
+          </tbody>
+        </table>
+
+        <div class="purchase-items-summary">
+          <div>Subtotal: <span id="subtotal-items"></span></div>
+          <div>Descontos: <span id="total-items-discount"></span></div>
+          <div><strong>Total: <span id="total-items-final"></span></strong></div>
+        </div>
+
         <div class="modal-buttons">
-          <button type="submit" id="submit-edit">Salvar</button>
+          <button type="submit" id="submit-new-purchase">Salvar</button>
           <button type="button" id="cancel-edit">Cancelar</button>
         </div>
       </form>

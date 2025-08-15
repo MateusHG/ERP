@@ -1,5 +1,4 @@
 import { showConfirm } from "../utils/messages";
-import { formatCurrency } from "../utils/formatters";
 import { recalcLine, updatePurchaseItemSummary } from "./purchase-item-summary";
 
 // Atualiza o estado de visualização ou edição de uma linha.
@@ -19,7 +18,7 @@ export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
 }
 
 // Aplica os eventos aos botões e inputs da linha.
-export function setupItemRowEvents(tr: HTMLTableRowElement) {
+export function setupItemRowEvents(tr: HTMLTableRowElement, container?: HTMLElement) {
   setViewMode(tr, false);
   recalcLine(tr);
 
@@ -31,13 +30,14 @@ export function setupItemRowEvents(tr: HTMLTableRowElement) {
   inputs.forEach((input) => {
     input.addEventListener("input", () => {
       recalcLine(tr);
+      if (container) updatePurchaseItemSummary(container);
     });
   });
 
   btnSave.addEventListener("click", () => {
     recalcLine(tr);
     setViewMode(tr, true);
-    updatePurchaseItemSummary();
+    if (container) updatePurchaseItemSummary(container);
   });
 
   btnEdit.addEventListener("click", () => {
@@ -49,14 +49,13 @@ export function setupItemRowEvents(tr: HTMLTableRowElement) {
     if (!confirm) return;
 
     tr.remove();
-    updatePurchaseItemSummary();
+    if (container) updatePurchaseItemSummary(container);
   });
 }
 
 // Coleta todos os dados das linhas preenchidas.
-export async function collectPurchaseItems() {
-  const itemsBody = document.getElementById("items-body")!;
-  const rows = Array.from(itemsBody.querySelectorAll("tr"));
+export async function collectPurchaseItems(container: HTMLElement) {
+  const rows = Array.from(container.querySelectorAll("tr"));
 
   return rows.map(row => {
     const get = (name: string) => {

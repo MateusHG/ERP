@@ -14,8 +14,8 @@ export function recalcLine(tr: HTMLTableRowElement) {
   if (totalCell) totalCell.textContent = formatCurrency(lineTotal);
 }
 
-export function updatePurchaseItemSummary() {
-  const rows = Array.from(document.querySelectorAll("#items-body tr"));
+export function updatePurchaseItemSummary(container: HTMLElement) {
+  const rows = Array.from(container.querySelectorAll("tr"));
 
   let subtotal = 0;
   let totalDiscounts = 0;
@@ -39,10 +39,10 @@ export function updatePurchaseItemSummary() {
   }
 
   //Atualiza os campos espelho no cabeçalho da compra.
-  const valorBrutoEl = document.getElementById("valor-bruto") as HTMLInputElement | null;
+  const valorBrutoEl = document.getElementById("new-valor-bruto") as HTMLInputElement | null;
   if (valorBrutoEl) valorBrutoEl.value = formatCurrency(subtotal);
 
-  const descontoVolumeEl = document.getElementById("desconto-itens") as HTMLInputElement | null;
+  const descontoVolumeEl = document.getElementById("new-desconto-itens") as HTMLInputElement | null;
   if (descontoVolumeEl) descontoVolumeEl.value = formatCurrency(totalDiscounts);
 
   // Atualiza apenas os totais de itens
@@ -51,7 +51,5 @@ export function updatePurchaseItemSummary() {
   (document.getElementById("total-items-final") as HTMLElement).textContent = formatCurrency(totalItemsWithDiscount);
 
   // Dispara evento para o purchase-summary recalcular o total final
-  document.dispatchEvent(new CustomEvent("itemsUpdated", {
-    detail: { subtotal, totalDiscounts, totalItemsWithDiscount }
-  }));
+  document.dispatchEvent(new CustomEvent("itemsUpdated", { detail: { container } }));
 };

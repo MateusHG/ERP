@@ -1,7 +1,7 @@
 import db from "../config/db";
 import { productModel } from "../products/product-model";
 
-export const searchAllProducts = async (filters: { id?: number, nome?: string, categoria?: string, status?: string }): Promise<productModel[]> => {
+export const searchAllProducts = async (filters: { id?: number, codigo?: string, nome?: string, categoria?: string, status?: string }): Promise<productModel[]> => {
   let query = `SELECT * FROM produtos`;
   const conditions: string[] = [];
   const values: any[] = [];
@@ -9,6 +9,11 @@ export const searchAllProducts = async (filters: { id?: number, nome?: string, c
   if (filters.id) {
     values.push(`${filters.id}%`);
     conditions.push(`CAST(id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.codigo) {
+    values.push(`%${filters.codigo}%`);
+    conditions.push(`codigo ILIKE $${values.length}`);
   }
 
   if (filters.nome) {

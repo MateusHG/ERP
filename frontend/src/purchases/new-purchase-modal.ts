@@ -5,20 +5,24 @@ import { loadPurchasesAPI, postPurchaseAPI } from "./purchases-service";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { formatCurrency, setupCurrencyInputs } from "../utils/formatters";
 import { setupPurchaseEvents } from "./purchases-events";
+import { addItemRowTo } from "./purchase-item-dom";
+import { setupItemRowEvents } from "./purchase-items-controller";
 
 const newPurchaseModal = document.getElementById("new-purchase-modal")!;
 const form = document.getElementById("new-purchase-form") as HTMLFormElement;
 const submitBtn = document.getElementById("submit-new-purchase")!;
 const cancelBtn = document.getElementById("cancel-new-purchase")!;
+const itemsBodyNew = document.getElementById("items-body-new-purchase-modal")!;
+const addItemBtnNew = document.getElementById("add-item-new-purchase-modal")!;
 
 setupSupplierAutoComplete("fornecedor-search", "fornecedor-id", "fornecedor-suggestions");
-setupPurchaseEvents();
 
 let originalFormData: Record<string, string> = {};
 
 // Abre o modal com os campos vazios;
 export function openNewPurchaseModal() {
   form.reset(); // Reseta os campos do formulário.
+  itemsBodyNew.innerHTML = "";
   newPurchaseModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 
@@ -40,17 +44,32 @@ export function openNewPurchaseModal() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault(); // Evita reload da página
 
+  // Pega as linhas de itens do purchase-item-dom.ts
+  const itemRows = Array.from(itemsBodyNew.querySelectorAll("tr"));
+  if (itemRows.length === 0) {
+    return showMessage("Obrigatório adicionar um item.")
+  }
+
+  const itens = itemRows.map(row => ({
+    produto_id: (row.querySelector('input[name="item-product-id"]') as HTMLInputElement).value,
+    quantidade: (row.querySelector('input[name="item-quantity"]') as HTMLInputElement).value,
+    preco_unitario: (row.querySelector('input[name="item-unit-price"]') as HTMLInputElement).value,
+    desconto_volume: (row.querySelector('input[name="item-discount-volume"]') as HTMLInputElement).value,
+  }));
+
   const newPurchaseData = {
-    fornecedor: (form.elements.namedItem("fornecedor") as HTMLInputElement).value,
-    data_emissao: (form.elements.namedItem("data-emissao") as HTMLInputElement).value,
-    tipo_pagamento: (form.elements.namedItem("tipo-pagamento") as HTMLInputElement).value,
-    status: (form.elements.namedItem("status") as HTMLInputElement).value,
-    desconto_financeiro: (form.elements.namedItem("desconto-financeiro") as HTMLInputElement).value,
-    desconto_comercial: (form.elements.namedItem("desconto-comercial") as HTMLInputElement).value,
-  };
+    fornecedor_id: (form.elements.namedItem("new-fornecedor-id") as HTMLInputElement).value,
+    data_emissao: (form.elements.namedItem("new-data-emissao") as HTMLInputElement).value,
+    tipo_pagamento: (form.elements.namedItem("new-tipo-pagamento") as HTMLInputElement).value,
+    desconto_financeiro: (form.elements.namedItem("new-desconto-financeiro") as HTMLInputElement).value,
+    desconto_comercial: (form.elements.namedItem("new-desconto-comercial") as HTMLInputElement).value,
+    status: (form.elements.namedItem("new-status") as HTMLInputElement).value,
+    itens
+  }
 
   try {
     const response = await postPurchaseAPI(newPurchaseData);
+
     showMessage(response.message || 'Compra cadastrado com sucesso.');
 
     newPurchaseModal.classList.add("hidden"); //Fecha o modal após enviar.
@@ -58,7 +77,7 @@ export function openNewPurchaseModal() {
     renderPurchasesList(await loadPurchasesAPI()); //Recarrega a lista atualizada de compras.
   
   } catch (err: any) {
-    console.error("Erro ao cadastrar fornecedor:", err);
+    console.error("Erro ao cadastrar compra:", err);
     showMessage(err.message || "Erro desconhecido ao cadastrar compra.")
   }
   });

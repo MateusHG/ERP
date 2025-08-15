@@ -2,25 +2,37 @@ import db from "../config/db";
 import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
 
 export const searchAllPurchases = async (
-  filters: { id?: number, fornecedor_id?: number, status?: string}
+  filters: { id?: number, fornecedor_nome?: string, status?: string,  data_emissao_inicio: string, data_emissao_final: string}
 ): Promise<purchaseModel[]> => {
-  let query = `SELECT * FROM compras`;
-  const conditions: string[] = [];
-  const values: any[] = [];
+  let query = `
+    SELECT c.*, f.nome_fantasia AS fornecedor_nome
+    FROM compras c
+    JOIN fornecedores f ON c.fornecedor_id = f.id`;
+  
+    const conditions: string[] = [];
+    const values: any[] = [];
 
   if (filters.id) {
     values.push(`${filters.id}%`);
-    conditions.push(`CAST(id AS TEXT) ILIKE $${values.length}`);
+    conditions.push(`CAST(c.id AS TEXT) ILIKE $${values.length}`);
   }
 
-  if (filters.fornecedor_id) {
-    values.push(`${filters.fornecedor_id}%`);
-    conditions.push(`CAST(fornecedor_id AS TEXT) ILIKE $${values.length}`);
+  if (filters.fornecedor_nome) {
+    values.push(`%${filters.fornecedor_nome}%`);
+    conditions.push(`f.nome_fantasia ILIKE $${values.length}`);
   }
 
   if (filters.status) {
     values.push(`${filters.status}`);
-    conditions.push(`status = $${values.length}`);
+    conditions.push(`c.status = $${values.length}`);
+  }
+
+  if (filters.data_emissao_inicio && filters.data_emissao_final) {
+    values.push(filters.data_emissao_inicio);
+    conditions.push(`c.data_emissao >= $${values.length}`);
+
+    values.push(filters.data_emissao_final);
+    conditions.push(`c.data_emissao <= $${values.length}`);
   }
 
   if (conditions.length > 0) {
@@ -35,30 +47,7 @@ export const searchAllPurchases = async (
 
 export const searchPurchaseById = async (id: number): Promise<purchaseModel | null> => {
   const result = await db.query(
-     `SELECT
-      c.id AS compra_id,
-      c.fornecedor_id,
-      c.data_emissao,
-      c.tipo_pagamento,
-      c.desconto_comercial,
-      c.desconto_financeiro,
-      c.valor_bruto,
-      c.valor_total,
-      c.status,
-      c.data_cadastro,
-      c.data_atualizacao,
-      
-      ic.id AS item_id,
-      ic.produto_id,
-      ic.quantidade,
-      ic.preco_unitario,
-      ic.desconto_volume,
-      ic.valor_subtotal
-    FROM 
-      compras c
-    LEFT JOIN 
-      itens_compra ic ON c.id = ic.compra_id
-    WHERE c.id = $1`,
+     `SELECT * FROM compras WHERE id = $1`,
     [id]
   );
 
@@ -159,6 +148,7 @@ export const insertPurchase = async (data: newPurchaseInput): Promise<purchaseMo
     const compra: purchaseModel = {
       id: rows[0].compra_id,
       fornecedor_id: rows[0].fornecedor_id,
+      fornecedor_nome: rows[0].fornecedor_nome,
       data_emissao: rows[0].data_emissao,
       tipo_pagamento: rows[0].tipo_pagamento,
       desconto_comercial: rows[0].desconto_comercial,

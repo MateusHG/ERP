@@ -9,22 +9,37 @@ export async function loadPurchasesAPI() {
   return await result.json();
 };
 
-export async function searchPurchasesWithFilterAPI(filters: {id?: string, fornecedor_id?: string, status?: string}) {
+export async function searchPurchasesWithFilterAPI(filters: {
+  id?: string, 
+  fornecedor_nome?: string, 
+  status?: string, 
+  data_emissao_inicio?: string,
+  data_emissao_final?: string
+}) {
   const params = new URLSearchParams();
 
   if (filters.id) params.append("id", filters.id);
-  if (filters.fornecedor_id) params.append("fornecedor_id", filters.fornecedor_id);
+  if (filters.fornecedor_nome) params.append("fornecedor_nome", filters.fornecedor_nome);
   if (filters.status) params.append("status", filters.status);
+  if (filters.data_emissao_inicio) params.append("data_emissao_inicio", filters.data_emissao_inicio);
+  if (filters.data_emissao_final) params.append("data_emissao_final", filters.data_emissao_final);
 
   const result = await authorizedFetch(`https://localhost:3000/api/compras?${params.toString()}`, {
     method: "GET"
   });
 
-  console.log("Resposta do filter fornecedor id:", filters.fornecedor_id);
   return await result.json();
 };
 
-export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemModel> {
+export async function getPurchaseByIdAPI(id: number): Promise<purchaseModel> {
+  const result = await authorizedFetch(`https://localhost:3000/api/compras/${id}`, {
+    method: "GET"
+  });
+
+  return result.json();
+};
+
+export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemModel[]> {
   const result = await authorizedFetch(`https://localhost:3000/api/compra-itens/${id}`, {
     method: "GET"
   });
@@ -41,8 +56,14 @@ export async function postPurchaseAPI(newPurchaseData: any) {
   return response.json();
 };
 
-export async function fetchProductSuggestions(query: string) {
-  const result = await authorizedFetch(`https://localhost:3000/api/produtos?nome=${encodeURIComponent(query)}`);
+export async function fetchProductSuggestions(filters: {id?: string, codigo?: string, nome?: string}) {
+  const params = new URLSearchParams();
+
+  if (filters.id) params.append("id", filters.id);
+  if (filters.codigo) params.append("codigo", filters.codigo);
+  if (filters.nome) params.append("nome", filters.nome);
+
+  const result = await authorizedFetch(`https://localhost:3000/api/produtos?${params.toString()}`);
   if (!result.ok) return [];
   return await result.json();
 };

@@ -535,7 +535,7 @@ input[readonly] {
   gap: 16px;
 }
 
-#add-item-btn {
+.add-item-btn {
   margin-left: 8px;
   background: #ffffff;
   color: #2e80eb;
@@ -549,7 +549,7 @@ input[readonly] {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-#add-item-btn:hover {
+.add-item-btn:hover {
   background: #2e80eb;
   color: white;
   border-color: #2e80eb;

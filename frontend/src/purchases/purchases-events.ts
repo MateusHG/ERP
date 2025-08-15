@@ -4,9 +4,10 @@ import { showConfirm, showMessage } from "../utils/messages";
 import { renderPurchasesList } from "./purchases-dom";
 import { openNewPurchaseModal } from "./new-purchase-modal";
 import { loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-service";
-import { createEditableRow } from "./purchase-item-dom";
+import { addItemRowTo } from "./purchase-item-dom";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";
+import { setupItemRowEvents } from "./purchase-items-controller";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
@@ -65,29 +66,32 @@ export async function handleDeleteClick(target: HTMLElement) {
   }
 };
 
-export async function handleNewPurchaseItemClick(target: HTMLElement) {
-  const itemsBody = document.getElementById("items-body")! as HTMLTableSectionElement;
-  const row = createEditableRow();
-  itemsBody.appendChild(row);
-};
+export async function handleNewPurchaseItemClick(button: HTMLElement) {
+  const modal = button.closest(".modal")!;
+  const tbody = modal.querySelector("tbody")!;
+  const tr = addItemRowTo(tbody);
+  setupItemRowEvents(tr, tbody);
+}
 
 export function setupPurchaseEvents() {
-  // Atualiza resumo quando os inputs dos itens mudam
-  const itemsBody = document.getElementById("items-body");
-  if (itemsBody) {
-    itemsBody.addEventListener("input", (e) => {
-      const target = e.target as HTMLInputElement;
-      if (
+  // Delegação de evento para qualquer input dentro de tbody
+  document.removeEventListener("input", handleInputDelegation);
+  document.addEventListener("input", handleInputDelegation);
+
+  function handleInputDelegation(e: Event) {
+    const target = e.target as HTMLInputElement;
+    if (
         target.name === "item-quantity" ||
         target.name === "item-unit-price" ||
         target.name === "item-discount-volume"
       ) {
-        updatePurchaseItemSummary();
-      }
-    });
+      // Encontra o tbody mais próximo para atualizar o resumo.
+      const tbody = target.closest("tbody");
+      if (tbody) updatePurchaseItemSummary(tbody);
+    }
   }
 
-  ["desconto-financeiro", "desconto-comercial"].forEach((id) => {
+  ["new-desconto-financeiro", "new-desconto-comercial"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", () => {

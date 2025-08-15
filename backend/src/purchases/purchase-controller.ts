@@ -5,8 +5,10 @@ import { createPurchaseService, deletePurchaseByIdService, getAllPurchasesServic
 export const getPurchases = async (req: Request, res: Response) => {
   const filters = {
     id: typeof req.query.id === 'string' ? Number(req.query.id): undefined,
-    fornecedor_id: req.query.fornecedor_id === 'string' ? Number(req.query.fornecedor_id): undefined,
+    fornecedor_nome: req.query.fornecedor_nome as string,
     status: req.query.status as string,
+    data_emissao_inicio: req.query.data_emissao_inicio as string,
+    data_emissao_final: req.query.data_emissao_final as string,
   };
 
   const httpResponse = await getAllPurchasesService(filters);

@@ -3,10 +3,23 @@ import { purchaseItemModel } from "../purchases/purchase-model";
 
 
 export const searchAllPurchaseItems = async (purchaseId: number): Promise<purchaseItemModel[]> => {
-  const result = await db.query(
-    `SELECT * FROM itens_compra WHERE compra_id = $1`, [purchaseId]
-  );
-
+  const query = `
+  SELECT ic.id,
+         ic.compra_id AS purchase_id,
+         ic.produto_id,
+         p.codigo AS produto_codigo,
+         p.nome AS produto_nome,
+         ic.quantidade,
+         ic.preco_unitario,
+         ic.desconto_volume,
+         ic.valor_subtotal
+  FROM itens_compra ic
+  JOIN produtos p ON p.id = ic.produto_id
+  WHERE ic.compra_id = $1
+  ORDER BY ic.id
+  `;
+  
+  const result = await db.query(query, [purchaseId]);
   return result.rows;
 };
 

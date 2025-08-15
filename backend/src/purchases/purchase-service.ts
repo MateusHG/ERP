@@ -3,7 +3,7 @@ import { badRequest, created, internalServerError, notFound, ok } from "../utils
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 
 export const getAllPurchasesService = async (
-  filters: {id?: number, fornecedor_id?: number, status?: string}
+  filters: {id?: number, fornecedor_nome?: string, status?: string, data_emissao_inicio: string, data_emissao_final: string}
 ) => {
   try {
     const purchases = await purchasesRepository.searchAllPurchases(filters);
@@ -40,9 +40,24 @@ export const createPurchaseService = async (
   itens: Omit<purchaseItemModel, 'id' | 'valor_subtotal'>[]}
 ) => {
   try {
-    if ( !purchase.data_emissao || !purchase.status || !purchase.fornecedor_id || !purchase.tipo_pagamento || !purchase.itens) {
-      return badRequest(
-        'Campos obrigatórios estão ausentes: Data de emissão, status: pendente aprovado ou cancelado, fornecedor, tipo de pagamento ou itens.')
+    if ( !purchase.data_emissao ) {
+      return badRequest('Obrigatório informar uma data.')
+    }
+
+    if (!purchase.status) {
+      return badRequest('Obrigatório informar status da compra.')
+    }
+
+    if (!purchase.fornecedor_id) {
+      return badRequest("Obrigatório selecionar um fornecedor válido.")
+    }
+
+    if (!purchase.tipo_pagamento) {
+      return badRequest('Obrigatório informar o tipo de pagamento.')
+    }
+
+    if (!purchase.itens) {
+      return badRequest('Obrigatório adicionar um item.')
     }
 
     const supplierExists = await purchasesRepository.verifySupplierId(purchase.fornecedor_id);

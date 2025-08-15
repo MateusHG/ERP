@@ -1,5 +1,5 @@
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
-import { formatCurrency } from "../utils/formatters";
+import { formatCurrency, getCurrentMonthDateRange } from "../utils/formatters";
 import { authorizedFetch } from "../utils/fetch-helper";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -52,34 +52,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   const finalDateInput = document.getElementById('final-date') as HTMLInputElement;
   const filterBtn = document.getElementById('filter-btn') as HTMLButtonElement;
 
-
-  // Gera datas padrão para o mês atual
-  const today = new Date();
-  const month = today.getMonth(); // 0 = Janeiro
-  const year = today.getFullYear();
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-
-  //Formata a data.
-  const formatDate = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-
-const initialDateStr = formatDate(firstDay);
-const finalDateStr = formatDate(lastDay);
+  const { start, end } = getCurrentMonthDateRange();
 
 //Preenche os inputs do filtro de data.
 if (initialDateInput && finalDateInput) {
-  initialDateInput.value = initialDateStr;
-  finalDateInput.value = finalDateStr;
+  initialDateInput.value = start;
+  finalDateInput.value = end;
 }
 
 // Primeira chamada com as datas padrão do mês atual
-await loadDashboardWithFilter(initialDateStr, finalDateStr);
+await loadDashboardWithFilter(start, end);
 
 //Clique no botão filtrar.
 if (filterBtn) {
@@ -93,7 +75,7 @@ if (filterBtn) {
 //Faz a requisição ao backend com os filtros de data.
 try {
   const response = await authorizedFetch(
-    `https://localhost:3000/api/dashboard?data_inicial=${initialDateStr}&data_final=${finalDateStr}`,
+    `https://localhost:3000/api/dashboard?data_inicial=${start}&data_final=${end}`,
     {
       method: "GET"
     }

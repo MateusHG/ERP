@@ -5,6 +5,7 @@ import { createProductService, deleteProductsByIdService, getProductsByIdService
 export const getProducts = async (req: Request, res: Response) => {
   const filters = {
     id: typeof req.query.id === 'string' ? Number(req.query.id) : undefined,
+    codigo: req.query.codigo as string,
     nome: req.query.nome as string,
     categoria: req.query.categoria as string,
     status: req.query.status as string,
