@@ -17,7 +17,7 @@ const makeCellInput = (name: string, type = "text", initial = "", placeholder = 
   return { td, input };
 };
 
-export function createEditableRow(item?: any): HTMLTableRowElement {
+export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTableRowElement {
   const tr = document.createElement("tr");
 
   const { td: tdProductId, input: inputProductId } = makeCellInput(
@@ -75,12 +75,13 @@ export function createEditableRow(item?: any): HTMLTableRowElement {
   btnSave.type = "button";
   btnSave.textContent = "✅";
   btnSave.title = "Salvar";
+  btnSave.disabled = isSaved;
 
   const btnEdit = document.createElement("button");
   btnEdit.type = "button";
   btnEdit.textContent = "✏️";
   btnEdit.title = "Editar";
-  btnEdit.disabled = true;
+  btnEdit.disabled = !isSaved;
 
   const btnRemove = document.createElement("button");
   btnRemove.type = "button";
@@ -95,12 +96,21 @@ export function createEditableRow(item?: any): HTMLTableRowElement {
   return tr;
 }
 
-export function addItemRowTo(container: HTMLElement, item?: any): HTMLTableRowElement {
+export function addItemRowTo(
+  container: HTMLElement,
+  item?: any,
+  prefix: "new" | "edit" = "new",
+  isSaved: boolean = false
+): HTMLTableRowElement {
   if (!container) {
     console.error("Container não encontrado para adicionar o item.");
     throw new Error("Container não encontrado");
   }
-  const tr = createEditableRow(item);
+
+  const tr = createEditableRow(item, isSaved);
   container.appendChild(tr);
+
+  setupItemRowEvents(tr, container, prefix);
+
   return tr;
 };

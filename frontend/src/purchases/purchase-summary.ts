@@ -1,8 +1,8 @@
 import { formatCurrency } from "../utils/formatters";
 
 document.addEventListener("itemsUpdated", (e: any) => {
-  console.log("Evento itemsUpdated recebido:", e.detail);
-  updateTotalPurchaseDisplay();
+  const prefix = e.detail?.prefix || "new"; // prefixo para nova compra
+  updateTotalPurchaseDisplay(prefix);
 });
 
 /** Converte texto de moeda (R$ 1.234,56) para número */
@@ -19,50 +19,51 @@ export function calcTotalPurchase(
   descontoComercial: number
 ) {
   const totalDiscounts = descontoVolume + descontoFinanceiro + descontoComercial;
-  const total = gross - (descontoFinanceiro + descontoComercial);
+  const total = gross - totalDiscounts;
   return { totalDiscounts, total };
 }
 
-export function updateTotalPurchaseDisplay() {
-  const totalItemsWithDiscount = parseCurrency(
-    document.getElementById("total-items-final")?.textContent
-  );
+export function updateTotalPurchaseDisplay(prefix: "new" | "edit" = "new") {
+  const valorBruto = parseCurrency(
+    (document.getElementById(`${prefix}-valor-bruto`) as HTMLInputElement)?.value ||
+    document.getElementById(`${prefix}-valor-bruto`)?.textContent
+  )
 
   const descontoVolume = parseCurrency(
-    (document.getElementById("new-desconto-itens") as HTMLInputElement)?.value ||
-    document.getElementById("new-desconto-itens")?.textContent
+    (document.getElementById(`${prefix}-desconto-itens`) as HTMLInputElement)?.value ||
+    document.getElementById(`${prefix}-desconto-itens`)?.textContent
   );
 
   const descontoFinanceiro = parseCurrency(
-    (document.getElementById("new-desconto-financeiro") as HTMLInputElement)?.value ||
-    document.getElementById("new-desconto-financeiro")?.textContent
+    (document.getElementById(`${prefix}-desconto-financeiro`) as HTMLInputElement)?.value ||
+    document.getElementById(`${prefix}-desconto-financeiro`)?.textContent
   );
 
   const descontoComercial = parseCurrency(
-    (document.getElementById("new-desconto-comercial") as HTMLInputElement)?.value ||
-    document.getElementById("new-desconto-comercial")?.textContent
+    (document.getElementById(`${prefix}-desconto-comercial`) as HTMLInputElement)?.value ||
+    document.getElementById(`${prefix}-desconto-comercial`)?.textContent
   );
 
   console.log("Valores numéricos convertidos:", {
-    totalItemsWithDiscount,
+    valorBruto,
     descontoVolume,
     descontoFinanceiro,
     descontoComercial
   });
 
   const { totalDiscounts, total } = calcTotalPurchase(
-    totalItemsWithDiscount,
+    valorBruto,
     descontoVolume,
     descontoFinanceiro,
     descontoComercial
   );
 
-  const descontosTotaisEl = document.getElementById("new-descontos-totais") as HTMLInputElement;
+  const descontosTotaisEl = document.getElementById(`${prefix}-descontos-totais`) as HTMLInputElement;
   if (descontosTotaisEl) {
     descontosTotaisEl.value = formatCurrency(totalDiscounts);
   }
 
-  const valorTotalEl = document.getElementById("new-valor-total") as HTMLInputElement;
+  const valorTotalEl = document.getElementById(`${prefix}-valor-total`) as HTMLInputElement;
   if (valorTotalEl) {
     valorTotalEl.value = formatCurrency(total);
   }

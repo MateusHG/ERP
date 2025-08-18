@@ -1,5 +1,6 @@
 import { showConfirm } from "../utils/messages";
 import { recalcLine, updatePurchaseItemSummary } from "./purchase-item-summary";
+import { updateTotalPurchaseDisplay } from "./purchase-summary";
 
 // Atualiza o estado de visualização ou edição de uma linha.
 export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
@@ -18,8 +19,15 @@ export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
 }
 
 // Aplica os eventos aos botões e inputs da linha.
-export function setupItemRowEvents(tr: HTMLTableRowElement, container?: HTMLElement) {
-  setViewMode(tr, false);
+export function setupItemRowEvents(
+  tr: HTMLTableRowElement,
+  container?: HTMLElement,
+  prefix: "new" | "edit" = "new"
+) {
+
+  const isView = prefix === "edit";
+  setViewMode(tr, isView);
+  
   recalcLine(tr);
 
   const btnSave = tr.querySelector("button[title='Salvar']") as HTMLButtonElement;
@@ -27,10 +35,13 @@ export function setupItemRowEvents(tr: HTMLTableRowElement, container?: HTMLElem
   const btnRemove = tr.querySelector("button[title='Remover']") as HTMLButtonElement;
 
   const inputs = tr.querySelectorAll('input[name="item-quantity"], input[name="item-unit-price"], input[name="item-discount-volume"]');
+
   inputs.forEach((input) => {
     input.addEventListener("input", () => {
       recalcLine(tr);
       if (container) updatePurchaseItemSummary(container);
+
+      updateTotalPurchaseDisplay(prefix);
     });
   });
 
@@ -38,6 +49,8 @@ export function setupItemRowEvents(tr: HTMLTableRowElement, container?: HTMLElem
     recalcLine(tr);
     setViewMode(tr, true);
     if (container) updatePurchaseItemSummary(container);
+
+    updateTotalPurchaseDisplay(prefix);
   });
 
   btnEdit.addEventListener("click", () => {
@@ -50,6 +63,7 @@ export function setupItemRowEvents(tr: HTMLTableRowElement, container?: HTMLElem
 
     tr.remove();
     if (container) updatePurchaseItemSummary(container);
+    updateTotalPurchaseDisplay(prefix);
   });
 }
 

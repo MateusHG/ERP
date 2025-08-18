@@ -2,27 +2,15 @@ import { fetchProductSuggestions } from "../purchases/purchases-service";
 import { authorizedFetch } from "./fetch-helper";
 
 export async function setupSupplierAutoComplete(
-  inputId: string,
-  hiddenInputId: string,
-  suggestionsId: string
+  input: HTMLInputElement,
+  hiddenInput: HTMLInputElement,
+  suggestionsList: HTMLUListElement
 ) {
-  const input = document.getElementById(inputId) as HTMLInputElement;
-  const hiddenInput = document.getElementById(hiddenInputId) as HTMLInputElement;
-  const suggestions = document.getElementById(suggestionsId) as HTMLUListElement;
-
-  if (!input || !hiddenInput || !suggestions) {
-    console.error("Autocomplete: Elementos não encontrados.");
-    return;
-  }
-
   let selectedSupplierName = "";
   let currentController: AbortController | null = null;
 
   async function loadSuppliers(query: string) {
-    if (currentController) {
-      currentController.abort();
-    }
-
+    if (currentController) currentController.abort();
     currentController = new AbortController();
 
     try {
@@ -32,7 +20,7 @@ export async function setupSupplierAutoComplete(
       );
 
       const suppliers = await res.json();
-      suggestions.innerHTML = "";
+      suggestionsList.innerHTML = "";
 
       suppliers.forEach((supplier: any) => {
         const li = document.createElement("li");
@@ -44,18 +32,18 @@ export async function setupSupplierAutoComplete(
           input.value = supplier.nome_fantasia;
           hiddenInput.value = String(supplier.id); //Salva o ID para o backend.
           selectedSupplierName = supplier.nome_fantasia;
-          suggestions.classList.add("hidden");
+          suggestionsList.classList.add("hidden");
         });
 
-        suggestions.appendChild(li);
+        suggestionsList.appendChild(li);
       });
 
-      suggestions.classList.toggle("hidden", suppliers.length === 0);
+      suggestionsList.classList.toggle("hidden", suppliers.length === 0);
     } catch (err: any) {
       if (err.name !== "AbortError") {
         console.error("Erro ao buscar fornecedores:", err);
       }
-      suggestions.classList.add("hidden");
+      suggestionsList.classList.add("hidden");
     }
   }
 
@@ -67,13 +55,13 @@ export async function setupSupplierAutoComplete(
     if (query.length >= 2) {
       loadSuppliers(query);
     } else {
-      suggestions.classList.add("hidden");
+      suggestionsList.classList.add("hidden");
     }
   });
 
   document.addEventListener("click", (e) => {
-    if (!input.contains(e.target as Node) && !suggestions.contains(e.target as Node)) {
-      suggestions.classList.add("hidden");
+    if (!input.contains(e.target as Node) && !suggestionsList.contains(e.target as Node)) {
+      suggestionsList.classList.add("hidden");
     }
   });
 
@@ -81,12 +69,12 @@ export async function setupSupplierAutoComplete(
     setTimeout(() => {
       if (input.value !== selectedSupplierName) {
         hiddenInput.value = "";
-        suggestions.classList.add("hidden");
+        suggestionsList.classList.add("hidden");
       }
     }, 300);
   });
 }
-
+     
 //Autocomplete para itens na compra.
 export function attachItemAutoComplete(input: HTMLInputElement, onSelect: (item: any) => void) {
   let suggestionBox: HTMLUListElement | null = null;

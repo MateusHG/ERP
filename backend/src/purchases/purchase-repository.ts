@@ -47,7 +47,10 @@ export const searchAllPurchases = async (
 
 export const searchPurchaseById = async (id: number): Promise<purchaseModel | null> => {
   const result = await db.query(
-     `SELECT * FROM compras WHERE id = $1`,
+     `SELECT c.*, f.nome_fantasia AS fornecedor_nome
+      FROM compras c
+      JOIN fornecedores f ON c.fornecedor_id = f.id
+      WHERE c.id = $1`,
     [id]
   );
 

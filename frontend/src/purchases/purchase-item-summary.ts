@@ -1,4 +1,3 @@
-// purchase-item-summary.ts
 import { formatCurrency } from "../utils/formatters";
 
 export function recalcLine(tr: HTMLTableRowElement) {
@@ -14,7 +13,7 @@ export function recalcLine(tr: HTMLTableRowElement) {
   if (totalCell) totalCell.textContent = formatCurrency(lineTotal);
 }
 
-export function updatePurchaseItemSummary(container: HTMLElement) {
+export function updatePurchaseItemSummary(container: HTMLElement, prefix: "new" | "edit" = "new" ) {
   const rows = Array.from(container.querySelectorAll("tr"));
 
   let subtotal = 0;
@@ -39,17 +38,44 @@ export function updatePurchaseItemSummary(container: HTMLElement) {
   }
 
   //Atualiza os campos espelho no cabeçalho da compra.
-  const valorBrutoEl = document.getElementById("new-valor-bruto") as HTMLInputElement | null;
+  const valorBrutoEl = document.getElementById(`${prefix}-valor-bruto`) as HTMLInputElement | null;
   if (valorBrutoEl) valorBrutoEl.value = formatCurrency(subtotal);
 
-  const descontoVolumeEl = document.getElementById("new-desconto-itens") as HTMLInputElement | null;
+  const descontoVolumeEl = document.getElementById(`${prefix}-desconto-itens`) as HTMLInputElement | null;
   if (descontoVolumeEl) descontoVolumeEl.value = formatCurrency(totalDiscounts);
 
-  // Atualiza apenas os totais de itens
-  (document.getElementById("subtotal-items") as HTMLElement).textContent = formatCurrency(subtotal);
-  (document.getElementById("total-items-discount") as HTMLElement).textContent = formatCurrency(totalDiscounts);
-  (document.getElementById("total-items-final") as HTMLElement).textContent = formatCurrency(totalItemsWithDiscount);
+  const subtotalItemsEl = document.getElementById(`${prefix}-subtotal-items`) as HTMLInputElement | null;
+  if (subtotalItemsEl) subtotalItemsEl.textContent = formatCurrency(subtotal);
 
-  // Dispara evento para o purchase-summary recalcular o total final
-  document.dispatchEvent(new CustomEvent("itemsUpdated", { detail: { container } }));
+  const totalItemsDiscountEl = document.getElementById(`${prefix}-total-items-discount`) as HTMLInputElement | null;
+  if (totalItemsDiscountEl) totalItemsDiscountEl.textContent = formatCurrency(totalDiscounts);
+
+  const totalItemsFinal = document.getElementById(`${prefix}-total-items-final`) as HTMLInputElement | null;
+  if (totalItemsFinal) totalItemsFinal.textContent = formatCurrency(totalItemsWithDiscount);
+
 };
+
+
+// Reseta os valores do summary, necessário pois ao cadastrar uma compra e depois cadastrar uma nova em seguida,
+// estava trazendo os valores da compra anterior.
+export function resetPurchaseItemSummary(prefix: "new" | "edit" = "new") {
+  const zero = formatCurrency(0);
+
+  const valorBrutoEl = document.getElementById(`${prefix}-valor-bruto`) as HTMLInputElement | null;
+  if (valorBrutoEl) valorBrutoEl.value = zero;
+
+  const descontoVolumeEl = document.getElementById(`${prefix}-desconto-itens`) as HTMLInputElement | null;
+  if (descontoVolumeEl) descontoVolumeEl.value = zero;
+
+  const subtotalItemsEl = document.getElementById(`${prefix}-subtotal-items`) as HTMLElement | null;
+  if (subtotalItemsEl) subtotalItemsEl.textContent = zero;
+
+  const totalItemsDiscountEl = document.getElementById(`${prefix}-total-items-discount`) as HTMLElement | null;
+  if (totalItemsDiscountEl) totalItemsDiscountEl.textContent = zero;
+
+  const totalItemsFinalEl = document.getElementById(`${prefix}-total-items-final`) as HTMLElement | null;
+  if (totalItemsFinalEl) totalItemsFinalEl.textContent = zero;
+
+  // Garante que o purchase-summary também recalcule zerado
+  document.dispatchEvent(new CustomEvent("itemsUpdated", { detail: { container: null, prefix } }));
+}

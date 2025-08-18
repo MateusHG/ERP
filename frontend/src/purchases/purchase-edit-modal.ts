@@ -1,9 +1,12 @@
-import { formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
 import { getItemsByPurchaseIdAPI, getPurchaseByIdAPI, loadPurchasesAPI } from "./purchases-service";
 import { renderPurchasesList } from "./purchases-dom";
-import { addItemRowTo, createEditableRow } from "./purchase-item-dom";
+import { addItemRowTo } from "./purchase-item-dom";
+import { setupSupplierAutoComplete } from "../utils/autocomplete";
+import { updatePurchaseItemSummary } from "./purchase-item-summary";
+import { updateTotalPurchaseDisplay } from "./purchase-summary";
+import { formatCurrency } from "../utils/formatters";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
@@ -19,7 +22,9 @@ export async function openEditModal(id: number) {
   console.log("Compra:", purchase);
 
   // Seleciona os inputs dentro do modal de edição
-  const inputFornecedorId = modal.querySelector<HTMLInputElement>('input[name="fornecedor-id"]')!;
+  const inputFornecedorSearch = modal.querySelector<HTMLInputElement>('#fornecedor-search')!;
+  const inputFornecedorId = modal.querySelector<HTMLInputElement>('#fornecedor-id')!;
+  const suggestions = modal.querySelector<HTMLUListElement>('#fornecedor-suggestions')!;
   const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="data-emissao"]')!;
   const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="tipo-pagamento"]')!;
   const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="desconto-financeiro"]')!;
@@ -27,20 +32,21 @@ export async function openEditModal(id: number) {
   const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="status"]')!;
 
   // Preenche os campos
+  inputFornecedorSearch.value = purchase.fornecedor_nome || "";
   inputFornecedorId.value = String(purchase.fornecedor_id);
-  inputDataEmissao.value = formatData(purchase.data_emissao);
+  setupSupplierAutoComplete(inputFornecedorSearch, inputFornecedorId, suggestions)
+
+  inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
-  inputDescontoFinanceiro.value = String(purchase.desconto_financeiro || 0);
-  inputDescontoComercial.value = String(purchase.desconto_comercial || 0);
+  inputDescontoFinanceiro.value = formatCurrency(purchase.desconto_financeiro || 0);
+  inputDescontoComercial.value = formatCurrency(purchase.desconto_comercial || 0);
   inputStatus.value = purchase.status || "";
 
   // Carrega os itens da compra
-  const items = await getItemsByPurchaseIdAPI(id);
-  console.log("Itens da compra:", items);
-
   const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLTableSectionElement;
   itemsBody.innerHTML = "";
 
+  const items = await getItemsByPurchaseIdAPI(id);
   items.forEach(item => {
     addItemRowTo(itemsBody, {
       produto_id: item.produto_id,
@@ -50,8 +56,11 @@ export async function openEditModal(id: number) {
       preco_unitario: item.preco_unitario,
       desconto_volume: item.desconto_volume || "0.00",
       valor_subtotal: item.valor_subtotal
-    });
+    }, "edit", true); // prefix = "edit", isSaved = true
   });
+
+  updatePurchaseItemSummary(itemsBody, "edit");
+  updateTotalPurchaseDisplay("edit");
 
   modal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
@@ -73,12 +82,12 @@ form.addEventListener("submit", async (event) => {
   const formData = new FormData(form);
 
     const updatedPurchaseData = {
-      fornecedor_id: formData.get("fornecedor-id")?.toString() || "",
-      data_emissao: formData.get("data-emissao")?.toString() || "",
-      tipo_pagamento: formData.get("tipo-pagamento")?.toString() || "",
-      desconto_financeiro: Number(formData.get("desconto-financeiro") || 0),
-      desconto_comercial: Number(formData.get("desconto-comercial") || 0),
-      status: formData.get("status")?.toString() || "",
+      fornecedor_id: formData.get("edit-fornecedor-id")?.toString() || "",
+      data_emissao: formData.get("edit-data-emissao")?.toString() || "",
+      tipo_pagamento: formData.get("edit-tipo-pagamento")?.toString() || "",
+      desconto_financeiro: Number(formData.get("edit-desconto-financeiro") || 0),
+      desconto_comercial: Number(formData.get("edit-desconto-comercial") || 0),
+      status: formData.get("edit-status")?.toString() || "",
     // Itens da compra podem ser enviados separados ou em outra rota
   };
 

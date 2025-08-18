@@ -4,9 +4,8 @@ import { renderPurchasesList } from "./purchases-dom";
 import { loadPurchasesAPI, postPurchaseAPI } from "./purchases-service";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { formatCurrency, setupCurrencyInputs } from "../utils/formatters";
-import { setupPurchaseEvents } from "./purchases-events";
+import { resetPurchaseItemSummary } from "./purchase-item-summary";
 import { addItemRowTo } from "./purchase-item-dom";
-import { setupItemRowEvents } from "./purchase-items-controller";
 
 const newPurchaseModal = document.getElementById("new-purchase-modal")!;
 const form = document.getElementById("new-purchase-form") as HTMLFormElement;
@@ -15,7 +14,11 @@ const cancelBtn = document.getElementById("cancel-new-purchase")!;
 const itemsBodyNew = document.getElementById("items-body-new-purchase-modal")!;
 const addItemBtnNew = document.getElementById("add-item-new-purchase-modal")!;
 
-setupSupplierAutoComplete("fornecedor-search", "fornecedor-id", "fornecedor-suggestions");
+const inputFornecedorSearch = document.getElementById("fornecedor-search") as HTMLInputElement;
+const inputFornecedorId = document.getElementById("fornecedor-id") as HTMLInputElement;
+const suggestions = document.getElementById("fornecedor-suggestions") as HTMLUListElement;
+
+setupSupplierAutoComplete(inputFornecedorSearch,inputFornecedorId, suggestions);
 
 let originalFormData: Record<string, string> = {};
 
@@ -23,11 +26,13 @@ let originalFormData: Record<string, string> = {};
 export function openNewPurchaseModal() {
   form.reset(); // Reseta os campos do formulário.
   itemsBodyNew.innerHTML = "";
+  resetPurchaseItemSummary();
+
   newPurchaseModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 
   const todayISO = new Date().toISOString().split("T")[0];
-  const dateInput = document.getElementById("edit-data-emissao") as HTMLInputElement;
+  const dateInput = document.getElementById("new-data-emissao") as HTMLInputElement;
   dateInput.value = todayISO;
 
   setupCurrencyInputs();

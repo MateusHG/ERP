@@ -7,7 +7,6 @@ import { loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-serv
 import { addItemRowTo } from "./purchase-item-dom";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";
-import { setupItemRowEvents } from "./purchase-items-controller";
 
 // Setup do evento de filtragem.
 export function handleFilterChangeEvent() {
@@ -69,8 +68,9 @@ export async function handleDeleteClick(target: HTMLElement) {
 export async function handleNewPurchaseItemClick(button: HTMLElement) {
   const modal = button.closest(".modal")!;
   const tbody = modal.querySelector("tbody")!;
-  const tr = addItemRowTo(tbody);
-  setupItemRowEvents(tr, tbody);
+  const prefix: "new" | "edit" = modal.id === "edit-modal" ? "edit" : "new";
+  
+  addItemRowTo(tbody, undefined, prefix, false);
 }
 
 export function setupPurchaseEvents() {
@@ -87,22 +87,30 @@ export function setupPurchaseEvents() {
       ) {
       // Encontra o tbody mais próximo para atualizar o resumo.
       const tbody = target.closest("tbody");
-      if (tbody) updatePurchaseItemSummary(tbody);
+      if (tbody) {
+        const prefix = tbody.closest(".modal")?.id === "edit-modal" ? "edit" : "new";
+        updatePurchaseItemSummary(tbody, prefix);
+      }
     }
   }
 
-  ["new-desconto-financeiro", "new-desconto-comercial"].forEach((id) => {
+  [["new-desconto-financeiro", "new"],
+   ["edit-desconto-financeiro", "edit"],
+   ["new-desconto-comercial", "new"],
+   ["edit-desconto-comercial", "edit"],
+  ].forEach(([id, prefix]) => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("input", () => {
-        document.dispatchEvent(new CustomEvent("itemsUpdated", {detail: {}}));
-        updateTotalPurchaseDisplay();
+        document.dispatchEvent(new CustomEvent("itemsUpdated", {detail: { prefix }}));
+        updateTotalPurchaseDisplay(prefix as "new" | "edit");
       });
     }
   });
 
-  document.addEventListener("itemsUpdated", () => {
-    updateTotalPurchaseDisplay();
+  document.addEventListener("itemsUpdated", (e: any) => {
+    const prefix = e.detail?.prefix || "new";
+    updateTotalPurchaseDisplay(prefix);
   });
 }
 
