@@ -79,14 +79,13 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
     if (Object.keys(data).length === 0) {
       return badRequest('Nenhum campo enviado para atualização.')
     }
-    
+
+    const updatedPurchase = purchasesRepository.updatePurchase(id, data);
+    return ok(updatedPurchase);
   } catch (err) {
     console.error(err);
     return internalServerError('Erro ao atualizar compra.')
   }
-  
-  const updatedPurchase = await purchasesRepository.updatePurchase(id, data);
-  return ok(updatedPurchase);
 };
 
 export const deletePurchaseByIdService = async (id: number) => {

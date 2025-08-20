@@ -1,6 +1,6 @@
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
-import { getItemsByPurchaseIdAPI, getPurchaseByIdAPI, loadPurchasesAPI } from "./purchases-service";
+import { getItemsByPurchaseIdAPI, getPurchaseByIdAPI, loadPurchasesAPI, updatePurchaseAPI } from "./purchases-service";
 import { renderPurchasesList } from "./purchases-dom";
 import { addItemRowTo } from "./purchase-item-dom";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
@@ -54,6 +54,7 @@ export async function openEditModal(id: number) {
   itemsBody.innerHTML = "";
 
   const items = await getItemsByPurchaseIdAPI(id);
+
   items.forEach(item => {
     addItemRowTo(itemsBody, {
       produto_id: item.produto_id,
@@ -62,7 +63,7 @@ export async function openEditModal(id: number) {
       quantidade: item.quantidade,
       preco_unitario: item.preco_unitario,
       desconto_volume: item.desconto_volume || "0.00",
-      valor_subtotal: item.valor_subtotal
+      valor_subtotal: item.valor_subtotal,
     }, "edit", true); // prefix = "edit", isSaved = true
   });
 

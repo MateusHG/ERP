@@ -1,5 +1,7 @@
 import db from "../config/db";
 import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
+import { getPurchaseById } from "./purchase-controller";
+import { getPurchaseByIdService } from "./purchase-service";
 
 export const searchAllPurchases = async (
   filters: { id?: number, fornecedor_nome?: string, status?: string,  data_emissao_inicio: string, data_emissao_final: string}
@@ -193,18 +195,124 @@ export const verifySupplierId = async (fornecedor_id: number): Promise<purchaseM
   return result.rows[0] || null;
 };
 
+// Atualizar compra + itens
 export const updatePurchase = async (id: number, fieldsToUpdate: Partial<purchaseModel>) => {
-  const keys = Object.keys(fieldsToUpdate);
-  const values = Object.values(fieldsToUpdate);
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
 
-  if (keys.length === 0) return null;
+    const { itens, ...purchaseFields } = fieldsToUpdate;
 
-  const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
-  const query = `UPDATE compras SET ${setClause} WHERE id = $${keys.length + 1} RETURNING *`;
-  
-  const result = await db.query(query, [...values, id]);
-  return result.rows[0];
+    const keys = Object.keys(purchaseFields);
+    const values = Object.values(purchaseFields);
+
+    if (keys.length > 0) {
+      const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(", ");
+      const query = `UPDATE compras SET ${setClause} WHERE id = $${keys.length + 1}`;
+      await client.query(query, [...values, id]);
+    }
+
+    if (itens && Array.isArray(itens)) {
+      await updatePurchaseItems(client, id, itens);
+    }
+
+    await client.query("COMMIT");
+
+    return getPurchaseByIdQuery(id); // Retorna a compra completa
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
+
+// Atualizar itens
+const updatePurchaseItems = async (client: any, purchaseId: number, items: any[]) => {
+  const currentItems = await client.query(
+    `SELECT id FROM itens_compra WHERE compra_id = $1`,
+    [purchaseId]
+  );
+  const currentItemIds = currentItems.rows.map((row) => row.id);
+
+  const itemsToUpdate = items.filter((item) => item.item_id !== undefined && item.item_id !== null);
+  const itemsToCreate = items.filter((item) => !item.item_id);
+  const itemsToDelete = currentItemIds.filter(
+    (id) => !items.some((item) => item.item_id === id)
+  );
+
+  // Deletar
+  if (itemsToDelete.length > 0) {
+    await client.query(
+      `DELETE FROM itens_compra WHERE id = ANY($1) AND compra_id = $2`,
+      [itemsToDelete, purchaseId]
+    );
+  }
+
+  // Atualizar
+  if (itemsToUpdate.length > 0) {
+    await Promise.all(
+      itemsToUpdate.map((item) =>
+        client.query(
+          `UPDATE itens_compra
+           SET produto_id = $1, quantidade = $2, preco_unitario = $3, desconto_volume = $4
+           WHERE id = $5 AND compra_id = $6`,
+          [
+            item.produto_id,
+            item.quantidade,
+            item.preco_unitario,
+            item.desconto_volume || 0,
+            item.item_id,
+            purchaseId,
+          ]
+        )
+      )
+    );
+  }
+
+  // Criar
+  if (itemsToCreate.length > 0) {
+    await Promise.all(
+      itemsToCreate.map((item) =>
+        client.query(
+          `INSERT INTO itens_compra (
+            compra_id, produto_id, quantidade, preco_unitario, desconto_volume
+          ) VALUES ($1, $2, $3, $4, $5)`,
+          [
+            purchaseId,
+            item.produto_id,
+            item.quantidade,
+            item.preco_unitario,
+            item.desconto_volume || 0,
+          ]
+        )
+      )
+    );
+  }
+};
+
+// Buscar compra com itens
+export async function getPurchaseByIdQuery(id: number) {
+  const purchaseResult = await db.query(
+    `SELECT * FROM compras WHERE id = $1`,
+    [id]
+  );
+
+  if (purchaseResult.rows.length === 0) return null;
+
+  const itemsResult = await db.query(
+    `SELECT ci.*, p.codigo as produto_codigo, p.nome as produto_nome
+     FROM itens_compra ci
+     LEFT JOIN produtos p ON ci.produto_id = p.id
+     WHERE ci.compra_id = $1`,
+    [id]
+  );
+
+  return {
+    ...purchaseResult.rows[0],
+    itens: itemsResult.rows,
+  };
+}
 
 export const deletePurchaseById = async (id: number): Promise<boolean> => {
   const client = await db.connect()

@@ -39,14 +39,6 @@ export async function getPurchaseByIdAPI(id: number): Promise<purchaseModel> {
   return result.json();
 };
 
-export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemModel[]> {
-  const result = await authorizedFetch(`https://localhost:3000/api/compra-itens/${id}`, {
-    method: "GET"
-  });
-
-  return result.json();
-};
-
 export async function postPurchaseAPI(newPurchaseData: any) {
   const response = await authorizedFetch(`https://localhost:3000/api/compras`, {
     method: "POST",
@@ -68,6 +60,14 @@ export async function updatePurchaseAPI(purchaseId: number, updatedPurchaseData:
   }
 
   return response.json();
+};
+
+export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemModel[]> {
+  const result = await authorizedFetch(`https://localhost:3000/api/compra-itens/${id}`, {
+    method: "GET"
+  });
+
+  return result.json();
 };
 
 export async function fetchProductSuggestions(filters: {id?: string, codigo?: string, nome?: string}) {
