@@ -30,10 +30,10 @@ export function renderPurchasesList(purchases: purchaseModel[]): void {
     tr.appendChild(textCell(purchase.id));
     tr.appendChild(textCell(purchase.fornecedor_nome || purchase.fornecedor_id));
     tr.appendChild(textCell(paymentLabels[purchase.tipo_pagamento] || purchase.tipo_pagamento));
-    tr.appendChild(textCell(formatCurrency(purchase.desconto_comercial)));
-    tr.appendChild(textCell(formatCurrency(purchase.desconto_financeiro)));
-    tr.appendChild(textCell(formatCurrency(purchase.valor_bruto)));
-    tr.appendChild(textCell(formatCurrency(purchase.valor_total)));
+    tr.appendChild(textCell(formatCurrency(purchase.desconto_comercial ?? 0)));
+    tr.appendChild(textCell(formatCurrency(purchase.desconto_financeiro ?? 0)));
+    tr.appendChild(textCell(formatCurrency(purchase.valor_bruto ?? 0)));
+    tr.appendChild(textCell(formatCurrency(purchase.valor_total ?? 0)));
     tr.appendChild(textCell(statusLabels[purchase.status] || purchase.status));
 
     const tdActions = document.createElement("td");

@@ -1,5 +1,5 @@
 import { attachItemAutoComplete } from "../utils/autocomplete";
-import { formatCurrency } from "../utils/formatters";
+import { formatCurrency, formatEditableCurrency, makeCurrencyCellInput } from "../utils/formatters";
 import { setupItemRowEvents } from "./purchase-items-controller";
 
 // Manipulação de DOM para os itens da compra.
@@ -51,17 +51,27 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   inputQuantity.min = "1";
   tr.appendChild(tdQuantity);
 
-  const { td: tdUnitPrice, input: inputUnitPrice } = makeCellInput(
-    "item-unit-price", "number", item?.preco_unitario.toString() || "0.00"
-  );
-  inputUnitPrice.min = "0";
+  const { td: tdUnitPrice, input: inputUnitPrice } = makeCurrencyCellInput(
+  "item-unit-price",
+   item?.preco_unitario != null ? item.preco_unitario : 0
+);
   tr.appendChild(tdUnitPrice);
 
-  const { td: tdDiscount, input: inputDiscount } = makeCellInput(
-    "item-discount-volume", "number", item?.desconto_volume?.toString() || "0.00"
-  );
-  inputDiscount.min = "0";
+// Desconto por volume
+const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
+  "item-discount-volume",
+   item?.desconto_volume != null ?  item.desconto_volume : 0
+);
   tr.appendChild(tdDiscount);
+
+  // Total desconto
+  const tdTotalDiscount = document.createElement("td");
+  tdTotalDiscount.classList.add("item-total-discount");
+  const discountValue = item?.desconto_volume && item?.quantidade
+    ? Number(item.desconto_volume) * Number(item.quantidade)
+    : 0;
+  tdTotalDiscount.textContent = formatCurrency(discountValue); // garante R$
+  tr.appendChild(tdTotalDiscount);
 
   const tdTotal = document.createElement("td");
   tdTotal.textContent = item ? formatCurrency(Number(item.valor_subtotal || 0)) : formatCurrency(0);
@@ -110,7 +120,7 @@ export function addItemRowTo(
   const tr = createEditableRow(item, isSaved);
   container.appendChild(tr);
 
-  setupItemRowEvents(tr, container, prefix);
+  setupItemRowEvents(tr, container, prefix, isSaved);
 
   return tr;
 };

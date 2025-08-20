@@ -56,6 +56,20 @@ export async function postPurchaseAPI(newPurchaseData: any) {
   return response.json();
 };
 
+export async function updatePurchaseAPI(purchaseId: number, updatedPurchaseData: any) {
+  const response = await authorizedFetch(`https://localhost:3000/api/compras/${purchaseId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updatedPurchaseData)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Erro ao atualizar a compra.");
+  }
+
+  return response.json();
+};
+
 export async function fetchProductSuggestions(filters: {id?: string, codigo?: string, nome?: string}) {
   const params = new URLSearchParams();
 

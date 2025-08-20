@@ -58,8 +58,6 @@ export function parseCurrency(value: string): number {
 }
 
 const currencyInputIds = [
-  "edit-desconto-financeiro",
-  "edit-desconto-comercial",
   "desconto-itens",
   "descontos-totais",
   "valor-bruto",
@@ -76,29 +74,38 @@ function applyCurrencyMask(input: HTMLInputElement) {
   // Pega valor numérico limpo (parse de string formatada)
   const numericValue = parseCurrency(input.value);
 
-  // Formata o valor para moeda BR
-  input.value = formatCurrency(numericValue);
+  if (input.readOnly) {
+    input.value = formatCurrency(numericValue);
+  } else {
+    input.value = formatCurrency(numericValue).replace("R$", "").trim();
+  }
 
-  // Ajusta a posição do cursor para evitar pular muito
+  if (!input.readOnly) {
   const newLength = input.value.length;
   const diff = newLength - oldLength;
   const newCursorPos = Math.max(0, cursorPos + diff);
   input.setSelectionRange(newCursorPos, newCursorPos);
+  }
 }
 
 // Inicializa os inputs para aplicar máscara no evento 'input'
 export function setupCurrencyInputs(): void {
-  currencyInputIds.forEach((id) => {
-    const input = document.getElementById(id) as HTMLInputElement | null;
-    if (!input) return;
+    const currencyInputs = document.querySelectorAll<HTMLInputElement>(
+       "#desconto-itens, #descontos-totais, #valor-bruto, #valor-total, #edit-desconto-financeiro, #edit-desconto-comercial"
+    );
 
-    // Se já tiver valor no input (ex: edição), formata na abertura
-    input.value = formatCurrency(parseCurrency(input.value));
-
-    // Aplica máscara a cada digitação
-    input.addEventListener("input", () => {
+    currencyInputs.forEach((input) => {
       applyCurrencyMask(input);
-    });
+
+    if (!input.readOnly) {
+      input.addEventListener("input", () => applyCurrencyMask(input));
+
+      input.addEventListener("paste", (event) => {
+        event.preventDefault();
+        const pastText = event.clipboardData?.getData("text") ?? "";
+        input.value = formatCurrency(parseCurrency(pastText)).replace("R$", "").trim();
+      });
+    }
 
     // Opcional: tratar colar para manter formato
     input.addEventListener("paste", (event) => {
@@ -109,6 +116,63 @@ export function setupCurrencyInputs(): void {
     });
   });
 }
+
+//Gera um <span> com R$, para usar nos campos de itens que são criados dinamicamente.
+// Formata número para pt-BR sem R$
+export const formatEditableCurrency = (value: number | string): string => {
+  const numberValue = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(numberValue)) return "0,00";
+  return numberValue.toFixed(2).replace(".", ",");
+};
+
+// Cria célula de input monetário com prefixo R$
+export const makeCurrencyCellInput = (name: string, initial: number | string = "") => {
+  const td = document.createElement("td");
+  td.style.position = "relative";
+
+  // Prefixo R$
+  const span = document.createElement("span");
+  span.textContent = "R$";
+  span.classList.add("prefix");
+  span.style.position = "absolute";
+  span.style.left = "12px";
+  span.style.top = "50%";
+  span.style.transform = "translateY(-50%)";
+  span.style.pointerEvents = "none";
+
+  // Input
+  const input = document.createElement("input");
+  input.type = "text";
+  input.name = name;
+  input.autocomplete = "off";
+  input.style.width = "100%";
+  input.style.paddingLeft = "30px"; // espaço para o R$
+
+  if (initial !== undefined && initial!== null && initial !== "") {
+    input.value = Number(initial).toFixed(2).replace(".", ",");
+  } else {
+    input.value = "";
+  }
+
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^\d,]/g, "");
+  });
+
+  // Formata ao perder foco, mas permite campo vazio
+  input.addEventListener("blur", () => {
+    const trimmed = input.value.trim();
+    if (!trimmed) return; // mantém vazio se usuário apagou tudo
+    const numericValue = parseFloat(trimmed.replace(",", ".")); 
+    if (!isNaN(numericValue)) {
+      input.value = numericValue.toFixed(2).replace(".", ",");
+    }
+  });
+
+  td.appendChild(span);
+  td.appendChild(input);
+
+  return { td, input };
+};
 
 //Formatação de número de telefone/celular.
 export function formatPhoneNumber(value: string): string {

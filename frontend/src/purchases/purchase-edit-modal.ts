@@ -6,7 +6,7 @@ import { addItemRowTo } from "./purchase-item-dom";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";
-import { formatCurrency } from "../utils/formatters";
+import { collectPurchaseItems } from "./purchase-items-controller";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
@@ -38,8 +38,15 @@ export async function openEditModal(id: number) {
 
   inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
-  inputDescontoFinanceiro.value = formatCurrency(purchase.desconto_financeiro || 0);
-  inputDescontoComercial.value = formatCurrency(purchase.desconto_comercial || 0);
+  
+  inputDescontoFinanceiro.value = (Number(purchase.desconto_financeiro) || 0)
+  .toFixed(2)
+  .replace(".", ",");
+
+  inputDescontoComercial.value = (Number(purchase.desconto_comercial) || 0)
+  .toFixed(2)
+  .replace(".", ",");
+
   inputStatus.value = purchase.status || "";
 
   // Carrega os itens da compra
@@ -88,10 +95,17 @@ form.addEventListener("submit", async (event) => {
       desconto_financeiro: Number(formData.get("edit-desconto-financeiro") || 0),
       desconto_comercial: Number(formData.get("edit-desconto-comercial") || 0),
       status: formData.get("edit-status")?.toString() || "",
-    // Itens da compra podem ser enviados separados ou em outra rota
   };
 
+  // Coleta os itens que estão no modal
+  const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLElement;
+  const purchaseItems = await collectPurchaseItems(itemsBody);
+
+  // Adiciona itens ao payload
+  updatedPurchaseData['itens'] = purchaseItems;
+
   try {
+    // Envia dados do cabeçalho + itens juntos.
     const response = await updatePurchaseAPI(currentEditId, updatedPurchaseData);
     showMessage(response.message);
 

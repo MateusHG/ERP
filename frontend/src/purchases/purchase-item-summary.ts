@@ -1,13 +1,16 @@
 import { formatCurrency } from "../utils/formatters";
 
 export function recalcLine(tr: HTMLTableRowElement) {
-  const quantity = parseFloat((tr.querySelector('[name="item-quantity"]') as HTMLInputElement)?.value) || 0;
-  const unit = parseFloat((tr.querySelector('[name="item-unit-price"]') as HTMLInputElement)?.value) || 0;
-  const discountPerUnit = parseFloat((tr.querySelector('[name="item-discount-volume"]') as HTMLInputElement)?.value) || 0;
+  const quantity = parseFloat((tr.querySelector('[name="item-quantity"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
+  const unit = parseFloat((tr.querySelector('[name="item-unit-price"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
+  const discountPerUnit = parseFloat((tr.querySelector('[name="item-discount-volume"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
 
   const gross = quantity * unit;
   const lineDiscount = discountPerUnit * quantity;
   const lineTotal = Math.max(0, gross - lineDiscount);
+
+  const discountCell = tr.querySelector(".item-line-discount") as HTMLElement;
+  if (discountCell) discountCell.textContent = formatCurrency(lineDiscount);
 
   const totalCell = tr.querySelector(".item-line-total") as HTMLElement;
   if (totalCell) totalCell.textContent = formatCurrency(lineTotal);
@@ -21,9 +24,9 @@ export function updatePurchaseItemSummary(container: HTMLElement, prefix: "new" 
   let totalItemsWithDiscount = 0;
 
   for (const row of rows) {
-    const quantity = parseFloat((row.querySelector('[name="item-quantity"]') as HTMLInputElement)?.value) || 0;
-    const unit = parseFloat((row.querySelector('[name="item-unit-price"]') as HTMLInputElement)?.value) || 0;
-    const discountPerUnit = parseFloat((row.querySelector('[name="item-discount-volume"]') as HTMLInputElement)?.value) || 0;
+    const quantity = parseFloat((row.querySelector('[name="item-quantity"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
+    const unit = parseFloat((row.querySelector('[name="item-unit-price"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
+    const discountPerUnit = parseFloat((row.querySelector('[name="item-discount-volume"]') as HTMLInputElement)?.value.replace(",", ".")) || 0;
 
     const gross = quantity * unit;
     const lineDiscount = discountPerUnit * quantity;
@@ -32,6 +35,9 @@ export function updatePurchaseItemSummary(container: HTMLElement, prefix: "new" 
     subtotal += gross;
     totalDiscounts += lineDiscount;
     totalItemsWithDiscount += lineTotal;
+
+    const discountCell = row.querySelector(".item-line-discount") as HTMLElement;
+    if (discountCell) discountCell.textContent = formatCurrency(lineDiscount);
 
     const totalCell = row.querySelector(".item-line-total") as HTMLElement;
     if (totalCell) totalCell.textContent = formatCurrency(lineTotal);

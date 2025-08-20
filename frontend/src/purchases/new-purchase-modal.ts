@@ -58,16 +58,16 @@ export function openNewPurchaseModal() {
   const itens = itemRows.map(row => ({
     produto_id: (row.querySelector('input[name="item-product-id"]') as HTMLInputElement).value,
     quantidade: (row.querySelector('input[name="item-quantity"]') as HTMLInputElement).value,
-    preco_unitario: (row.querySelector('input[name="item-unit-price"]') as HTMLInputElement).value,
-    desconto_volume: (row.querySelector('input[name="item-discount-volume"]') as HTMLInputElement).value,
+    preco_unitario: Number((row.querySelector('input[name="item-unit-price"]') as HTMLInputElement).value.replace(",", ".")),
+    desconto_volume: Number((row.querySelector('input[name="item-discount-volume"]') as HTMLInputElement).value.replace(",", ".")),
   }));
 
   const newPurchaseData = {
     fornecedor_id: (form.elements.namedItem("new-fornecedor-id") as HTMLInputElement).value,
     data_emissao: (form.elements.namedItem("new-data-emissao") as HTMLInputElement).value,
     tipo_pagamento: (form.elements.namedItem("new-tipo-pagamento") as HTMLInputElement).value,
-    desconto_financeiro: (form.elements.namedItem("new-desconto-financeiro") as HTMLInputElement).value,
-    desconto_comercial: (form.elements.namedItem("new-desconto-comercial") as HTMLInputElement).value,
+    desconto_financeiro: Number((form.elements.namedItem("new-desconto-financeiro") as HTMLInputElement).value.replace(",", ".")),
+    desconto_comercial: Number((form.elements.namedItem("new-desconto-comercial") as HTMLInputElement).value.replace(",", ".")),
     status: (form.elements.namedItem("new-status") as HTMLInputElement).value,
     itens
   }

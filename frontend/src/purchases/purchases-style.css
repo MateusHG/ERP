@@ -515,13 +515,49 @@ input[readonly] {
 #items-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: -8px;
+  table-layout: fixed; /* Importante: distribui colunas conforme largura definida */
 }
 
 #items-table th, #items-table td {
   border: 1px solid #ccc;
   padding: 6px 8px;
   text-align: left;
+}
+
+/* Produto ID - largura fixa pequena */
+#items-table th:nth-child(1),
+#items-table td:nth-child(1) {
+  width: 75px;
+  text-align: center;
+}
+
+/* Código - pode ser compacto também */
+#items-table th:nth-child(2),
+#items-table td:nth-child(2) {
+  width: 100px;
+  text-align: left;
+}
+
+#items-table th:nth-child(7),
+#items-table td:nth-child(7)
+ {
+  width: 100px;
+  text-align: center;
+}
+
+#items-table th:nth-child(8),
+#items-table td:nth-child(8)
+ {
+  width: 100px;
+  text-align: center;
+}
+
+/* Coluna Ações - impede quebra de botões */
+#items-table th:nth-child(9),
+#items-table td:nth-child(9) {
+  width: 140px;
+  text-align: center;
+  white-space: nowrap; /* não deixa os botões quebrarem de linha */
 }
 
 #items-table input {
@@ -553,4 +589,51 @@ input[readonly] {
   background: #2e80eb;
   color: white;
   border-color: #2e80eb;
+}
+
+.input-with-prefix {
+  position: relative;
+  display: inline-block;
+}
+
+.input-with-prefix .prefix {
+  position: absolute;
+  left: 10px;       /* espaço da borda interna */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  pointer-events: none; /* não bloqueia clique no input */
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.input-with-prefix input {
+  padding-left: 35px;   /* espaço para o prefixo */
+  height: 32px;         /* ajuste de altura */
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.prefix {
+  color: #555;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.split-row td {
+  background: #f9f9f9;
+  padding: 10px;
+}
+
+.split-items-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.split-items-table th,
+.split-items-table td {
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  text-align: left;
+  font-size: 0.85rem;
 }
