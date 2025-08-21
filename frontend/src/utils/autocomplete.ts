@@ -4,10 +4,15 @@ import { authorizedFetch } from "./fetch-helper";
 export async function setupSupplierAutoComplete(
   input: HTMLInputElement,
   hiddenInput: HTMLInputElement,
-  suggestionsList: HTMLUListElement
+  suggestionsList: HTMLUListElement,
+  selectedSupplierName: string = ""
 ) {
-  let selectedSupplierName = "";
+  let currentSelectedName = selectedSupplierName;
   let currentController: AbortController | null = null;
+
+  if (selectedSupplierName && hiddenInput.value) {
+    currentSelectedName = selectedSupplierName;
+  }
 
   async function loadSuppliers(query: string) {
     if (currentController) currentController.abort();
@@ -24,13 +29,13 @@ export async function setupSupplierAutoComplete(
 
       suppliers.forEach((supplier: any) => {
         const li = document.createElement("li");
-        li.textContent = `${supplier.nome_fantasia} (ID: ${supplier.id})`;
+        li.textContent = supplier.nome_fantasia;
         li.classList.add("suggestion-item");
 
         li.addEventListener("mousedown", (e) => {
           e.preventDefault();
           input.value = supplier.nome_fantasia;
-          hiddenInput.value = String(supplier.id); //Salva o ID para o backend.
+          hiddenInput.value = String(supplier.id); // ✅ ID salvo para backend
           selectedSupplierName = supplier.nome_fantasia;
           suggestionsList.classList.add("hidden");
         });
@@ -49,9 +54,13 @@ export async function setupSupplierAutoComplete(
 
   input.addEventListener("input", () => {
     const query = input.value.trim();
-    hiddenInput.value = "";
-    selectedSupplierName = "";
 
+    // Limpa o id sempre que o usuário digita manualmente
+    if (query !== currentSelectedName) {
+      hiddenInput.value = "";
+      selectedSupplierName = "";
+    }
+    
     if (query.length >= 2) {
       loadSuppliers(query);
     } else {
@@ -67,8 +76,10 @@ export async function setupSupplierAutoComplete(
 
   input.addEventListener("blur", () => {
     setTimeout(() => {
-      if (input.value !== selectedSupplierName) {
+      // Se o valor do input não corresponder ao fornecedor selecionado, limpa o id
+      if (input.value !== currentSelectedName) {
         hiddenInput.value = "";
+        currentSelectedName = "";
         suggestionsList.classList.add("hidden");
       }
     }, 300);

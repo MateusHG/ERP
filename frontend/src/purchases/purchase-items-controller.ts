@@ -159,14 +159,22 @@ export async function collectPurchaseItems(container: HTMLElement) {
 
     const totalText = (row.querySelector(".item-line-total") as HTMLElement).textContent || "";
 
+    const produto_id = Number(get("item-product-id"));
+    if (!produto_id || isNaN(produto_id)) {
+      return null;
+    }
+
     return {
-      product_id: get("item-product-id"),
-      code: get("item-code"),
-      name: get("item-name"),
-      quantity: get("item-quantity"),
-      unit_price: get("item-unit-price"),
-      discount_volume: get("item-discount-volume"),
-      line_total: totalText,
-    };
-  });
-}
+      produto_id,
+      produto_codigo: get("item-code"),
+      produto_nome: get("item-name"),
+      quantidade: Number(get("item-quantity")) || 0,
+      preco_unitario: parseFloat(get("item-unit-price").replace(",", ".")) || 0,
+      desconto_volume: parseFloat(get("item-discount-volume").replace(",", ".")) || 0,
+      valor_subtotal: parseFloat(
+          totalText.replace(/[^\d,.-]/g, "").replace(",", ".")
+        ) || 0,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null); // remove nulos
+};

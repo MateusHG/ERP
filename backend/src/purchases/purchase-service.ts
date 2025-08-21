@@ -80,10 +80,21 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
+    if ("data_emissao" in data && !data.data_emissao) {
+      return badRequest("Obrigatório informar data da emissão.")
+    }
+
     const updatedPurchase = purchasesRepository.updatePurchase(id, data);
     return ok(updatedPurchase);
-  } catch (err) {
-    console.error(err);
+
+  } catch (err: any) {
+    console.error("Erro ao atualizar a compra:", err);
+
+    // Se for erro de banco de dados (constraint violation), devolve mensagem clara
+    if (err.code === "23502") { // NOT NULL violation
+      return badRequest("Campo obrigatório não preenchido: " + err.column);
+    }
+
     return internalServerError('Erro ao atualizar compra.')
   }
 };

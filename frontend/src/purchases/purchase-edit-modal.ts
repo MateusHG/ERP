@@ -14,27 +14,41 @@ const cancelBtn = document.getElementById("cancel-edit");
 
 let currentEditId: number | null = null;
 let originalFormData: Record<string, string> = {};
+let originalItems: any[] = [];
 
 export async function openEditModal(id: number) {
   currentEditId = id;
 
   const purchase = await getPurchaseByIdAPI(id);
-  console.log("Compra:", purchase);
 
   // Seleciona os inputs dentro do modal de edição
   const inputFornecedorSearch = modal.querySelector<HTMLInputElement>('#fornecedor-search')!;
   const inputFornecedorId = modal.querySelector<HTMLInputElement>('#fornecedor-id')!;
   const suggestions = modal.querySelector<HTMLUListElement>('#fornecedor-suggestions')!;
-  const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="data-emissao"]')!;
-  const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="tipo-pagamento"]')!;
+  const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="edit-data-emissao"]')!;
+  const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="edit-tipo-pagamento"]')!;
   const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="desconto-financeiro"]')!;
   const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="desconto-comercial"]')!;
-  const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="status"]')!;
+  const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="edit-status"]')!;
 
-  // Preenche os campos
-  inputFornecedorSearch.value = purchase.fornecedor_nome || "";
-  inputFornecedorId.value = String(purchase.fornecedor_id);
-  setupSupplierAutoComplete(inputFornecedorSearch, inputFornecedorId, suggestions)
+    // Preenche campos
+    inputFornecedorSearch.value = purchase.fornecedor_nome || "";
+    inputFornecedorId.value = String(purchase.fornecedor_id || "");
+    await setupSupplierAutoComplete(
+    inputFornecedorSearch,
+    inputFornecedorId,
+    suggestions,
+    purchase.fornecedor_nome || ""
+  );
+
+  await setupSupplierAutoComplete(inputFornecedorSearch, inputFornecedorId, suggestions, purchase.fornecedor_nome || "");
+
+    // Monitoramento do hidden input para debug
+  const hiddenInputObserver = new MutationObserver(() => {
+    console.log("Hidden input fornecedor-id:", inputFornecedorId.value);
+  });
+  hiddenInputObserver.observe(inputFornecedorId, { attributes: true, attributeFilter: ['value'] });
+
 
   inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
@@ -54,6 +68,7 @@ export async function openEditModal(id: number) {
   itemsBody.innerHTML = "";
 
   const items = await getItemsByPurchaseIdAPI(id);
+  originalItems = JSON.parse(JSON.stringify(items)); // Guarda os itens originais para a comparação
 
   items.forEach(item => {
     addItemRowTo(itemsBody, {
@@ -88,32 +103,65 @@ form.addEventListener("submit", async (event) => {
   if (!currentEditId) return;
 
   const formData = new FormData(form);
-
-    const updatedPurchaseData = {
-      fornecedor_id: formData.get("edit-fornecedor-id")?.toString() || "",
-      data_emissao: formData.get("edit-data-emissao")?.toString() || "",
-      tipo_pagamento: formData.get("edit-tipo-pagamento")?.toString() || "",
-      desconto_financeiro: Number(formData.get("edit-desconto-financeiro") || 0),
-      desconto_comercial: Number(formData.get("edit-desconto-comercial") || 0),
-      status: formData.get("edit-status")?.toString() || "",
-  };
-
-  // Coleta os itens que estão no modal
   const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLElement;
-  const purchaseItems = await collectPurchaseItems(itemsBody);
+  const currentItems = await collectPurchaseItems(itemsBody);
 
-  // Adiciona itens ao payload
-  updatedPurchaseData['itens'] = purchaseItems;
+  const updatedPurchaseData: Partial<any> = {};
+
+  // Helpers
+  const parseString = (value: FormDataEntryValue | null) => value && value.toString().trim() !== "" ? value.toString() : null;
+  const parseNumber = (value: FormDataEntryValue | null) => value ? Number(value) : null;
+    
+  //Cabeçalho: compara com originalFormData, pra depois enviar no corpo da requisição só o que foi alterado, evita ficar reenviando todas as informações toda vez.
+  const fornecedor_id = parseNumber(formData.get("edit-fornecedor-id"));
+  if (fornecedor_id !== null && fornecedor_id !== Number(originalFormData["edit-fornecedor-id"])) {
+    updatedPurchaseData.fornecedor_id = fornecedor_id;
+  }
+
+  const data_emissao = parseString(formData.get("edit-data-emissao"));
+  if (data_emissao !== originalFormData["edit-data-emissao"]) updatedPurchaseData.data_emissao = data_emissao;
+
+  const tipo_pagamento = parseString(formData.get("edit-tipo-pagamento"));
+  if (tipo_pagamento !== originalFormData["edit-tipo-pagamento"]) updatedPurchaseData.tipo_pagamento = tipo_pagamento;
+
+  const desconto_financeiro = parseNumber(formData.get("edit-desconto-financeiro")) ?? 0;
+  if (desconto_financeiro !== Number(originalFormData["edit-desconto-financeiro"] ?? 0)) updatedPurchaseData.desconto_financeiro = desconto_financeiro;
+
+  const desconto_comercial = parseNumber(formData.get("edit-desconto-comercial")) ?? 0;
+  if (desconto_comercial !== Number(originalFormData["edit-desconto-comercial"] ?? 0)) updatedPurchaseData.desconto_comercial = desconto_comercial;
+
+  const status = parseString(formData.get("edit-status"));
+  if (status !== originalFormData["edit-status"]) updatedPurchaseData.status = status;
+
+  // Itens da compra: adiciona apenas se houver alteração
+  const changedItems = currentItems.filter((item, i) => {
+    const original = originalItems[i];
+    return !original || JSON.stringify(item) !== JSON.stringify(original);
+  });
+  if (changedItems.length > 0) updatedPurchaseData.itens = changedItems;
+
+    if (fornecedor_id === null) {
+      showMessage("Selecione um fornecedor válido.");
+      return;
+    }
 
   try {
-    // Envia dados do cabeçalho + itens juntos.
-    const response = await updatePurchaseAPI(currentEditId, updatedPurchaseData);
-    showMessage(response.message);
+  // Envia dados do cabeçalho + itens juntos.
+  const response = await updatePurchaseAPI(currentEditId, updatedPurchaseData);
 
-    modal.classList.add("hidden");
-    renderPurchasesList(await loadPurchasesAPI());
+  if (!response.ok) {
+  await showMessage(response.message || "Erro inesperado ao salvar compra.");
+  return;
+}
 
-  } catch (err: any) {
-    showMessage(err.message);
-  }
-});
+await showMessage("Compra atualizada com sucesso.");
+
+  modal.classList.add("hidden");
+
+  // garante que a lista vai ser recarregada com os dados atualizados
+  const purchases = await loadPurchasesAPI();
+  renderPurchasesList(purchases);
+
+} catch (err: any) {
+  await showMessage(err?.message || "Erro de conexão com o servidor.");
+}});

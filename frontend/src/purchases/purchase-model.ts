@@ -38,6 +38,7 @@ export const statusLabels: Record<string, string> = {
   aguardando: "Aguardando Aprovação",
   aprovado: "Aprovado",
   recebido: "Recebido",
+  finalizado: "Finalizado",
   cancelado: "Cancelado"
 };
 

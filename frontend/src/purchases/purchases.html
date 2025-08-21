@@ -64,6 +64,7 @@
         <option value="aguardando">Aguardando Aprovação</option>
         <option value="aprovado">Aprovado</option>
         <option value="recebido">Recebido</option>
+        <option value="finalizado">Finalizado</option>
         <option value="cancelado">Cancelado</option>
       </select>
     </div>
@@ -113,6 +114,7 @@
               <option value="aguardando">Aguardando Aprovação</option>
               <option value="aprovado">Aprovado</option>
               <option value="recebido">Recebido</option>
+              <option value="finalizado">Finalizado</option>
               <option value="cancelado">Cancelado</option>
             </select>
           </div>
@@ -236,18 +238,18 @@
           <div class="form-group">
             <label for="fornecedor-search">Fornecedor:</label>
             <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
-            <input type="hidden" id="fornecedor-id" name="fornecedor-id" />
+            <input type="hidden" id="fornecedor-id" name="edit-fornecedor-id" />
             <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
             <label for="edit-data-emissao">Data da Emissão:</label>
-            <input type="date" name="data-emissao" id="edit-data-emissao" required />
+            <input type="date" name="edit-data-emissao" id="edit-data-emissao" required />
           </div>
 
           <div class="form-group">
             <label for="edit-tipo-pagamento">Tipo de Pagamento:</label>
-            <select name="tipo-pagamento" id="edit-tipo-pagamento" required >
+            <select name="edit-tipo-pagamento" id="edit-tipo-pagamento" required >
               <option value="" disabled selected>Selecione o tipo de pagamento....</option>
               <option value="pix">Pix</option>
               <option value="boleto">Boleto Bancário</option>
@@ -259,11 +261,12 @@
 
           <div class="form-group">
             <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
+            <select name="edit-status" id="edit-status" required >
               <option value="aberto">Em Aberto</option>
               <option value="aguardando">Aguardando Aprovação</option>
               <option value="aprovado">Aprovado</option>
               <option value="recebido">Recebido</option>
+              <option value="finalizado">Finalizado</option>
               <option value="cancelado">Cancelado</option>
             </select>
           </div>

@@ -1,3 +1,4 @@
+import { showMessage } from "../utils/messages";
 import { authorizedFetch } from "../utils/fetch-helper";
 import { purchaseItemModel, purchaseModel } from "./purchase-model";
 
@@ -54,12 +55,13 @@ export async function updatePurchaseAPI(purchaseId: number, updatedPurchaseData:
     body: JSON.stringify(updatedPurchaseData)
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Erro ao atualizar a compra.");
-  }
+  const result = await response.json();
 
-  return response.json();
+   return {
+    ok: response.ok,                  // true se HTTP 2xx
+    message: result.body?.message || null, // se backend enviar mensagem
+    data: result.body?.data || result.body || null, // pega os dados retornados
+  };
 };
 
 export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemModel[]> {
