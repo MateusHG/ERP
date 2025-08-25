@@ -3,13 +3,13 @@ import db  from "../config/db";
 export const getGeneralDashboard = async (data_inicial: string, data_final: string) => {
   const query = `
    SELECT
-      (SELECT COUNT(*) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status = 'Finalizado') AS total_vendas_finalizadas,
-      (SELECT SUM(valor_total) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status = 'Finalizado') AS total_vendas_finalizadas_valores,
-      (SELECT COUNT(*) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'Finalizado') AS total_vendas_pendentes,
+      (SELECT COUNT(*) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status = 'finalizado') AS total_vendas_finalizadas,
+      (SELECT SUM(valor_total) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status = 'finalizado') AS total_vendas_finalizadas_valores,
+      (SELECT COUNT(*) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'finalizado') AS total_vendas_pendentes,
 
-      (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status = 'Finalizado') AS total_compras_finalizadas,
-      (SELECT SUM(valor_total) FROM compras WHERE data_emissao BETWEEN $1 and $2 AND status = 'Finalizado') AS total_compras_valores,
-      (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'Finalizado') AS total_compras_pendentes,
+      (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status = 'finalizado') AS total_compras_finalizadas,
+      (SELECT SUM(valor_total) FROM compras WHERE data_emissao BETWEEN $1 and $2 AND status = 'finalizado') AS total_compras_valores,
+      (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'finalizado') AS total_compras_pendentes,
 
       (SELECT COUNT(*) FROM produtos WHERE estoque < estoque_minimo) AS produtos_estoque_baixo,
       (SELECT COUNT(*) FROM produtos WHERE estoque BETWEEN estoque_minimo AND estoque_maximo) AS produtos_estoque_medio,

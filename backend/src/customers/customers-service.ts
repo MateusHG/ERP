@@ -119,7 +119,7 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
   }
     //Valida duplicidade se for enviado ** CNPJ **
     if (hasCnpj && data.cnpj) {
-      const cnpjAlreadyExists = await customerRepository.verifyCnpj(data.cnpj);
+      const cnpjAlreadyExists = await customerRepository.verifyCnpj(data.cnpj, id);
       if (cnpjAlreadyExists) {
         return badRequest('CNPJ já existe em outro cadastro.');
       }
@@ -127,14 +127,14 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
 
     //Verifica se já existe a razão social e email.
     if (data.razao_social) {
-    const razaoAlreadyExists = await customerRepository.verifyRazao(data.razao_social);
+    const razaoAlreadyExists = await customerRepository.verifyRazao(data.razao_social, id);
     if (razaoAlreadyExists) {
       return badRequest('Razão social já existe em outro cadastro.');
     }
   }
 
     if (data.email) {
-    const emailAlreadyExists = await customerRepository.verifyEmail(data.email);
+    const emailAlreadyExists = await customerRepository.verifyEmail(data.email, id);
     if (emailAlreadyExists) {
       return badRequest('Email já existe em outro cadastro.')
     }

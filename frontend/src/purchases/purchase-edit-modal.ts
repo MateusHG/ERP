@@ -12,43 +12,34 @@ const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
 
+// Seleciona os inputs dentro do modal de edição
+const inputFornecedorSearch = modal.querySelector<HTMLInputElement>('#fornecedor-search')!;
+const inputFornecedorId = modal.querySelector<HTMLInputElement>('#fornecedor-id')!;
+const suggestions = modal.querySelector<HTMLUListElement>('#fornecedor-suggestions')!;
+
+setupSupplierAutoComplete(inputFornecedorSearch, inputFornecedorId, suggestions);
+
 let currentEditId: number | null = null;
 let originalFormData: Record<string, string> = {};
 let originalItems: any[] = [];
 
+// --------------------------------------------------------------------------------------------------
+ 
 export async function openEditModal(id: number) {
   currentEditId = id;
 
   const purchase = await getPurchaseByIdAPI(id);
 
-  // Seleciona os inputs dentro do modal de edição
-  const inputFornecedorSearch = modal.querySelector<HTMLInputElement>('#fornecedor-search')!;
-  const inputFornecedorId = modal.querySelector<HTMLInputElement>('#fornecedor-id')!;
-  const suggestions = modal.querySelector<HTMLUListElement>('#fornecedor-suggestions')!;
+    // Preenche campo do fornecedor.
+  inputFornecedorSearch.value = purchase.fornecedor_nome || "";
+  inputFornecedorId.value = String(purchase.fornecedor_id || "");
+
   const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="edit-data-emissao"]')!;
   const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="edit-tipo-pagamento"]')!;
   const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="desconto-financeiro"]')!;
   const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="desconto-comercial"]')!;
   const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="edit-status"]')!;
-
-    // Preenche campos
-    inputFornecedorSearch.value = purchase.fornecedor_nome || "";
-    inputFornecedorId.value = String(purchase.fornecedor_id || "");
-    await setupSupplierAutoComplete(
-    inputFornecedorSearch,
-    inputFornecedorId,
-    suggestions,
-    purchase.fornecedor_nome || ""
-  );
-
-  await setupSupplierAutoComplete(inputFornecedorSearch, inputFornecedorId, suggestions, purchase.fornecedor_nome || "");
-
-    // Monitoramento do hidden input para debug
-  const hiddenInputObserver = new MutationObserver(() => {
-    console.log("Hidden input fornecedor-id:", inputFornecedorId.value);
-  });
-  hiddenInputObserver.observe(inputFornecedorId, { attributes: true, attributeFilter: ['value'] });
-
+  
 
   inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
@@ -102,8 +93,16 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!currentEditId) return;
 
-  const formData = new FormData(form);
   const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLElement;
+  const itemRows = Array.from(itemsBody.querySelectorAll("tr"));
+
+  const isEditing = itemRows.some(row => row.dataset.status !== "salvo");
+  if (isEditing) {
+    await showMessage("Obrigatório salvar todos os itens antes de salvar a compra.");
+    return;
+  }
+
+  const formData = new FormData(form);
   const currentItems = await collectPurchaseItems(itemsBody);
 
   const updatedPurchaseData: Partial<any> = {};

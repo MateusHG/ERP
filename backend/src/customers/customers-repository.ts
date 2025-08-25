@@ -99,37 +99,36 @@ export const insertCustomer = async (customer: Omit<customerModel, 'id' | 'data_
 };
 
 //Consultas para verificar e depois utilizar na service como validação e não deixar duplicar registros com mesmo CPF, CNPJ, EMAIL, RAZAO SOCIAL.
-export const verifyRazao = async (razao: string): Promise<customerModel |  null> => {
-  const result = await db.query(
-    `SELECT * FROM clientes where razao_social = $1 limit 1`,
-    [razao]
-  );
-
-  return result.rows[0] || null;
+export const verifyRazao = async (razao: string, ignoredId?: number) => {
+  const query = `SELECT 1 FROM clientes WHERE razao_social = $1 ${ignoredId ? "AND id <> $2" : ""} LIMIT 1`;
+    
+  const values = ignoredId ? [razao, ignoredId]: [razao];
+  const result = await db.query(query, values);
+  return result.rowCount > 0;
 };
 
-export const verifyCnpj = async (cnpj: string): Promise<customerModel |  null> => {
-  const result = await db.query(
-    `SELECT * FROM clientes where cnpj = $1 limit 1`,
-    [cnpj]
-  );
+export const verifyCnpj = async (cnpj: string, ignoredId?: number) => {
+  const query = `SELECT 1 FROM clientes WHERE cnpj = $1 ${ignoredId ? "AND id <> $2" : ""}
+                 LIMIT 1
+                `;
 
-  return result.rows[0] || null;
+  const values = ignoredId ? [cnpj, ignoredId]: [cnpj];
+  const result = await db.query(query, values);
+  return result.rowCount > 0;
+};
+
+export const verifyEmail = async (email: string, ignoredId?:number) => {
+  const query =
+    `SELECT 1 FROM clientes WHERE email = $1 ${ignoredId ? "AND id <> $2" : ""} LIMIT 1`;
+  const values = ignoredId ? [email, ignoredId]: [email];
+  const result = await db.query(query, values);
+  return result.rowCount > 0;
 };
 
 export const verifyCpf = async (cpf: string): Promise<customerModel |  null> => {
   const result = await db.query(
     `SELECT * FROM clientes where cpf = $1 limit 1`,
     [cpf]
-  );
-
-  return result.rows[0] || null;
-};
-
-export const verifyEmail = async (email: string): Promise<customerModel | null> => {
-  const result = await db.query(
-    `SELECT * FROM clientes where email = $1 limit 1`,
-    [email]
   );
 
   return result.rows[0] || null;

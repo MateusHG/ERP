@@ -110,7 +110,7 @@ export const deletePurchaseByIdService = async (id: number) => {
     if (!deleted) {
       return notFound('ID não encontrado.')
     }
-      return ok('Compra deletada com sucesso.');
+      return ok( { message:  'Compra deletada com sucesso.' });
   
     } catch (err) {
       console.error(err);

@@ -72,6 +72,14 @@ export async function getItemsByPurchaseIdAPI(id: number): Promise<purchaseItemM
   return result.json();
 };
 
+export async function deletePurchaseAPI(id: number) {
+  const response = await authorizedFetch(`https://localhost:3000/api/compras/${id}`, {
+    method: "DELETE"
+  });
+
+  return response.json();
+}
+
 export async function fetchProductSuggestions(filters: {id?: string, codigo?: string, nome?: string}) {
   const params = new URLSearchParams();
 

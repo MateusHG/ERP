@@ -3,7 +3,7 @@ import { getFilterValues } from "./purchases-dom";
 import { showConfirm, showMessage } from "../utils/messages";
 import { renderPurchasesList } from "./purchases-dom";
 import { openNewPurchaseModal } from "./new-purchase-modal";
-import { getItemsByPurchaseIdAPI, loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-service";
+import { deletePurchaseAPI, getItemsByPurchaseIdAPI, loadPurchasesAPI, searchPurchasesWithFilterAPI } from "./purchases-service";
 import { addItemRowTo } from "./purchase-item-dom";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";

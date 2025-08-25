@@ -5,13 +5,13 @@ export async function setupSupplierAutoComplete(
   input: HTMLInputElement,
   hiddenInput: HTMLInputElement,
   suggestionsList: HTMLUListElement,
-  selectedSupplierName: string = ""
+  initialSupplierName: string = ""
 ) {
-  let currentSelectedName = selectedSupplierName;
+  let selectedSupplierName = initialSupplierName;
   let currentController: AbortController | null = null;
 
-  if (selectedSupplierName && hiddenInput.value) {
-    currentSelectedName = selectedSupplierName;
+  if (initialSupplierName && hiddenInput.value) {
+    selectedSupplierName = initialSupplierName;
   }
 
   async function loadSuppliers(query: string) {
@@ -29,7 +29,7 @@ export async function setupSupplierAutoComplete(
 
       suppliers.forEach((supplier: any) => {
         const li = document.createElement("li");
-        li.textContent = supplier.nome_fantasia;
+        li.textContent = `${supplier.nome_fantasia} (ID: ${supplier.id})`;
         li.classList.add("suggestion-item");
 
         li.addEventListener("mousedown", (e) => {
@@ -56,9 +56,8 @@ export async function setupSupplierAutoComplete(
     const query = input.value.trim();
 
     // Limpa o id sempre que o usuário digita manualmente
-    if (query !== currentSelectedName) {
+    if (query !== selectedSupplierName) {
       hiddenInput.value = "";
-      selectedSupplierName = "";
     }
     
     if (query.length >= 2) {
@@ -77,9 +76,9 @@ export async function setupSupplierAutoComplete(
   input.addEventListener("blur", () => {
     setTimeout(() => {
       // Se o valor do input não corresponder ao fornecedor selecionado, limpa o id
-      if (input.value !== currentSelectedName) {
+      if (input.value !== selectedSupplierName) {
         hiddenInput.value = "";
-        currentSelectedName = "";
+        selectedSupplierName = "";
         suggestionsList.classList.add("hidden");
       }
     }, 300);

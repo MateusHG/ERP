@@ -55,6 +55,11 @@ export function openNewPurchaseModal() {
     return showMessage("Obrigatório adicionar um item.")
   }
 
+  const isEditing = itemRows.some(row => row.dataset.status !== "salvo");
+  if (isEditing) {
+    return showMessage("Obrigatório salvar todos os itens antes de salvar a compra.")
+  }
+
   const itens = itemRows.map(row => ({
     produto_id: (row.querySelector('input[name="item-product-id"]') as HTMLInputElement).value,
     quantidade: (row.querySelector('input[name="item-quantity"]') as HTMLInputElement).value,

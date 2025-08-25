@@ -233,12 +233,12 @@ const updatePurchaseItems = async (client: any, purchaseId: number, items: any[]
     `SELECT id FROM itens_compra WHERE compra_id = $1`,
     [purchaseId]
   );
-  const currentItemIds = currentItems.rows.map((row) => row.id);
+  const currentItemIds = currentItems.rows.map((row: {id: number}) => row.id);
 
   const itemsToUpdate = items.filter((item) => item.item_id !== undefined && item.item_id !== null);
   const itemsToCreate = items.filter((item) => !item.item_id);
   const itemsToDelete = currentItemIds.filter(
-    (id) => !items.some((item) => item.item_id === id)
+    (id: number) => !items.some((item) => item.item_id === id)
   );
 
   // Deletar

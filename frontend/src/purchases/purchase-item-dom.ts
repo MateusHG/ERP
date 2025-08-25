@@ -20,6 +20,8 @@ const makeCellInput = (name: string, type = "text", initial = "", placeholder = 
 export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTableRowElement {
   const tr = document.createElement("tr");
 
+  tr.dataset.status = isSaved ? "salvo" : "editando";
+
   const { td: tdProductId, input: inputProductId } = makeCellInput(
     "item-product-id", "text", item?.produto_id.toString() || "", "Digite o ID..."
   );
@@ -92,6 +94,12 @@ const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
   btnEdit.textContent = "✏️";
   btnEdit.title = "Editar";
   btnEdit.disabled = !isSaved;
+
+  btnEdit.addEventListener("click", () => {
+    tr.dataset.status = "editando";
+    btnEdit.disabled = true;
+    btnEdit.disabled = false;
+  });
 
   const btnRemove = document.createElement("button");
   btnRemove.type = "button";

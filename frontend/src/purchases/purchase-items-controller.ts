@@ -18,6 +18,8 @@ export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
 
   btnSave.disabled = isView;
   btnEdit.disabled = !isView;
+
+  tr.dataset.status = isView ? "salvo" : "editando";
 }
 
 // Aplica os eventos aos botões e inputs da linha.
@@ -104,7 +106,11 @@ export function setupItemRowEvents(
     const inputName = tr.querySelector('input[name="item-name"]') as HTMLInputElement;
 
     //Validação para caso o usuário altere os campos do código e nome, ao salvar substitui os campos com as informações corretas buscando o produto pelo id.
-    if (inputId && inputId.value) {
+    if (!inputId || !inputId.value) {
+      await showMessage("Informe o ID do produto antes de salvar.");
+      return;
+    }
+
       try {
         const [produto] = await fetchProductSuggestions({ id: inputId.value });
 
@@ -113,24 +119,22 @@ export function setupItemRowEvents(
           await showMessage("ID do produto inválido.");
           return;
         }
+
           inputCode.value = produto.codigo;
           inputName.value = produto.nome;
 
+          recalcLine(tr);
+          setViewMode(tr, true);
+          tr.dataset.saved = "true"; // Marca como salvo
+
+          if (container) updatePurchaseItemSummary(container);
+          updateTotalPurchaseDisplay(prefix);
+          
       } catch (err) {
         console.error("Erro ao validar produto:", err);
         await showMessage("Erro ao validar o produto, tente novamente.");
         return;
       }
-    } else {
-      await showMessage("Informe o ID do produto antes de salvar.");
-      return;
-    }
-
-    recalcLine(tr);
-    setViewMode(tr, true);
-    if (container) updatePurchaseItemSummary(container);
-
-    updateTotalPurchaseDisplay(prefix);
   });
 
   btnEdit.addEventListener("click", () => {
