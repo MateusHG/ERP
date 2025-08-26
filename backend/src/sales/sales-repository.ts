@@ -47,38 +47,17 @@ export const searchAllSales = async (
 
 export const searchSaleById = async (id: number): Promise<salesModel | null> => {
   const result = await db.query(
-    `SELECT
-  v.id_venda AS id_venda,
-  v.data_emissao,
-  v.tipo_pagamento,
-  v.desconto_comercial,
-  v.desconto_financeiro,
-  v.valor_bruto,
-  v.valor_total,
-  v.status,
-  v.data_cadastro,
-  v.data_atualizacao,
-  v.id_cliente,
-
-  iv.id_venda AS id_venda,
-  iv.id_item,
-  iv.id_produto,
-  iv.quantidade,
-  iv.preco_unitario,
-  iv.desconto_volume,
-  iv.valor_subtotal
-FROM
-	vendas v
-INNER JOIN
-	itens_venda iv ON v.id_venda = iv.id_venda
-WHERE v.id_venda = $1`,
+    `SELECT v.*, c.nome_fantasia AS cliente_nome
+     FROM vendas v
+     JOIN clientes c ON v.cliente_id = c.id
+     WHERE v.id = $1`,
   [id]);
 
   return result.rows[0];
 };
 
 interface newSaleInput extends Omit<salesModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> {
-  items: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
+  itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
 }
 
 export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
@@ -91,7 +70,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
     //Insert na tabela "vendas".
     const insertSaleQuery = `
       INSERT INTO vendas (
-      id_cliente,
+      cliente_id,
       data_emissao,
       tipo_pagamento,
       desconto_comercial,
@@ -108,7 +87,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
        $6,
        NOW (),
        NOW () )
-       RETURNING id_venda`;
+       RETURNING id`;
 
     //Guarda os valores no array
     const saleValues = [
@@ -121,24 +100,19 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
     ];
 
     const result = await client.query( insertSaleQuery, saleValues );
-    const saleId = result.rows[0].id_venda;
+    const saleId = result.rows[0].id;
 
     //Insert na tabela "itens_venda"
     const insertSaleItemQuery = `
     INSERT INTO itens_venda (
-    id_venda,
-    id_produto,
+    venda_id,
+    produto_id,
     quantidade,
     preco_unitario,
     desconto_volume
-    ) VALUES (
-     $1,
-     $2,
-     $3,
-     $4,
-     $5 );`
+    ) VALUES ($1, $2, $3, $4, $5)`;
 
-      for (const item of data.items) {
+      for (const item of data.itens) {
       await client.query(insertSaleItemQuery, [
         saleId,
         item.produto_id,
@@ -154,8 +128,8 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
     // SELECT para consulta, depois retorna todos os dados da venda inserida no JSON de resposta.
     const insertedSaleResponse = `
       SELECT
-        v.id_venda AS id_venda,
-        v.id_cliente,
+        v.id AS venda_id,
+        v.cliente_id,
         v.data_emissao,
         v.tipo_pagamento,
         v.desconto_comercial,
@@ -166,15 +140,15 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
         v.data_cadastro,
         v.data_atualizacao,
 
-        iv.id_item AS id_item,
-        iv.id_produto,
+        iv.id AS id_item,
+        iv.produto_id,
         iv.quantidade,
         iv.preco_unitario,
         iv.desconto_volume,
         iv.valor_subtotal
       FROM vendas v
-      INNER JOIN itens_venda iv ON v.id_venda = iv.id_venda
-      WHERE v.id_venda = $1
+      INNER JOIN itens_venda iv ON v.id = iv.venda_id
+      WHERE v.id = $1
     `;
 
     const selectResult = await client.query(insertedSaleResponse, [saleId]);

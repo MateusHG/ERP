@@ -34,9 +34,9 @@ export async function openEditModal(id: number) {
   inputClienteId.value = String(sale.cliente_id || "");
 
   const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="edit-data-emissao"]')!;
-  const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="edit-tipo-pagamento]')!;
-  const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-financeiro]')!;
-  const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-comercial]')!;
+  const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="edit-tipo-pagamento"]')!;
+  const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-financeiro"]')!;
+  const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-comercial"]')!;
   const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="edit-status"]')!;
 
   inputDataEmissao.value = sale.data_emissao ? sale.data_emissao.split("T")[0] : "";

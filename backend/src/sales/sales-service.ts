@@ -37,10 +37,10 @@ export const getSaleByIdService = async (id: number) => {
 export const createSalesService = async (
   //Omitindo campos que são gerados automaticamente pelo banco de dados.
   sale: Omit<salesModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> & {
-  items: Omit<salesItemModel, 'id'  | 'valor_subtotal'>[]}
+  itens: Omit<salesItemModel, 'id'  | 'valor_subtotal'>[]}
 ) => {
   try {
-    if ( !sale.status || !sale.cliente_id || !sale.tipo_pagamento || !sale.items ) {
+    if ( !sale.status || !sale.cliente_id || !sale.tipo_pagamento || !sale.itens ) {
       return badRequest(
         'Campos obrigatórios estão ausentes: status da venda, cliente, tipo de pagamento ou itens. ')
     }
