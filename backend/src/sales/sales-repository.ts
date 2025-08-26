@@ -1,33 +1,47 @@
 import db from "../config/db"
-import { salesItemModel, salesModel } from "../models/sales-model"
+import { salesItemModel, salesModel } from "./sales-model"
 
-export const searchAllSales = async (): Promise<salesModel[]> => {
-  const result = await db.query(
-    `SELECT
-  v.id_venda AS id_venda,
-  v.data_emissao,
-  v.tipo_pagamento,
-  v.desconto_comercial,
-  v.desconto_financeiro,
-  v.valor_bruto,
-  v.valor_total,
-  v.status,
-  v.data_cadastro,
-  v.data_atualizacao,
-  v.id_cliente,
+export const searchAllSales = async (
+  filters: { id?: number, cliente_nome?: string, status?: string, data_emissao_inicio: string, data_emissao_final: string }
+): Promise<salesModel[]> => {
+  let query = `
+    SELECT v.*, c.nome_fantasia AS cliente_nome
+    FROM vendas v
+    JOIN clientes c ON v.cliente_id = c.id`
 
-  iv.id_venda AS id_venda,
-  iv.id_item,
-  iv.id_produto,
-  iv.quantidade,
-  iv.preco_unitario,
-  iv.desconto_volume,
-  iv.valor_subtotal
-FROM
-	vendas v
-INNER JOIN
-	itens_venda iv ON v.id_venda = iv.id_venda`);
+  const conditions: string[] = [];
+  const values: any[] = [];
 
+  if (filters.id) {
+    values.push(`${filters.id}%`);
+    conditions.push(`CAST(v.id AS TEXT) ILIKE $${values.length}`);
+  }
+
+  if (filters.cliente_nome) {
+    values.push(`%${filters.cliente_nome}%`);
+    conditions.push(`c.nome_fantasia ILIKE $${values.length}`);
+  }
+
+  if (filters.status) {
+    values.push(`${filters.status}`);
+    conditions.push(`v.status = $${values.length}`);
+  }
+
+  if (filters.data_emissao_inicio && filters.data_emissao_final) {
+    values.push(filters.data_emissao_inicio);
+    conditions.push(`v.data_emissao >= $${values.length}`);
+
+    values.push(filters.data_emissao_final);
+    conditions.push(`v.data_emissao <= $${values.length}`);
+  }
+
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join (" AND ");
+  }
+
+  query += ` ORDER BY id DESC`;
+
+  const result = await db.query(query, values);
   return result.rows;
 };
 
@@ -98,7 +112,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
 
     //Guarda os valores no array
     const saleValues = [
-      data.id_cliente,
+      data.cliente_id,
       data.data_emissao,
       data.tipo_pagamento,
       data.desconto_comercial,
@@ -127,7 +141,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
       for (const item of data.items) {
       await client.query(insertSaleItemQuery, [
         saleId,
-        item.id_produto,
+        item.produto_id,
         item.quantidade,
         item.preco_unitario,
         item.desconto_volume
@@ -195,10 +209,10 @@ export const deleteSaleById = async (id: number): Promise<boolean> => {
     await client.query('BEGIN');
 
     //DELETE primeiro na itens_venda por chave estrangeira (FK).
-    await client.query(`DELETE FROM itens_venda WHERE id_venda = $1`, [id]);
+    await client.query(`DELETE FROM itens_venda WHERE venda_id = $1`, [id]);
 
     //DELETE na tabela vendas.
-    const result = await client.query(`DELETE FROM vendas WHERE id_venda = $1`, [id]);
+    const result = await client.query(`DELETE FROM vendas WHERE id = $1`, [id]);
 
     await client.query('COMMIT');
     return result.rowCount > 0;
@@ -225,7 +239,7 @@ export const verifyClientId = async (id_cliente: number): Promise<salesModel | n
 
 export const verifySaleId = async (id: number): Promise<salesModel | null> => {
   const result = await db.query(
-    `SELECT * from vendas WHERE id_venda = $1 limit 1`,
+    `SELECT * FROM vendas WHERE id = $1 limit 1`,
     [id]
   );
 

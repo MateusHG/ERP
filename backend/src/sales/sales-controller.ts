@@ -2,7 +2,15 @@ import { Request, Response } from "express";
 import { createSalesService, deleteSaleByIdService, getAllSalesService, getSaleByIdService, updateSaleByIdService } from "../sales/sales-service";
 
 export const getSales = async (req: Request, res: Response) => {
-  const httpResponse = await getAllSalesService();
+  const filters = {
+    id: typeof req.query.id === 'string' ? Number(req.query.id): undefined,
+    cliente_nome: req.query.cliente_nome as string,
+    status: req.query.status as string,
+    data_emissao_inicio: req.query.data_emissao_inicio as string,
+    data_emissao_final: req.query.data_emissao_final as string,
+  };
+  
+  const httpResponse = await getAllSalesService(filters);
   res.status(httpResponse.statusCode).json(httpResponse.body);
 };
 

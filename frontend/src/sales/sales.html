@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Compras</title>
-  <link rel="stylesheet" href="./purchases-style.css">
+  <title>Vendas</title>
+  <link rel="stylesheet" href="./sales-styles.css">
 </head>
-<header class="purchases-header">
+<header class="sales-header">
   <!-- Esquerda: Logo + Título -->
   <div class="header-left">
     <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
@@ -41,10 +41,10 @@
   </div>
 </header>
   
-  <header class="purchases-header">
+  <header class="sales-header">
   <div class="left">
     <div>
-      <h1>Compras <img src="/erpicons/purchase.svg" alt="Produtos-Icone"><button id="btn-new-purchase" class="btn-new-purchase">+ Nova Compra</button></h1>
+      <h1>Vendas <img src="/erpicons/sales.svg" alt="Produtos-Icone"><button id="btn-new-sale" class="btn-new-sale">+ Nova Venda</button></h1>
       <div class="filter-date-period">
       <label for="initial-date">Período de:</label>
       <input type="date" id="initial-date" name="initial-date">
@@ -56,14 +56,14 @@
 
       <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
-      <input type="text" id="filtro-nome-fornecedor" placeholder="Buscar por Fornecedor...">
+      <input type="text" id="filtro-nome-cliente" placeholder="Buscar por Cliente...">
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
         <option value="">Todos</option>
         <option value="aberto">Em Aberto</option>
         <option value="aguardando">Aguardando Aprovação</option>
         <option value="aprovado">Aprovado</option>
-        <option value="recebido">Recebido</option>
+        <option value="despachado">Despachado</option>
         <option value="finalizado">Finalizado</option>
         <option value="cancelado">Cancelado</option>
       </select>
@@ -77,17 +77,17 @@
 </header>
 
   <main>
-      <!-- Modal: Nova Compra -->
-      <div id="new-purchase-modal" class="modal hidden">
+      <!-- Modal: Nova Venda -->
+      <div id="new-sale-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Nova Compra</h3>
-          <form id="new-purchase-form">
+          <h3>Nova Venda</h3>
+          <form id="new-sale-form">
         <div class="form-fields">
           <div class="form-group">
-            <label for="fornecedor-search">Fornecedor:</label>
-            <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
-            <input type="hidden" id="fornecedor-id" name="new-fornecedor-id" />
-            <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
+            <label for="cliente-search">Cliente:</label>
+            <input id="cliente-search" name="cliente" type="text"  placeholder="Digite para buscar clientes..." autocomplete="off" />
+            <input type="hidden" id="cliente-id" name="new-cliente-id" />
+            <ul id="cliente-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
@@ -156,7 +156,7 @@
           </div>
         </div>
 
-        <h4>Itens da Compra<button type="button" id="add-item-new-purchase-modal" class="add-item-btn">+ Adicionar</button></h4>
+        <h4>Itens da Venda<button type="button" id="add-item-new-sale-modal" class="add-item-btn">+ Adicionar</button></h4>
         <table id="items-table">
           <thead>
             <tr>
@@ -171,31 +171,31 @@
               <th>Ações</th>
             </tr>
           </thead>
-          <tbody id="items-body-new-purchase-modal">
+          <tbody id="items-body-new-sale-modal">
             <!-- Linhas serão injetadas aqui. -->
           </tbody>
         </table>
 
-        <div class="purchase-items-summary">
+        <div class="sale-items-summary">
           <div>Subtotal: <span id="new-subtotal-items"></span></div>
           <div>Descontos: <span id="new-total-items-discount"></span></div>
           <div><strong>Total: <span id="new-total-items-final"></span></strong></div>
         </div>
 
         <div class="modal-buttons">
-          <button type="submit" id="submit-new-purchase">Salvar</button>
-          <button type="button" id="cancel-new-purchase">Cancelar</button>
+          <button type="submit" id="submit-new-sale">Salvar</button>
+          <button type="button" id="cancel-new-sale">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-    <table id="purchase-table">
+    <table id="sale-table">
       <thead>
         <tr>
           <th>Data Emissão</th>
-          <th>ID Compra</th>
-          <th>Fornecedor</th>
+          <th>ID Venda</th>
+          <th>Cliente</th>
           <th>Tipo Pagamento</th>
           <th>Desconto Comercial</th>
           <th>Desconto Financeiro</th>
@@ -205,7 +205,7 @@
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="purchases-tbody">
+      <tbody id="sales-tbody">
       </tbody>
     </table>
   </main>
@@ -229,17 +229,17 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Compra -->
+  <!-- Modal: Editar Venda -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Compra</h3>
+      <h3>Editar Venda</h3>
       <form id="edit-form">
         <div class="form-fields">
           <div class="form-group">
-            <label for="fornecedor-search">Fornecedor:</label>
-            <input id="fornecedor-search" name="fornecedor" type="text"  placeholder="Digite para buscar fornecedores..." autocomplete="off" />
-            <input type="hidden" id="fornecedor-id" name="edit-fornecedor-id" />
-            <ul id="fornecedor-suggestions" class="autocomplete-list hidden"></ul>
+            <label for="cliente-search">Cliente:</label>
+            <input id="cliente-search" name="cliente" type="text"  placeholder="Digite para buscar clientes..." autocomplete="off" />
+            <input type="hidden" id="cliente-id" name="edit-cliente-id" />
+            <ul id="cliente-suggestions" class="autocomplete-list hidden"></ul>
           </div>
 
           <div class="form-group">
@@ -308,7 +308,7 @@
           </div>
         </div>
 
-        <h4>Itens da Compra<button type="button" id="add-item-edit-modal" class="add-item-btn">+ Adicionar</button></h4>
+        <h4>Itens da Venda<button type="button" id="add-item-edit-modal" class="add-item-btn">+ Adicionar</button></h4>
         <table id="items-table">
           <thead>
             <tr>
@@ -328,14 +328,14 @@
           </tbody>
         </table>
 
-        <div class="purchase-items-summary">
+        <div class="sale-items-summary">
           <div>Subtotal: <span id="edit-subtotal-items"></span></div>
           <div>Descontos: <span id="edit-total-items-discount"></span></div>
           <div><strong>Total: <span id="edit-total-items-final"></span></strong></div>
         </div>
 
         <div class="modal-buttons">
-          <button type="submit" id="submit-new-purchase">Salvar</button>
+          <button type="submit" id="submit-new-sale">Salvar</button>
           <button type="button" id="cancel-edit">Cancelar</button>
         </div>
       </form>

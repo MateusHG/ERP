@@ -2,9 +2,11 @@ import { salesItemModel, salesModel } from "../sales/sales-model";
 import * as salesRepository from "../sales/sales-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 
-export const getAllSalesService = async () => {
+export const getAllSalesService = async (
+  filters: { id?: number, cliente_nome?: string, status?: string, data_emissao_inicio: string, data_emissao_final: string }
+) => {
   try {
-    const sales = await salesRepository.searchAllSales();
+    const sales = await salesRepository.searchAllSales(filters);
     return ok(sales);
   
   } catch (err) {
@@ -38,12 +40,12 @@ export const createSalesService = async (
   items: Omit<salesItemModel, 'id'  | 'valor_subtotal'>[]}
 ) => {
   try {
-    if ( !sale.status || !sale.id_cliente || !sale.tipo_pagamento || !sale.items ) {
+    if ( !sale.status || !sale.cliente_id || !sale.tipo_pagamento || !sale.items ) {
       return badRequest(
         'Campos obrigatórios estão ausentes: status da venda, cliente, tipo de pagamento ou itens. ')
     }
 
-    const clientExists = await salesRepository.verifyClientId(sale.id_cliente);
+    const clientExists = await salesRepository.verifyClientId(sale.cliente_id);
     if (!clientExists) {
       return badRequest('Cliente informado não existe.')
     }
@@ -93,7 +95,7 @@ export const deleteSaleByIdService = async (id: number) => {
     }
 
     await salesRepository.deleteSaleById(id);
-    return ok('Venda deletada com sucesso.');
+    return ok({ message: 'Venda deletada com sucesso.' } );
   
     } catch (err) {
       console.error(err);

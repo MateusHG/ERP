@@ -88,7 +88,7 @@ export function setupItemRowEvents(
   btnSave.addEventListener("click", async () => {
     // Valida campos numéricos antes de salvar (evita números negativos)
     for (const input of numericInputs) {
-      const value =input.value.trim();
+      const value = input.value.trim();
 
       if (value === "") {
         await showMessage("Preencha todos os campos numéricos.");

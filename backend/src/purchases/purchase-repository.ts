@@ -1,7 +1,5 @@
 import db from "../config/db";
 import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
-import { getPurchaseById } from "./purchase-controller";
-import { getPurchaseByIdService } from "./purchase-service";
 
 export const searchAllPurchases = async (
   filters: { id?: number, fornecedor_nome?: string, status?: string,  data_emissao_inicio: string, data_emissao_final: string}

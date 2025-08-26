@@ -1,6 +1,7 @@
 export interface salesModel {
-  id_venda: number;
-  id_cliente: number; //FK
+  id: number;
+  cliente_id: number; //FK
+  cliente_nome: string,
   data_emissao: Date;
   tipo_pagamento: 'pix' | 'boleto' | 'cartao' | 'transferencia' | 'prazo';
   desconto_comercial?: number;   // acordos, promoções, contratos
@@ -14,11 +15,11 @@ export interface salesModel {
 }
 
 export interface salesItemModel {
-  id_item: number;
-  id_venda: number;         // FK
-  id_produto: number;
+  id: number;
+  venda_id: number;         // FK
+  produto_id: number;
   quantidade: number;
   preco_unitario: number;
   desconto_volume?: number;    // desconto por item por quantidade
-  valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
+  // valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
 }

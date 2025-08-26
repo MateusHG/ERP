@@ -84,7 +84,93 @@ export async function setupSupplierAutoComplete(
     }, 300);
   });
 }
+
+// --------------------------------------------------------------------------------------------------------------
      
+export async function setupCustomerAutoComplete(
+  input: HTMLInputElement,
+  hiddenInput: HTMLInputElement,
+  suggestionsList: HTMLUListElement,
+  initialCustomerName: string = ""
+) {
+  let selectedCustomerName = initialCustomerName;
+  let currentController: AbortController | null = null;
+
+  if (initialCustomerName && hiddenInput.value) {
+    selectedCustomerName = initialCustomerName;
+  }
+
+  async function loadCustomers(query: string) {
+    if (currentController) currentController.abort();
+    currentController = new AbortController();
+
+    try {
+      const res = await authorizedFetch(
+        `https://localhost:3000/api/clientes?nome_fantasia=${encodeURIComponent(query)}`,
+        { signal: currentController.signal }
+      );
+
+      const customers = await res.json();
+      suggestionsList.innerHTML = "";
+
+      customers.forEach((customer: any) => {
+        const li = document.createElement("li");
+        li.textContent = `${customer.nome_fantasia} (ID: ${customer.id})`;
+        li.classList.add("suggestion-item");
+
+        li.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          input.value = customer.nome_fantasia;
+          hiddenInput.value = String(customer.id); // ✅ ID salvo para backend
+          selectedCustomerName = customer.nome_fantasia;
+          suggestionsList.classList.add("hidden");
+        });
+
+        suggestionsList.appendChild(li);
+      });
+
+      suggestionsList.classList.toggle("hidden", customers.length === 0);
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.error("Erro ao buscar clientes:", err);
+      }
+      suggestionsList.classList.add("hidden");
+    }
+  }
+
+  input.addEventListener("input", () => {
+    const query = input.value.trim();
+
+    // Limpa o id sempre que o usuário digita manualmente
+    if (query !== selectedCustomerName) {
+      hiddenInput.value = "";
+    }
+    
+    if (query.length >= 2) {
+      loadCustomers(query);
+    } else {
+      suggestionsList.classList.add("hidden");
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target as Node) && !suggestionsList.contains(e.target as Node)) {
+      suggestionsList.classList.add("hidden");
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => {
+      // Se o valor do input não corresponder ao fornecedor selecionado, limpa o id
+      if (input.value !== selectedCustomerName) {
+        hiddenInput.value = "";
+        selectedCustomerName = "";
+        suggestionsList.classList.add("hidden");
+      }
+    }, 300);
+  });
+}
+
 //Autocomplete para itens na compra.
 export function attachItemAutoComplete(input: HTMLInputElement, onSelect: (item: any) => void) {
   let suggestionBox: HTMLUListElement | null = null;
