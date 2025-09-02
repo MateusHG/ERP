@@ -33,7 +33,7 @@ export function updateSaleItemSummary(container: HTMLElement, prefix: "new" | "e
     const lineTotal = Math.max(0, gross - lineDiscount);
 
     subtotal += gross;
-    totalDiscounts = lineDiscount,
+    totalDiscounts += lineDiscount;
     totalItemsWithDiscount += lineTotal;
 
     const discountCell = row.querySelector(".item-line-discount") as HTMLElement;

@@ -10,6 +10,7 @@ import salesRouter from "./sales/sales-routes";
 import saleItemRouter from "./sales/sale-item-routes";
 import authRouter from "./auth/auth-routes";
 import dashboardsRoutes from "./dashboards/dashboard-routes";
+import inventoryRouter from "./inventory/inventory-routes";
 
 function createApp() {
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api/compras", purchaseRouter);
 app.use("/api/compra-itens", purchaseItemRouter);
 app.use("/api/vendas", salesRouter);
 app.use("/api/venda-itens", saleItemRouter);
+app.use("/api/estoque", inventoryRouter);
 
   return app;
 }

@@ -1,4 +1,4 @@
-import { formatCurrency } from "../utils/formatters";
+import { formatCurrency, makeCurrencyCellInput } from "../utils/formatters";
 import { attachItemAutoComplete } from "../utils/autocomplete";
 import { setupItemRowEvents } from "./sale-items-controller";
 
@@ -51,13 +51,13 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   inputQuantity.min = "1";
   tr.appendChild(tdQuantity);
 
-  const { td: tdUnitPrice, input: inputUnitPrice } = makeCellInput(
+  const { td: tdUnitPrice, input: inputUnitPrice } = makeCurrencyCellInput(
     "item-unit-price",
     item?.preco_unitario != null ? item.preco_unitario : 0
   );
   tr.appendChild(tdUnitPrice);
 
-  const { td: tdDiscount, input: inputDiscount} = makeCellInput(
+  const { td: tdDiscount, input: inputDiscount} = makeCurrencyCellInput(
     "item-discount-volume",
     item?.desconto_volume != null ? item.desconto_volume : 0
   );

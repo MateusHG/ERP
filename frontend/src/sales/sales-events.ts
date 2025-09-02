@@ -2,6 +2,8 @@ import { showConfirm, showMessage } from "../utils/messages";
 import { openNewSaleModal } from "./new-sale-modal";
 import { openEditModal } from "./sale-edit-modal";
 import { addItemRowTo } from "./sale-item-dom";
+import { updateSaleItemSummary } from "./sale-item-summary";
+import { updateTotalSaleDisplay } from "./sale-summary";
 import { getFilterValues, renderSalesList } from "./sales-dom";
 import { deleteSaleAPI, loadSalesAPI, searchSalesWithFilterAPI } from "./sales-service";
 
@@ -67,3 +69,44 @@ export async function handleNewSaleItemClick(button: HTMLElement) {
 
   addItemRowTo(tbody, undefined, prefix, false);
 };
+
+export function setupSaleEvents() {
+  document.removeEventListener("input", handleInputDelegation);
+  document.addEventListener("input", handleInputDelegation);
+
+  function handleInputDelegation(e: Event) {
+    const target = e.target as HTMLInputElement;
+    if (
+      target.name === "item-quantity" ||
+      target.name === "item-unit-price" ||
+      target.name === "item-discount-volume"
+    ) {
+      const tbody = target.closest("tbody");
+      if (tbody) {
+        const prefix = tbody.closest(".modal")?.id === "edit-modal" ? "edit" : "new";
+        updateSaleItemSummary(tbody, prefix);
+      }
+    }
+  }
+
+  [["new-desconto-financeiro", "new"],
+   ["edit-desconto-financeiro", "edit"],
+   ["new-desconto-comercial", "new"],
+   ["edit-desconto-comercial", "edit"],
+  ].forEach(([id, prefix]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", () => {
+        document.dispatchEvent(new CustomEvent("itemsUpdated", {detail: { prefix }}));
+        updateTotalSaleDisplay(prefix as "new" | "edit");
+      });
+    }
+  });
+
+  document.addEventListener("itemsUpdated", (e: any) => {
+    const prefix = e.detail?.prefix || "new";
+    updateTotalSaleDisplay(prefix);
+  });
+}
+
+setupSaleEvents();

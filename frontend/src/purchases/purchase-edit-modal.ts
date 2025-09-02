@@ -36,21 +36,17 @@ export async function openEditModal(id: number) {
 
   const inputDataEmissao = modal.querySelector<HTMLInputElement>('input[name="edit-data-emissao"]')!;
   const inputTipoPagamento = modal.querySelector<HTMLSelectElement>('select[name="edit-tipo-pagamento"]')!;
-  const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="desconto-financeiro"]')!;
-  const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="desconto-comercial"]')!;
+  const inputDescontoFinanceiro = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-financeiro"]')!;
+  const inputDescontoComercial = modal.querySelector<HTMLInputElement>('input[name="edit-desconto-comercial"]')!;
   const inputStatus = modal.querySelector<HTMLSelectElement>('select[name="edit-status"]')!;
   
 
   inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
   
-  inputDescontoFinanceiro.value = (Number(purchase.desconto_financeiro) || 0)
-  .toFixed(2)
-  .replace(".", ",");
+  inputDescontoFinanceiro.value = (Number(purchase.desconto_financeiro) || 0).toFixed(2);
 
-  inputDescontoComercial.value = (Number(purchase.desconto_comercial) || 0)
-  .toFixed(2)
-  .replace(".", ",");
+  inputDescontoComercial.value = (Number(purchase.desconto_comercial) || 0).toFixed(2);
 
   inputStatus.value = purchase.status || "";
 
@@ -108,8 +104,11 @@ form.addEventListener("submit", async (event) => {
   const updatedPurchaseData: Partial<any> = {};
 
   // Helpers
-  const parseString = (value: FormDataEntryValue | null) => value && value.toString().trim() !== "" ? value.toString() : null;
-  const parseNumber = (value: FormDataEntryValue | null) => value ? Number(value) : null;
+  const parseString = (value: FormDataEntryValue | null) => 
+    value && value.toString().trim() !== "" ? value.toString() : null;
+
+  const parseNumber = (value: FormDataEntryValue | null) => 
+    value ? Number(value.toString().replace(",", ".")) : null;
     
   //Cabeçalho: compara com originalFormData, pra depois enviar no corpo da requisição só o que foi alterado, evita ficar reenviando todas as informações toda vez.
   const fornecedor_id = parseNumber(formData.get("edit-fornecedor-id"));

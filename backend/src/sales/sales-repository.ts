@@ -163,17 +163,125 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
 };
 
 export const updateSaleById = async (id: number, fieldsToUpdate: Partial<salesModel>) => {
-  const keys = Object.keys(fieldsToUpdate);
-  const values = Object.values(fieldsToUpdate);
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
 
-  if (keys.length === 0) return null;
+    const { itens, ...saleFields } = fieldsToUpdate;
 
-  const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
-  const query = `UPDATE vendas SET ${setClause} WHERE id_venda = $${keys.length + 1} RETURNING *`;
+    const keys = Object.keys(saleFields);
+    const values = Object.values(saleFields);
 
-  const result = await db.query(query, [...values, id]);
-  return result.rows[0];
+    if (keys.length > 0) {
+      const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+      const query = `UPDATE vendas SET ${setClause} WHERE id = $${keys.length + 1}`;
+      console.log("Query:", query);
+      console.log("Values:", values);
+      await client.query(query, [...values, id]);
+    }
+
+    if (itens && Array.isArray(itens)) {
+      await updateSaleItems(client, id, itens);
+    }
+
+    await client.query("COMMIT");
+
+    return getSaleByIdQuery(id);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+// Atualiza os itens da venda
+const updateSaleItems = async (client: any, saleId: number, items: any[]) => {
+  const currentItems = await client.query(
+    `SELECT id FROM itens_venda WHERE venda_id = $1`,
+    [saleId]
+  );
+  const currentItemIds = currentItems.rows.map((row: {id: number}) => row.id);
+
+  const itemsToUpdate = items.filter((item) => item.item_id !== undefined && item.item_id !== null);
+  const itemsToCreate = items.filter((item) => !item.item_id);
+  const itemsToDelete = currentItemIds.filter(
+    (id: number) => !items.some((item) => item.item_id === id)
+  );
+
+  // Delete
+  if (itemsToDelete.length > 0) {
+    await client.query(
+      `DELETE FROM itens_venda WHERE id = ANY($1) AND venda_id = $2`,
+      [itemsToDelete, saleId]
+    );
+  }
+  
+  // Atualizar
+  if (itemsToUpdate.length > 0) {
+    await Promise.all(
+      itemsToUpdate.map((item) =>
+        client.query(
+          `UPDATE itens_venda
+           SET produto_id = $1, quantidade = $2, preco_unitario = $3, desconto_volume = $4
+           WHERE id = $5 AND venda_id = $6`,
+          [
+            item.produto_id,
+            item.quantidade,
+            item.preco_unitario,
+            item.desconto_volume || 0,
+            item.item_id,
+            saleId,
+          ]
+        )
+      )
+    );
+  }
+
+  // Criar itens
+  if (itemsToCreate.length > 0) {
+    await Promise.all(
+      itemsToCreate.map((item) => 
+        client.query(
+          `INSERT INTO itens_venda (
+          venda_id, produto_id, quantidade, preco_unitario, desconto_volume
+          ) VALUES ($1, $2, $3, $4, $5)`,
+          [
+            saleId,
+            item.produto_id,
+            item.quantidade,
+            item.preco_unitario,
+            item.desconto_volume || 0,
+          ]
+        )
+      )
+    );
+  }
 };
+
+// Buscar venda com itens
+export async function getSaleByIdQuery(id: number) {
+  const saleResult = await db.query(
+    `SELECT * FROM vendas WHERE id = $1`,
+    [id]
+  );
+
+  if (saleResult.rows.length === 0) return null;
+
+  const itemsResult = await db.query(
+    `SELECT vi.*, p.codigo as produto_codigo, p.nome as produto_nome
+     FROM itens_venda vi
+     LEFT JOIN produtos p ON vi.produto_id = p.id
+     WHERE vi.venda_id = $1`,
+     [id]
+  );
+
+  return {
+    ...saleResult.rows[0],
+    itens: itemsResult.rows,
+  };
+};
+
 
 export const deleteSaleById = async (id: number): Promise<boolean> => {
   const client = await db.connect()

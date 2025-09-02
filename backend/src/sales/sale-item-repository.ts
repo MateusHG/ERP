@@ -2,10 +2,22 @@ import db from "../config/db";
 import { salesItemModel } from "../sales/sales-model";
 
 export const searchAllSaleItems = async (saleId: number): Promise<salesItemModel[]> => {
-  const result = await db.query(
-    `SELECT * from itens_venda WHERE id_venda = $1`, [saleId]
-  );
+  const query = `
+  SELECT iv.id,
+         iv.venda_id AS sale_id,
+         iv.produto_id,
+         p.codigo AS produto_codigo,
+         p.nome AS produto_nome,
+         iv.quantidade,
+         iv.preco_unitario,
+         iv.desconto_volume,
+         iv.valor_subtotal
+  FROM itens_venda iv
+  JOIN produtos p ON p.id = iv.produto_id
+  WHERE iv.venda_id = $1
+  ORDER BY iv.id`;
 
+  const result = await db.query(query, [saleId]);
   return result.rows;
 };
 
@@ -14,7 +26,7 @@ export const insertSaleItem = async (
   saleItem: Omit<salesItemModel, 'id' | 'sale_id' | 'valor_subtotal'>
 ): Promise<salesItemModel> => {
   const {
-    id_produto,
+    produto_id,
     quantidade,
     preco_unitario,
     desconto_volume
@@ -22,15 +34,15 @@ export const insertSaleItem = async (
 
   const result = await db.query(
     `INSERT INTO itens_venda (
-    id_venda,
-    id_produto,
+    venda_id,
+    produto_id,
     quantidade,
     preco_unitario,
     desconto_volume
     ) VALUES (
      $1, $2, $3, $4, $5
     ) RETURNING *`,
-     [saleId, id_produto, quantidade, preco_unitario, desconto_volume]
+     [saleId, produto_id, quantidade, preco_unitario, desconto_volume]
   );
 
   return result.rows[0];
@@ -43,7 +55,7 @@ export const updateSaleItem = async (
 
 ): Promise<salesItemModel | null > => {
 
-const allowedFields = ['id_produto', 'quantidade', 'preco_unitario', 'desconto_volume'];
+const allowedFields = ['produto_id', 'quantidade', 'preco_unitario', 'desconto_volume'];
 const keys = Object.keys(fieldsToUpdate).filter(key => allowedFields.includes(key));
 const values = keys.map(key => fieldsToUpdate[key as keyof typeof fieldsToUpdate]);
 
@@ -54,7 +66,7 @@ const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
 const query = `
   UPDATE itens_venda
   set ${setClause}
-  WHERE id_item = $${keys.length + 1} AND id_venda = $${keys.length + 2}
+  WHERE id = $${keys.length + 1} AND venda_id = $${keys.length + 2}
   RETURNING *;
   `;
 
@@ -63,19 +75,19 @@ const query = `
 }; 
 
 export const deleteSaleItem = async (saleId: number, saleItemId: number): Promise<boolean> => {
-  const result = await db.query(`DELETE from itens_venda WHERE id_venda = $1 and id_item = $2`, [saleId, saleItemId])
+  const result = await db.query(`DELETE from itens_venda WHERE venda_id = $1 and id = $2`, [saleId, saleItemId])
   return result.rowCount > 0;
 };
 
 
 //Verificações
 export const verifySale = async (saleId: number): Promise<boolean> => {
-  const result = await db.query(`SELECT * FROM vendas WHERE id_venda = $1 limit 1`, [saleId]);
+  const result = await db.query(`SELECT * FROM vendas WHERE id = $1 limit 1`, [saleId]);
   return result.rows[0] || null;
 };
 
 export const verifySaleItem = async (saleItemId: number): Promise<boolean> => {
-  const result = await db.query(`SELECT * FROM itens_venda WHERE id_item = $1 limit 1`, [saleItemId]);
+  const result = await db.query(`SELECT * FROM itens_venda WHERE id = $1 limit 1`, [saleItemId]);
   return result.rows[0] || null;
 };
 

@@ -42,13 +42,8 @@ export async function openEditModal(id: number) {
   inputDataEmissao.value = sale.data_emissao ? sale.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = sale.tipo_pagamento || "";
 
-  inputDescontoFinanceiro.value = (Number(sale.desconto_financeiro) || 0)
-  .toFixed(2)
-  .replace(".", ",");
-
-  inputDescontoComercial.value = (Number(sale.desconto_comercial) || 0)
-  .toFixed(2)
-  .replace(".", ",");
+  inputDescontoFinanceiro.value = (Number(sale.desconto_financeiro) || 0).toFixed(2);
+  inputDescontoComercial.value = (Number(sale.desconto_comercial) || 0).toFixed(2);
 
   inputStatus.value = sale.status || "";
 
@@ -95,7 +90,7 @@ form.addEventListener("submit", async (event) => {
   const itemsBody = modal.querySelector('#items-body-edit-modal') as HTMLElement;
   const itemRows = Array.from(itemsBody.querySelectorAll('tr'));
 
-  const isEditing = itemRows.some(row => row.dataset.stauts !== "salvo");
+  const isEditing = itemRows.some(row => row.dataset.status !== "salvo");
   if (isEditing) {
     await showMessage("Obrigatório salvar todos os itens antes de salvar a venda.");
     return;
@@ -107,8 +102,11 @@ form.addEventListener("submit", async (event) => {
   const updatedSaleData: Partial<any> = {};
 
   // Helpers
-  const parseString = (value: FormDataEntryValue | null) => value && value.toString().trim() !== "" ? value.toString() : null;
-  const parseNumber = (value: FormDataEntryValue | null) => value ? Number(value) : null;
+  const parseString = (value: FormDataEntryValue | null) => 
+    value && value.toString().trim() !== "" ? value.toString() : null;
+
+  const parseNumber = (value: FormDataEntryValue | null) => 
+    value ? Number(value.toString().replace(",", ".")) : null;
 
   // Cabeçalho: compara com originalFormData, para depois enviar no corpo da requisição só o que foi alterado, evita reenviar todas as informações toda vez.
   const cliente_id = parseNumber(formData.get("edit-cliente-id"));
