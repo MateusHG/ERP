@@ -11,9 +11,9 @@ export const getGeneralDashboard = async (data_inicial: string, data_final: stri
       (SELECT SUM(valor_total) FROM compras WHERE data_emissao BETWEEN $1 and $2 AND status = 'finalizado') AS total_compras_valores,
       (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'finalizado') AS total_compras_pendentes,
 
-      (SELECT COUNT(*) FROM produtos WHERE estoque < estoque_minimo) AS produtos_estoque_baixo,
-      (SELECT COUNT(*) FROM produtos WHERE estoque BETWEEN estoque_minimo AND estoque_maximo) AS produtos_estoque_medio,
-      (SELECT COUNT(*) FROM produtos WHERE estoque > estoque_maximo) AS produtos_estoque_alto,
+      (SELECT COUNT(*) AS produtos_estoque_baixo FROM produtos p INNER JOIN estoque_saldo es ON p.id = es.produto_id WHERE es.quantidade < p.estoque_minimo),
+      (SELECT COUNT(*) AS produtos_estoque_medio FROM produtos p INNER JOIN estoque_saldo es ON p.id = es.produto_id WHERE es.quantidade BETWEEN p.estoque_minimo AND p.estoque_maximo),
+      (SELECT COUNT(*) AS produtos_estoque_alto FROM produtos p INNER JOIN estoque_saldo es ON p.id = es.produto_id WHERE es.quantidade > p.estoque_maximo),
 
       (SELECT COUNT(*) FROM fornecedores WHERE status = 'Ativo') AS fornecedores_ativos,
       (SELECT COUNT(*) FROM fornecedores WHERE status = 'Inativo') AS fornecedores_inativos,

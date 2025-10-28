@@ -61,14 +61,12 @@ export const updateProductByIdService = async (id: number, data: Partial<product
     }
 
     // Atribui 0 se undefined ou null (valor padrão)
-    data.estoque = data.estoque ?? 0;
     data.estoque_minimo = data.estoque_minimo ?? 0;
     data.estoque_maximo = data.estoque_maximo ?? 0;
 
     //Garante que valores negativos não sejam enviados.
     if (
       (typeof data.estoque_minimo === "number" && data.estoque_minimo < 0) ||
-      (typeof data.estoque === "number" && data.estoque < 0) ||
       (typeof data.estoque_maximo === "number" && data.estoque_maximo < 0)
     ) {
       return badRequest("Valores negativos não são permitidos.");

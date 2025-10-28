@@ -8,16 +8,13 @@ export interface inventoryListModel {
   estoque_atual: number,
   preco_medio_compra: string,
   preco_medio_venda: string
-}
+};
 
-export interface InventoryMovementModel {
-  id: number;
-  produto_id: number;
-  tipo: "Entrada" | "Saída";
-  quantidade: number;
-  origem: string;
-  referencia_id: number;
-  usuario_id: number;
-  usuario_nome: string,
-  created_at: Date;
+export interface inventoryMovementsModel {
+  data: string,
+  tipo_mov: string,
+  origem: string,
+  quantidade: number,
+  valor_un: string,
+  user: string
 };

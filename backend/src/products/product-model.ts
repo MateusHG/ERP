@@ -4,7 +4,6 @@ export interface productModel {
   nome: string;
   descricao: string;
   preco: number;
-  estoque: number;
   categoria: string;
   status: string;
   estoque_minimo: number;

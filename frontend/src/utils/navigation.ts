@@ -8,7 +8,8 @@ export async function initNavigation() {
     'btn-suppliers': '/suppliers/suppliers.html',
     'btn-purchases': '/purchases/purchases.html',
     'btn-customers': '/customers/customers.html',
-    'btn-sales': '/sales/sales.html'
+    'btn-sales': '/sales/sales.html',
+    'btn-inventory': '/inventory/inventory.html'
   };
 
   Object.entries(routes).forEach(([btnId, path]) => {

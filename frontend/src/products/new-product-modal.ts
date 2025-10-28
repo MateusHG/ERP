@@ -21,7 +21,6 @@ export function openNewProductModal() {
 
   // Valores padrão já definidos
   (form.elements.namedItem("status") as HTMLInputElement).value = "Ativo";
-  (form.elements.namedItem("estoque") as HTMLInputElement).value = "0";
   (form.elements.namedItem("estoque_min") as HTMLInputElement).value = "0";
   (form.elements.namedItem("estoque_max") as HTMLInputElement).value = "0";
 
@@ -42,7 +41,6 @@ export function openNewProductModal() {
       nome: (form.elements.namedItem("nome") as HTMLInputElement).value,
       descricao: (form.elements.namedItem("descricao") as HTMLInputElement).value,
       preco: parseFloat((form.elements.namedItem("preco") as HTMLInputElement).value),
-      estoque: parseInt((form.elements.namedItem("estoque") as HTMLInputElement).value),
       categoria: (form.elements.namedItem("categoria") as HTMLInputElement).value,
       status: (form.elements.namedItem("status") as HTMLSelectElement).value,
       estoque_minimo: parseInt((form.elements.namedItem("estoque_min") as HTMLInputElement).value),

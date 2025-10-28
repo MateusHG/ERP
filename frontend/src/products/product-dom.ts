@@ -31,7 +31,6 @@ export function renderProductsList(products: productModel[]): void {
     tr.appendChild(textCell(product.nome));
     tr.appendChild(textCell(product.descricao));
     tr.appendChild(textCell(product.preco));
-    tr.appendChild(textCell(product.estoque));
     tr.appendChild(textCell(product.categoria));
     tr.appendChild(textCell(product.status));
     tr.appendChild(textCell(product.estoque_minimo));

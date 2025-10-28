@@ -47,13 +47,13 @@ export const searchProductsById = async (id: number): Promise<productModel | nul
 };
 
 export const insertProduct = async (product: Omit<productModel, 'id' | 'data_cadastro' | 'data_atualizacao'>): Promise<productModel> => {
-  const {codigo, nome, descricao, preco, estoque, categoria, status, estoque_minimo, estoque_maximo} = product;
+  const {codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo} = product;
 
   const result = await db.query(
-  `INSERT INTO produtos (codigo, nome, descricao, preco, estoque, categoria, status, estoque_minimo, estoque_maximo)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  `INSERT INTO produtos (codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8 )
    RETURNING *`,
-  [codigo, nome, descricao, preco, estoque, categoria, status, estoque_minimo, estoque_maximo]
+  [codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo]
 );
 
 return result.rows[0];

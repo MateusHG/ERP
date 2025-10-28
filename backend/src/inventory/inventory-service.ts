@@ -2,6 +2,17 @@ import * as inventoryRepository from "../inventory/inventory-repository";
 import { badRequest, internalServerError, ok } from "../utils/http-helper";
 import { InventoryMovementModel } from "./inventory-model";
 
+export const listInventoryService = async() => {
+  try {
+    const inventoryList = await inventoryRepository.listInventoryItems();
+    return ok(inventoryList);
+  
+  } catch (err) {
+    console.error(err);
+    return internalServerError('Erro ao listar estoque.')
+  }
+};
+
 export const registerMovementService = async (mov: InventoryMovementModel) => {
   try {
 

@@ -4,6 +4,25 @@ export function formatData(dataStr: string): string {
   return data.toLocaleDateString("pt-BR");
 };
 
+// Formatação de Data + Hora
+export function formatDataAndTime(dataStr: string): string {
+  if (!dataStr) return "-";
+
+  const data = new Date(dataStr.replace(" ", "T"));
+
+  if (isNaN(data.getTime())) return "-";
+
+  const day = String(data.getDate()).padStart(2, "0");
+  const month = String(data.getMonth() + 1).padStart(2, "0");
+  const year = data.getFullYear();
+
+  const hours = String(data.getHours()).padStart(2, "0");
+  const minutes = String(data.getMinutes()).padStart(2, "0");
+  const seconds = String(data.getSeconds()).padStart(2, "0");
+
+  return `${day}/${month}/${year} às ${hours}:${minutes}:${seconds}`;
+}
+
 export function getCurrentMonthDateRange(): { start: string, end: string } {
   // Gera datas padrão para o mês atual
   const today = new Date();

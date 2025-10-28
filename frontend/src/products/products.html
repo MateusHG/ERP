@@ -21,9 +21,9 @@
     <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
     <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
     <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button id="btn-btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button id="btn-btn-purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button id="btn-btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+    <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+    <button id="btn-purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+    <button id="btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
     <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
     <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
     <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
@@ -91,11 +91,6 @@
               </div>
 
               <div class="form-group">
-                <label for="new-estoque">Estoque:</label>
-                <input type="number" name="estoque" id="new-estoque" min="0" required />
-              </div>
-
-              <div class="form-group">
                 <label for="new-categoria">Categoria:</label>
                 <input type="text" name="categoria" id="new-categoria" minlength="1" maxlength="50" required />
               </div>
@@ -136,7 +131,6 @@
           <th>Nome</th>
           <th>Descrição</th>
           <th>Preço</th>
-          <th>Estoque</th>
           <th>Categoria</th>
           <th>Status</th>
           <th>Estoque Mín</th>
@@ -200,11 +194,6 @@
           <div class="form-group">
             <label for="edit-preco">Preço:</label>
             <input type="number" name="preco" id="edit-preco" required min="0" step="0.01" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-estoque">Estoque:</label>
-            <input type="number" name="estoque" id="edit-estoque" required min="0" />
           </div>
 
           <div class="form-group">

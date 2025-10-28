@@ -1,5 +1,21 @@
-import { InventoryMovementModel } from "./inventory-model";
+import { inventoryListModel, InventoryMovementModel } from "./inventory-model";
 import db  from "../config/db";
+
+export const listInventoryItems = async(): Promise<inventoryListModel[]> => {
+  const result = await db.query(`
+   SELECT p.id,
+	   p.codigo,
+	   p.nome AS produto_nome,
+	   p.categoria,
+	   p.estoque_minimo,
+	   p.estoque_maximo,
+	   es.quantidade AS estoque_atual
+FROM produtos p
+INNER JOIN estoque_saldo es
+	ON p.id = es.produto_id`)
+
+  return result.rows;
+}
 
 export async function registerMovement(mov: InventoryMovementModel) {
   const client = await db.connect();
@@ -15,7 +31,7 @@ export async function registerMovement(mov: InventoryMovementModel) {
     );
 
     const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
-    const fator = mov.tipo === "saida" ? -1 : 1;
+    const fator = mov.tipo === "Saída" ? -1 : 1;
     const novoSaldo = saldoAtual + quantidade * fator;
 
     if (novoSaldo < 0) {
@@ -34,7 +50,7 @@ export async function registerMovement(mov: InventoryMovementModel) {
         quantidade,
         mov.origem,
         mov.referencia_id,
-        mov.usuario_id,
+        mov.usuario_id
       ]
     );
 
@@ -68,8 +84,23 @@ export async function getBalance(produto_id: number) {
 
 export async function listMovements(produto_id: number) {
   const result = await db.query(
-    `SELECT * FROM movimentacoes_estoque WHERE produto_id = $1 ORDER BY created_at DESC`,
+    `
+    SELECT 
+      m.id,
+      m.produto_id,
+      m.tipo,
+      m.quantidade,
+      m.origem,
+      m.referencia_id,
+      m.usuario_id,
+      u.username AS usuario,
+      m.created_at
+    FROM movimentacoes_estoque m
+    INNER JOIN users u ON u.id = m.usuario_id
+    WHERE m.produto_id = $1
+    ORDER BY m.created_at DESC
+    `,
     [produto_id]
   );
   return result.rows;
-}
+};
