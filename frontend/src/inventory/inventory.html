@@ -48,13 +48,21 @@
 
       <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
-      <input type="text" id="filtro-produto" placeholder="Buscar por Produto...">
+      <input type="text" id="filtro-codigo" placeholder="Buscar por Código...">
+      <input type="text" id="filtro-nome" placeholder="Buscar por Nome...">
       <input type="text" id="filtro-categoria" placeholder="Buscar por Categoria...">
       <select id="filtro-status">
-        <option value="" disabled selected>Buscar por status...</option>
+        <option value="" disabled selected>Buscar por Status...</option>
         <option value="">Todos</option>
-        <option value="ativo">Ativo</option>
-        <option value="inativo">Inativo</option>
+        <option value="Ativo">Ativo</option>
+        <option value="Inativo">Inativo</option>
+      </select>
+      <select id="filtro-saldo">
+        <option value="" disabled selected>Buscar por Saldo...</option>
+        <option value="">Todos</option>
+        <option value="baixo">Baixo</option>
+        <option value="medio">Médio</option>
+        <option value="alto">Alto</option>
       </select>
     </div>
     </div>
@@ -142,6 +150,7 @@
           <th>Estoque Mínimo</th>
           <th>Estoque Máximo</th>
           <th>Estoque Atual</th>
+          <th>Status</th>
           <th>Preço Médio Compra</th>
           <th>Preço Médio Venda</th>
           <th>Ações</th>
@@ -286,5 +295,6 @@
   </div>
 
   <script type="module" src="./script.ts"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </body>
 </html>

@@ -1,22 +1,117 @@
 import { inventoryListModel, InventoryMovementModel } from "./inventory-model";
 import db  from "../config/db";
 
-export const listInventoryItems = async(): Promise<inventoryListModel[]> => {
-  const result = await db.query(`
-   SELECT p.id,
+export const listInventoryItems = async(filters: { 
+  id?: number, 
+  codigo?: string, 
+  nome?: string, 
+  categoria?: string, 
+  status?: string, 
+  saldo?: string
+}): Promise<inventoryListModel[]> => { 
+  
+  // Base da query
+  let query = `
+     SELECT p.id,
 	   p.codigo,
 	   p.nome AS produto_nome,
 	   p.categoria,
 	   p.estoque_minimo,
 	   p.estoque_maximo,
-	   es.quantidade AS estoque_atual
-FROM produtos p
-INNER JOIN estoque_saldo es
-	ON p.id = es.produto_id`)
+	   COALESCE(es.quantidade, 0) AS estoque_atual,
 
-  return result.rows;
+
+     -- Cálculo de preço médio de compra ponderado.
+
+     COALESCE(SUM(CASE
+        WHEN m.tipo IN('entrada') AND m.preco_unitario IS NOT NULL THEN m.quantidade * m.preco_unitario
+        ELSE 0 
+     END) / NULLIF(SUM(CASE
+        WHEN m.tipo IN ('entrada') AND m.preco_unitario IS NOT NULL THEN m.quantidade
+        ELSE 0
+     END), 0), 0) AS preco_medio_compra,
+
+
+     -- Preço médio de venda ponderado.
+    COALESCE(
+    SUM(CASE
+      WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL
+      THEN m.quantidade * m.preco_unitario
+      ELSE 0
+      END) / NULLIF(SUM(CASE
+        WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL
+        THEN m.quantidade
+        ELSE 0
+      END), 0),
+      0) AS preco_medio_venda
+
+FROM produtos p
+LEFT JOIN estoque_saldo es ON p.id = es.produto_id
+LEFT JOIN movimentacoes_estoque m ON p.id = m.produto_id
+`;
+
+// Array para condições e valores (fitros).
+const conditions: string[] = [];
+const values: any[] = [];
+let index = 1;
+
+if (filters.id) {
+  conditions.push(`CAST(p.id AS TEXT) ILIKE $${index++}`);
+  values.push(`${filters.id}%`);
 }
 
+if (filters.codigo) {
+  conditions.push(`p.codigo ILIKE $${index++}`);
+  values.push(`%${filters.codigo}%`);
+}
+
+if (filters.nome) {
+  conditions.push(`p.nome ILIKE $${index++}`);
+  values.push(`%${filters.nome}%`);
+}
+
+if (filters.categoria) {
+  conditions.push(`p.categoria ILIKE $${index++}`);
+  values.push(`%${filters.categoria}%`);
+}
+
+if (filters.status) {
+  conditions.push(`p.status = $${index++}`);
+  values.push(filters.status);
+}
+
+if (filters.saldo) {
+  // Status de saldo, colunas: estoque_minimo, estoque_maximo, quantidade.
+  if (filters.saldo === "baixo") {
+    conditions.push(`COALESCE(es.quantidade, 0) < p.estoque_minimo`);
+  
+  } else if (filters.saldo === "medio") {
+    conditions.push(`COALESCE(es.quantidade, 0) BETWEEN p.estoque_minimo AND p.estoque_maximo`);
+  
+  } else if (filters.saldo === "alto") {
+    conditions.push(`COALESCE(es.quantidade, 0) > p.estoque_maximo`);
+  }
+}
+
+if (conditions.length > 0) {
+  query += ` WHERE ` + conditions.join(" AND ");
+}
+
+query += `
+    GROUP BY 
+      p.id, p.codigo, p.nome, p.categoria, 
+      p.estoque_minimo, p.estoque_maximo, es.quantidade
+    ORDER BY p.id;
+  `;
+
+  const result = await db.query(query, values);
+  return result.rows;
+};
+
+// ***************************************************************************************** //
+
+// Registra a movimentação no estoque.
+//------------------------------------
 export async function registerMovement(mov: InventoryMovementModel) {
   const client = await db.connect();
   try {
@@ -31,7 +126,7 @@ export async function registerMovement(mov: InventoryMovementModel) {
     );
 
     const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
-    const fator = mov.tipo === "Saída" ? -1 : 1;
+    const fator = mov.tipo === "saida" ? -1 : 1;
     const novoSaldo = saldoAtual + quantidade * fator;
 
     if (novoSaldo < 0) {
@@ -42,15 +137,17 @@ export async function registerMovement(mov: InventoryMovementModel) {
     // Insert no log de movimentações
     const result = await client.query(
       `INSERT INTO movimentacoes_estoque
-       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       RETURNING *`,
       [
         mov.produto_id,
         mov.tipo,
         quantidade,
         mov.origem,
         mov.referencia_id,
-        mov.usuario_id
+        mov.usuario_id,
+        mov.preco_unitario ?? null,
       ]
     );
 
@@ -74,6 +171,10 @@ export async function registerMovement(mov: InventoryMovementModel) {
   }
 };
 
+// *********************************************************************** //
+
+// Consulta saldo dos produtos
+//
 export async function getBalance(produto_id: number) {
   const result = await db.query(
     `SELECT * FROM estoque_saldo WHERE produto_id = $1`,

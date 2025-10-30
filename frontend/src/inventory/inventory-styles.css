@@ -674,3 +674,8 @@ input[readonly] {
   text-align: left;
   font-size: 0.85rem;
 }
+
+#inventory-tbody td svg.status-icon {
+  cursor: help;
+  vertical-align: middle;
+}

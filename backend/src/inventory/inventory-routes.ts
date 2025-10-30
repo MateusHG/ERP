@@ -8,9 +8,10 @@ inventoryRouter.use(authenticate);
 
 inventoryRouter.get("/listar", listInventoryController);
 
+inventoryRouter.get("/movimentacoes/:id", listMovementsController);
+
 inventoryRouter.post("/movimentar", registerMovementController);
 
 inventoryRouter.get("/saldo/:id", getBalanceController);
-inventoryRouter.get("/movimentacoes/:id", listMovementsController);
 
 export default inventoryRouter;

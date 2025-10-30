@@ -1,6 +1,8 @@
 import { formatCurrency, formatData, formatDataAndTime } from "../utils/formatters";
-import { loadInventoryMovements } from "./inventory-service";
+import { getFilterValues, renderInventoryList } from "./inventory-dom";
+import { listInventoryWithFilterAPI, loadInventoryMovements } from "./inventory-service";
 
+// Função que cria dinamicamente o toggle de movimentações de um produto.
 export async function toggleMovementsRow(productRow: HTMLTableRowElement, produtoId: number, produtoNome: string) {
   const nextRow = productRow.nextElementSibling as HTMLTableRowElement | null;
 
@@ -21,11 +23,12 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
       <table class="movements-table">
         <thead>
           <tr>
-            <th>Data</th>
+            <th>Data e Horário</th>
             <th>Tipo</th>
             <th>Quantidade</th>
             <th>Origem</th>
-            <th>Valor Unitário</th>
+            <th>Preço Unitário</th>
+            <th>Total</th>
             <th>Usuário</th>
           </tr>
         </thead>
@@ -52,8 +55,15 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
           <td>${m.quantidade ?? "-"}</td>
           <td>${m.origem ?? "-"}</td>
           <td>${m.valor_unitario ? formatCurrency(m.valor_unitario) : "-"}</td>
+          <td>${m.valor_unitario ? formatCurrency(m.total) : "-"}</td>
           <td>${m.usuario || "-"}</td>
         </tr>
       `).join("")
     : `<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação encontrada.</td></tr>`;
+};
+
+export async function handleFilterChange() {
+  const filters = getFilterValues();
+  const items = await listInventoryWithFilterAPI(filters);
+  renderInventoryList(items);
 };

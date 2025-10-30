@@ -23,9 +23,9 @@ export function registerGlobalEvents() {
     }
   });
 
-// -------------------------
+// --------------------------------
 // Eventos de filtro (input/select)
-// -------------------------
+// --------------------------------
   const idInput = document.querySelector('#filtro-id')
   const nameInput = document.querySelector("#filtro-nome");
   const categoryInput = document.querySelector("#filtro-categoria");

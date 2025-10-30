@@ -16,5 +16,6 @@ export interface inventoryMovementsModel {
   origem: string,
   quantidade: number,
   valor_un: string,
+  total: string,
   user: string
 };
