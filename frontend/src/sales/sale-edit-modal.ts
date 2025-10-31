@@ -42,8 +42,11 @@ export async function openEditModal(id: number) {
   inputDataEmissao.value = sale.data_emissao ? sale.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = sale.tipo_pagamento || "";
 
-  inputDescontoFinanceiro.value = (Number(sale.desconto_financeiro) || 0).toFixed(2);
-  inputDescontoComercial.value = (Number(sale.desconto_comercial) || 0).toFixed(2);
+  inputDescontoFinanceiro.value = (Number(sale.desconto_financeiro) || 0)
+  .toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  inputDescontoComercial.value = (Number(sale.desconto_comercial) || 0)
+  .toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   inputStatus.value = sale.status || "";
 

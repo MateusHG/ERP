@@ -1,4 +1,4 @@
-import { handleFilterChange, toggleMovementsRow } from "./inventory-events";
+import { handleFilterChange, handleNewAdjustmentClick, toggleMovementsRow } from "./inventory-events";
 
 export async function registerGlobalEvents() {
   document.addEventListener("click", async (event) => {
@@ -6,7 +6,10 @@ export async function registerGlobalEvents() {
 
     if (!target) return;
 
-    if (target.classList.contains("btn-view-movements")) {
+    if (target.classList.contains("btn-new-inventory")) {
+      await handleNewAdjustmentClick(target);
+
+    } else if (target.classList.contains("btn-view-movements")) {
       const produtoId = Number(target.dataset.produtoId);
       const produtoNome = target.dataset.produtoNome ?? "";
       const productRow = target.closest("tr") as HTMLTableRowElement;

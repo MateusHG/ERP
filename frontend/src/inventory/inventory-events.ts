@@ -1,6 +1,12 @@
 import { formatCurrency, formatData, formatDataAndTime } from "../utils/formatters";
 import { getFilterValues, renderInventoryList } from "./inventory-dom";
 import { listInventoryWithFilterAPI, loadInventoryMovements } from "./inventory-service";
+import { openNewInventoryAdjustmentModal } from "./inventory-new-adjustment-modal";
+
+//Chama o modal de novo ajuste de estoque.
+export function handleNewAdjustmentClick(target: HTMLElement) {
+  openNewInventoryAdjustmentModal();
+};
 
 // Função que cria dinamicamente o toggle de movimentações de um produto.
 export async function toggleMovementsRow(productRow: HTMLTableRowElement, produtoId: number, produtoNome: string) {

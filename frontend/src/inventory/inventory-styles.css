@@ -440,7 +440,7 @@ input[readonly] {
 }
 
 /* Box para cadastro de novo fornecedor. */
-#new-sale-modal {
+#new-inventory-adjustment-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -453,11 +453,11 @@ input[readonly] {
   z-index: 1000;
 }
 
-#new-sale-modal.hidden {
+#new-inventory-adjustment-modal.hidden {
   display: none;
 }
 
-#submit-new-sale {
+#submit-new-inventory-adjustment {
   margin-top: 16px;
   padding: 8px 16px;
   border: none;
@@ -467,7 +467,7 @@ input[readonly] {
   cursor: pointer;
 }
 
-#cancel-new-sale {
+#cancel-new-inventory-adjustment {
   margin-top: 16px;
   padding: 8px 16px;
   border: none;
@@ -477,7 +477,7 @@ input[readonly] {
   cursor: pointer;
 }
 
-#new-sale-form {
+#new-new-inventory-adjustment-form {
   display: flex;
   flex-direction: column;
 }

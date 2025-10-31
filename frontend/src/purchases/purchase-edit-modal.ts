@@ -44,9 +44,11 @@ export async function openEditModal(id: number) {
   inputDataEmissao.value = purchase.data_emissao ? purchase.data_emissao.split("T")[0] : "";
   inputTipoPagamento.value = purchase.tipo_pagamento || "";
   
-  inputDescontoFinanceiro.value = (Number(purchase.desconto_financeiro) || 0).toFixed(2);
+  inputDescontoFinanceiro.value = (Number(purchase.desconto_financeiro) || 0)
+  .toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  inputDescontoComercial.value = (Number(purchase.desconto_comercial) || 0).toFixed(2);
+  inputDescontoComercial.value = (Number(purchase.desconto_comercial) || 0)
+  .toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   inputStatus.value = purchase.status || "";
 
