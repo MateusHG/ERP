@@ -1,12 +1,13 @@
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { setupCustomerAutoComplete } from "../utils/autocomplete";
 import { addItemRowTo } from "./sale-item-dom";
-import { getItemsBySaleIdAPI, getSaleByIdAPI, loadSalesAPI, updateSaleAPI } from "./sales-service";
+import { getItemsBySaleIdAPI, getSaleByIdAPI, loadSalesAPI, searchSalesWithFilterAPI, updateSaleAPI } from "./sales-service";
 import { showConfirm, showMessage } from "../utils/messages";
-import { renderSalesList } from "./sales-dom";
+import { getFilterValues, renderSalesList } from "./sales-dom";
 import { updateSaleItemSummary } from "./sale-item-summary";
 import { updateTotalSaleDisplay } from "./sale-summary";
-import { collectSaleItems } from "./sale-items-controller";
+import { collectSaleItems, lockSaleItems, unlockSaleItems } from "./sale-items-controller";
+import { getCurrentMonthDateRange } from "../utils/formatters";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form")! as HTMLFormElement;
@@ -27,6 +28,8 @@ let originalItems: any[] = [];
 
 export async function openEditModal(id: number) {
   currentEditId = id;
+
+  unlockSaleFormFields(form);
 
   const sale = await getSaleByIdAPI(id);
 
@@ -52,6 +55,7 @@ export async function openEditModal(id: number) {
 
   // Carrega os itens da venda;
   const itemsBody = modal.querySelector('#items-body-edit-modal') as HTMLTableSectionElement;
+  unlockSaleItems(itemsBody);
   itemsBody.innerHTML = "";
 
   const items = await getItemsBySaleIdAPI(id);
@@ -71,6 +75,60 @@ export async function openEditModal(id: number) {
 
   updateSaleItemSummary(itemsBody, "edit");
   updateTotalSaleDisplay("edit");
+
+  // Bloqueio: Caso o status da venda for entregue/finalizado, desabilita a edição dos dados.
+  function lockSaleFormFields(form: HTMLFormElement, helperMessage: string) {
+    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
+    fields.forEach(field => {
+      // Permite apenas alteração do status para o usuário poder reabrir a venda.
+      if (field.name === "edit-status") return;
+
+      if (field instanceof HTMLInputElement) {
+        field.readOnly = true;
+
+      } else if (field instanceof HTMLSelectElement) { 
+      field.dataset.locked = "true";
+      field.style.pointerEvents = "none";
+      field.style.background = "#f5f5f5";
+      field.style.color = "#777";
+      return;
+    };
+
+      field.title = helperMessage;
+      field.style.cursor = "not-allowed";
+  });
+}
+
+  function unlockSaleFormFields(form: HTMLFormElement) {
+    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
+
+    fields.forEach(field => {
+    // Reativa os campos, exceto o ID da venda (se existir)
+      if (field.name === "edit-id") return;
+
+      if (field instanceof HTMLInputElement) {
+        field.readOnly = false;
+        field.style.cursor = "text";
+    
+      } else if (field instanceof HTMLSelectElement) {
+        field.dataset.locked = "false";
+        field.style.pointerEvents = "auto";
+        field.style.background = "";
+        field.style.color = "";
+      }
+
+      field.title = "";
+  });
+}
+
+  const lockedStatuses = ["entregue", "finalizado"];
+  if (lockedStatuses.includes(sale.status)) {
+    const headerHelper = "Venda entregue/finalizada - Reabra a venda para editar.";
+    const itemHelper = "Itens não podem ser alterados em vendas com status Entregue ou Finalizado.";
+
+    lockSaleFormFields(form, headerHelper);
+    lockSaleItems(itemsBody, itemHelper);
+  }
 
   modal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
@@ -155,11 +213,26 @@ form.addEventListener("submit", async (event) => {
 
     await showMessage("Venda atualizada com sucesso.");
 
+    if (!["entregue", "finalizado"].includes(updatedSaleData.status || "")) {
+    // Atualiza o status original para refletir o novo valor
+    originalFormData["edit-status"] = updatedSaleData.status || "";
+
+    const updatedSale = await getSaleByIdAPI(currentEditId);
+    await openEditModal(updatedSale.id);
+  }  
+
+    const currentFilters = getFilterValues();
+    if (!currentFilters.data_emissao_inicio || !currentFilters.data_emissao_final) {
+      const { start, end } = getCurrentMonthDateRange();
+      currentFilters.data_emissao_inicio = start;
+      currentFilters.data_emissao_final = end;
+}
+  
+    const sales = await searchSalesWithFilterAPI(currentFilters);
+    renderSalesList(sales);
+
     modal.classList.add("hidden");
 
-    const sales = await loadSalesAPI();
-    renderSalesList(sales);
-  
   } catch (err: any) {
     await showMessage(err?.message || "Erro de conexão com o servidor.");
   }
