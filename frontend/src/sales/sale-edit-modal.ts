@@ -220,25 +220,29 @@ form.addEventListener("submit", async (event) => {
   }
 
   try {
-    const previousStatus = originalFormData["edit-status"]?.toLowerCase();
-    const currentStatus = (updatedSaleData.status || previousStatus)?.toLowerCase();
+  // =========================
+  // Validação de status
+  // =========================
+  const previousStatus = originalFormData["edit-status"]?.toLowerCase();
+  const currentStatus = (updatedSaleData.status || previousStatus)?.toLowerCase();
 
-    const statusesFinalized = ["finalizado", "entregue"];
-    const statusesOpen = ["aberto", "aguardando", "aprovado", "despachado", "cancelado"];
+  const statusesFinalized = ["finalizado", "entregue"];
+  const statusesOpen = ["aberto", "aguardando", "aprovado", "despachado", "cancelado"];
 
-    const wasFinalized = statusesFinalized.includes(previousStatus);
-    const isFinalized = statusesFinalized.includes(currentStatus);
+  const wasFinalized = statusesFinalized.includes(previousStatus);
+  const isFinalized = statusesFinalized.includes(currentStatus);
 
-    const wasOpen = statusesOpen.includes(previousStatus);
-    const isOpen = statusesOpen.includes(currentStatus);
+  const wasOpen = statusesOpen.includes(previousStatus);
+  const isOpen = statusesOpen.includes(currentStatus);
 
-    // Ignora transição entre status "entregue" e "finalizado"(Não movimenta estoque).
-    const isInternalTransition =
-      statusesFinalized.includes(previousStatus) &&
-      statusesFinalized.includes(currentStatus);
+  // Ignora transição entre status "entregue" e "finalizado"(Não movimenta estoque).
+  const isInternalTransition =
+    statusesFinalized.includes(previousStatus) &&
+    statusesFinalized.includes(currentStatus);
 
-    if (!isInternalTransition) {
-    
+  if (!isInternalTransition) {
+
+    // Abrir → Finalizado/Entregue (movimenta estoque)
     if (wasOpen && isFinalized) {
       const confirmed = await showConfirm(
         "<b>🛑 Atenção! 🛑</b><br><br>" +
@@ -246,16 +250,16 @@ form.addEventListener("submit", async (event) => {
         "<b>Deseja continuar?</b>"
       );
 
-    if (!confirmed) {
-      await showMessage(
-        "<b>Operação cancelada ✅</b><br><br>" +
-        "- Estoque não foi alterado."
-      );
-      return;
+      if (!confirmed) {
+        await showMessage(
+          "<b>Operação cancelada ✅</b><br><br>" +
+          "- Estoque não foi alterado."
+        );
+        return;
+      }
     }
-  }
 
-  // Alterar de finalizado/entregue → aberto (reverte movimentação)
+    // Finalizado/Entregue → Aberto (reverte movimentação)
     if (wasFinalized && isOpen) {
       const confirmed = await showConfirm(
         "<b>🛑 Atenção! 🛑</b><br><br>" +
@@ -264,39 +268,80 @@ form.addEventListener("submit", async (event) => {
         "<b>Deseja realmente continuar?</b>"
       );
 
-    if (!confirmed) {
-      await showMessage(
-        "<b>Operação cancelada ✅</b><br><br>" +
-        "- Estoque não foi alterado."
-      );
-      return;
+      if (!confirmed) {
+        await showMessage(
+          "<b>Operação cancelada ✅</b><br><br>" +
+          "- Estoque não foi alterado."
+        );
+        return;
+      }
     }
   }
-}
 
-    // Envia dados do cabeçalho + itens juntos.
-    const response = await updateSaleAPI(currentEditId, updatedSaleData);
+  // ================================
+  // Envia dados do cabeçalho + itens
+  // =========================
+  const response = await updateSaleAPI(currentEditId, updatedSaleData);
 
-    if (!response.ok) {
-      await showMessage(response.message || "Erro inesperado ao salvar venda.");
+  if (!response.ok) {
+    const errData = response.data;
+
+    // 🔹 Estoque insuficiente (suporte a múltiplos itens)
+    if (errData?.tipo === "estoque_negativo") {
+      const itens: any[] = Array.isArray(errData.itens) ? errData.itens : [errData];
+
+      const rowsHTML = itens.map(item => `
+        <tr>
+          <td style="padding: 4px; border: 1px solid #ccc;">${item.produto}</td>
+          <td style="padding: 4px; border: 1px solid #ccc;">${item.codigo}</td>
+          <td style="padding: 4px; border: 1px solid #ccc;">${item.estoqueAtual}</td>
+          <td style="padding: 4px; border: 1px solid #ccc;">${item.tentativaSaida}</td>
+          <td style="padding: 4px; border: 1px solid #ccc;">${item.estoqueFicaria}</td>
+        </tr>
+      `).join("");
+
+      const messageHTML = `
+        <strong>${errData.message}</strong><br><br>
+        <table style="border-collapse: collapse;">
+          <tr>
+            <th style="padding: 4px; border: 1px solid #ccc;">Produto</th>
+            <th style="padding: 4px; border: 1px solid #ccc;">Código</th>
+            <th style="padding: 4px; border: 1px solid #ccc;">Estoque Atual</th>
+            <th style="padding: 4px; border: 1px solid #ccc;">Tentativa de Saída</th>
+            <th style="padding: 4px; border: 1px solid #ccc;">Estoque Ficaria</th>
+          </tr>
+          ${rowsHTML}
+        </table>
+      `;
+
+      await showMessage(messageHTML);
       return;
     }
 
-    await showMessage("Venda atualizada com sucesso.");
-
-    const currentFilters = getFilterValues();
-    if (!currentFilters.data_emissao_inicio || !currentFilters.data_emissao_final) {
-      const { start, end } = getCurrentMonthDateRange();
-      currentFilters.data_emissao_inicio = start;
-      currentFilters.data_emissao_final = end;
-}
-  
-    const sales = await searchSalesWithFilterAPI(currentFilters);
-    renderSalesList(sales);
-
-    modal.classList.add("hidden");
-
-  } catch (err: any) {
-    await showMessage(err?.message || "Erro de conexão com o servidor.");
+    // Outros erros genéricos
+    await showMessage(response.message || "Erro inesperado ao salvar venda.");
+    return;
   }
-});
+
+  // =========================
+  // Venda atualizada com sucesso
+  // =========================
+  await showMessage("Venda atualizada com sucesso.");
+
+  const currentFilters = getFilterValues();
+  if (!currentFilters.data_emissao_inicio || !currentFilters.data_emissao_final) {
+    const { start, end } = getCurrentMonthDateRange();
+    currentFilters.data_emissao_inicio = start;
+    currentFilters.data_emissao_final = end;
+  }
+
+  const sales = await searchSalesWithFilterAPI(currentFilters);
+  renderSalesList(sales);
+
+  modal.classList.add("hidden");
+
+} catch (err: any) {
+  const details = err.responseData; // caso venha do fetch-helper
+  console.error(details);
+  await showMessage(err?.message || "Erro de conexão com o servidor.");
+}})

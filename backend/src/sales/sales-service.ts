@@ -1,4 +1,4 @@
-import { salesItemModel, salesModel } from "../sales/sales-model";
+import { estoqueNegativoItem, salesItemModel, salesModel } from "../sales/sales-model";
 import * as salesRepository from "../sales/sales-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 
@@ -74,10 +74,43 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
-    const updatedPurchase = await salesRepository.updateSaleById(id, data);
-    return ok(updatedPurchase);
+    // Verifica se há estoque antes de salvar(Monta a mensagem para enviar ao front-end) + trigger de fallback no postgres.
+    if (data.itens && Array.isArray(data.itens)) {
+      const itensNegativos: estoqueNegativoItem[] = [];
+
+      for (const item of data.itens as salesItemModel[]) {
+        const saldoAtual = await salesRepository.getProductBalance(item.produto_id);
+        const estoqueFicaria = saldoAtual - item.quantidade;
+
+        if (estoqueFicaria < 0) {
+          const produtoInfo = await salesRepository.getProductInfo(item.produto_id);
+
+          itensNegativos.push({
+            produto: produtoInfo.nome,
+            codigo: produtoInfo.codigo,
+            estoqueAtual: saldoAtual,
+            tentativaSaida: item.quantidade,
+            estoqueFicaria,
+          });
+        }
+      }
+
+      if (itensNegativos.length > 0) {
+        return {
+          statusCode: 400,
+          body: {
+            tipo: "estoque_negativo",
+            message: "Estoque insuficiente para realizar a movimentação.",
+            itens: itensNegativos,
+          },
+        };
+      }
+    }
+
+    const updatedSale = await salesRepository.updateSaleById(id, data);
+    return ok(updatedSale);
   
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
     return internalServerError('Erro ao atualizar venda.')
   }

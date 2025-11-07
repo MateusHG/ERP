@@ -23,3 +23,11 @@ export interface salesItemModel {
   desconto_volume?: number;    // desconto por item por quantidade
   // valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
 }
+
+export interface estoqueNegativoItem {
+  produto: string;
+  codigo: string;
+  estoqueAtual: number;
+  tentativaSaida: number;
+  estoqueFicaria: number;
+}

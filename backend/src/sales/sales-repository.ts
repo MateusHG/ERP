@@ -202,6 +202,7 @@ export const updateSaleById = async (
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
+    
   } finally {
     client.release();
   }
@@ -344,4 +345,22 @@ export const verifySaleId = async (id: number): Promise<salesModel | null> => {
   );
 
   return result.rows[0] || null;
+};
+
+// Busca o saldo do produto para validar estoque negativo.
+export const getProductBalance = async (produtoId: number): Promise<number> => {
+  const result = await db.query(
+    `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1`,
+    [produtoId]
+  );
+  return result.rows[0]?.quantidade ?? 0;
+};
+
+//Busca informações do produto para montar a resposta de estoque negativo.
+export const getProductInfo = async (produtoId: number): Promise<{ nome: string; codigo: string }> => {
+  const result = await db.query(
+    `SELECT nome, codigo FROM produtos WHERE id = $1`,
+    [produtoId]
+  );
+  return result.rows[0];
 };
