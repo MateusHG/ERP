@@ -200,7 +200,6 @@ body {
     }
 
 /* Box de confirmação para deletar o produto */
-
 #confirm-box {
   position: fixed;
   top: 0;
@@ -225,10 +224,11 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   text-align: center;
   font-family: sans-serif;
+  white-space: pre-line;
 }
 
 .confirm-buttons {
-  margin-top: 16px;
+  margin-top: -15px;
   display: flex;
   gap: 12px;
   justify-content: center;

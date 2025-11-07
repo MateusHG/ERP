@@ -106,6 +106,23 @@ export async function openEditModal(id: number) {
     // Reativa os campos, exceto o ID da venda (se existir)
       if (field.name === "edit-id") return;
 
+      // Campos que devem permanecer bloqueados(cálculos automáticos)
+      const lockedReadOnlyFields = [
+        "desconto-itens",
+        "descontos-totais",
+        "valor-bruto",
+        "valor-total"
+      ];
+
+      if (lockedReadOnlyFields.includes(field.name)) {
+        if (field instanceof HTMLInputElement) {
+          field.readOnly = true;
+          field.style.cursor = "not-allowed";
+        }
+        field.title = "Campo de visualização - calculado automaticamente.";
+        return;
+      }
+
       if (field instanceof HTMLInputElement) {
         field.readOnly = false;
         field.style.cursor = "text";
@@ -203,6 +220,60 @@ form.addEventListener("submit", async (event) => {
   }
 
   try {
+    const previousStatus = originalFormData["edit-status"]?.toLowerCase();
+    const currentStatus = (updatedSaleData.status || previousStatus)?.toLowerCase();
+
+    const statusesFinalized = ["finalizado", "entregue"];
+    const statusesOpen = ["aberto", "aguardando", "aprovado", "despachado", "cancelado"];
+
+    const wasFinalized = statusesFinalized.includes(previousStatus);
+    const isFinalized = statusesFinalized.includes(currentStatus);
+
+    const wasOpen = statusesOpen.includes(previousStatus);
+    const isOpen = statusesOpen.includes(currentStatus);
+
+    // Ignora transição entre status "entregue" e "finalizado"(Não movimenta estoque).
+    const isInternalTransition =
+      statusesFinalized.includes(previousStatus) &&
+      statusesFinalized.includes(currentStatus);
+
+    if (!isInternalTransition) {
+    
+    if (wasOpen && isFinalized) {
+      const confirmed = await showConfirm(
+        "<b>🛑 Atenção! 🛑</b><br><br>" +
+        "Alterar o status para <b>'Finalizado'</b> ou <b>'Entregue'</b> fará o sistema <b>dar saída no estoque.</b><br><br>" +
+        "<b>Deseja continuar?</b>"
+      );
+
+    if (!confirmed) {
+      await showMessage(
+        "<b>Operação cancelada ✅</b><br><br>" +
+        "- Estoque não foi alterado."
+      );
+      return;
+    }
+  }
+
+  // Alterar de finalizado/entregue → aberto (reverte movimentação)
+    if (wasFinalized && isOpen) {
+      const confirmed = await showConfirm(
+        "<b>🛑 Atenção! 🛑</b><br><br>" +
+        "<b>Esta venda já movimentou o estoque.</b><br><br>" +
+        "Ao alterar o status, o sistema irá <b>reverter a movimentação</b>.<br><br>" +
+        "<b>Deseja realmente continuar?</b>"
+      );
+
+    if (!confirmed) {
+      await showMessage(
+        "<b>Operação cancelada ✅</b><br><br>" +
+        "- Estoque não foi alterado."
+      );
+      return;
+    }
+  }
+}
+
     // Envia dados do cabeçalho + itens juntos.
     const response = await updateSaleAPI(currentEditId, updatedSaleData);
 
@@ -212,14 +283,6 @@ form.addEventListener("submit", async (event) => {
     }
 
     await showMessage("Venda atualizada com sucesso.");
-
-    if (!["entregue", "finalizado"].includes(updatedSaleData.status || "")) {
-    // Atualiza o status original para refletir o novo valor
-    originalFormData["edit-status"] = updatedSaleData.status || "";
-
-    const updatedSale = await getSaleByIdAPI(currentEditId);
-    await openEditModal(updatedSale.id);
-  }  
 
     const currentFilters = getFilterValues();
     if (!currentFilters.data_emissao_inicio || !currentFilters.data_emissao_final) {

@@ -1,4 +1,4 @@
-//Mostrar mensagens de confirmação
+// Box de mensagens de confirmação
 export function showConfirm(message: string): Promise<boolean> {
   return new Promise((resolve) => {
     const box = document.getElementById("confirm-box")!;
@@ -6,7 +6,9 @@ export function showConfirm(message: string): Promise<boolean> {
     const yesBtn = document.getElementById("confirm-yes")!;
     const noBtn = document.getElementById("confirm-no")!;
 
-    text.textContent = message;
+    // Converte quebras de linha para <br> e permite formatação HTML
+    text.innerHTML = message.replace(/\n/g, "<br>");
+
     box.classList.remove("hidden");
 
     const cleanup = () => {
@@ -28,7 +30,7 @@ export function showConfirm(message: string): Promise<boolean> {
     yesBtn.addEventListener("click", onYes);
     noBtn.addEventListener("click", onNo);
   });
-}
+};
 
 //Mostrar mensagens de retorno (erro,sucesso etc.)
 export function showMessage(message: string): void {
@@ -36,7 +38,7 @@ export function showMessage(message: string): void {
   const text = document.getElementById("message-text")!;
   const closeBtn = document.getElementById("message-close")!;
 
-  text.textContent = message;
+  text.innerHTML = message.replace(/\n/g, "<br>");
   box.classList.remove("hidden");
 
   const close = () => {
