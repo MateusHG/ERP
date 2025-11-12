@@ -14,6 +14,8 @@ export async function authorizedFetch(url: string, options: RequestInit = {}): P
 
   let response = await fetch(url, finalOptions);
 
+
+// ======== Tratamento de token expirado. ====== ///
   if (response.status === 401) {
     if (!isRefreshing) {
       isRefreshing = true;
@@ -35,16 +37,27 @@ export async function authorizedFetch(url: string, options: RequestInit = {}): P
     }
   }
 
+  // ============ Tratamento de erros =========== //
   if (!response.ok) {
-    const contentType = response.headers.get("Content-Type");
-    if (contentType && contentType.includes("application/json")) {
-      const errorBody = await response.json();
-      throw new Error(errorBody.message || "Erro na requisição.");
-    } else {
-      const fallbackText = await response.text();
-      throw new Error(fallbackText || "Erro desconhecido.");
-    }
+  let errorBody: any = null;
+
+  try {
+    // 🔹 Garante leitura segura do JSON, mesmo que o servidor retorne 400
+    const text = await response.text();
+    errorBody = text ? JSON.parse(text) : null;
+  } catch {
+    errorBody = { message: "Erro ao interpretar resposta do servidor." };
   }
 
-  return response;
+  const message =
+    errorBody?.message || `Erro na requisição (${response.status}).`;
+
+  // 🔹 Inclui todo o corpo original do erro (para acessar detalhes no service)
+  const error = new Error(message) as any;
+  error.responseData = errorBody;
+
+  throw error;
 }
+
+  return response;
+};

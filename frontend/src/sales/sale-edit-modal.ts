@@ -1,8 +1,8 @@
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { setupCustomerAutoComplete } from "../utils/autocomplete";
 import { addItemRowTo } from "./sale-item-dom";
-import { getItemsBySaleIdAPI, getSaleByIdAPI, loadSalesAPI, searchSalesWithFilterAPI, updateSaleAPI } from "./sales-service";
-import { showConfirm, showMessage } from "../utils/messages";
+import { getItemsBySaleIdAPI, getSaleByIdAPI, searchSalesWithFilterAPI, updateSaleAPI } from "./sales-service";
+import { showConfirm, showEstoqueNegativoMessage, showMessage } from "../utils/messages";
 import { getFilterValues, renderSalesList } from "./sales-dom";
 import { updateSaleItemSummary } from "./sale-item-summary";
 import { updateTotalSaleDisplay } from "./sale-summary";
@@ -283,43 +283,21 @@ form.addEventListener("submit", async (event) => {
   // =========================
   const response = await updateSaleAPI(currentEditId, updatedSaleData);
 
+  console.log("Resposta estoque negativo back-end:", response);
+  console.log("Data:", response.data);
+
   if (!response.ok) {
-    const errData = response.data;
+    const errData = response.data || response;
 
     // 🔹 Estoque insuficiente (suporte a múltiplos itens)
-    if (errData?.tipo === "estoque_negativo") {
-      const itens: any[] = Array.isArray(errData.itens) ? errData.itens : [errData];
-
-      const rowsHTML = itens.map(item => `
-        <tr>
-          <td style="padding: 4px; border: 1px solid #ccc;">${item.produto}</td>
-          <td style="padding: 4px; border: 1px solid #ccc;">${item.codigo}</td>
-          <td style="padding: 4px; border: 1px solid #ccc;">${item.estoqueAtual}</td>
-          <td style="padding: 4px; border: 1px solid #ccc;">${item.tentativaSaida}</td>
-          <td style="padding: 4px; border: 1px solid #ccc;">${item.estoqueFicaria}</td>
-        </tr>
-      `).join("");
-
-      const messageHTML = `
-        <strong>${errData.message}</strong><br><br>
-        <table style="border-collapse: collapse;">
-          <tr>
-            <th style="padding: 4px; border: 1px solid #ccc;">Produto</th>
-            <th style="padding: 4px; border: 1px solid #ccc;">Código</th>
-            <th style="padding: 4px; border: 1px solid #ccc;">Estoque Atual</th>
-            <th style="padding: 4px; border: 1px solid #ccc;">Tentativa de Saída</th>
-            <th style="padding: 4px; border: 1px solid #ccc;">Estoque Ficaria</th>
-          </tr>
-          ${rowsHTML}
-        </table>
-      `;
-
-      await showMessage(messageHTML);
+    if (errData?.detalhes?.produtos) {
+      const itens = errData.detalhes.produtos;
+      showEstoqueNegativoMessage(itens);
       return;
     }
 
     // Outros erros genéricos
-    await showMessage(response.message || "Erro inesperado ao salvar venda.");
+    await showMessage(errData.message || "Erro inesperado ao salvar venda.");
     return;
   }
 

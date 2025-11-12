@@ -43,3 +43,11 @@ export const statusLabels: Record<string, string> = {
   cancelado: "Cancelado"
 };
 
+export interface estoqueNegativoItem {
+  produto_id: number;
+  produto: string;
+  codigo: string;
+  estoque_atual: number;
+  tentativa_saida: number;
+  estoque_ficaria: number;
+};

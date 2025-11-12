@@ -1,3 +1,5 @@
+import { estoqueNegativoItem } from "sales/sale-model";
+
 // Box de mensagens de confirmação
 export function showConfirm(message: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -87,4 +89,69 @@ export function showNotAuthorizedMessage() {
     localStorage.clear();
     window.location.href = '/auth/login.html';
   }, 3000);
+};
+
+export function showEstoqueNegativoMessage(itens: any[], message?: string) {
+  const messageBox = document.getElementById("message-box")!;
+  const messageText = document.getElementById("message-text")!;
+  const closeButton = document.getElementById("message-close")!;
+
+  // Gera as linhas da tabela
+  const rowsHTML = itens
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding: 6px; border: 1px solid #ccc;">${item.produto_id}</td>
+        <td style="padding: 6px; border: 1px solid #ccc;">${item.produto}</td>
+        <td style="padding: 6px; border: 1px solid #ccc;">${item.codigo}</td>
+        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">${item.estoque_atual}</td>
+        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">${item.tentativa_saida}</td>
+        <td style="padding: 6px; border: 1px solid #ccc; text-align: center;">${item.estoque_ficaria}</td>
+      </tr>`
+    )
+    .join("");
+
+  // Monta o HTML completo da tabela
+  const tableHTML = `
+    <table style="
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 16px;
+      text-align: center;
+    ">
+      <thead>
+        <tr style="background-color: #2e80eb; color: white;">
+          <th style="padding: 6px; border: 1px solid #ccc;">ID</th>
+          <th style="padding: 6px; border: 1px solid #ccc;">Produto</th>
+          <th style="padding: 6px; border: 1px solid #ccc;">Código</th>
+          <th style="padding: 6px; border: 1px solid #ccc;">Estoque Atual</th>
+          <th style="padding: 6px; border: 1px solid #ccc;">Tentativa de Saída</th>
+          <th style="padding: 6px; border: 1px solid #ccc;">Estoque Ficaria</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHTML}</tbody>
+    </table>
+  `;
+
+  // Atualiza o conteúdo do modal de mensagem
+  messageText.innerHTML = `
+    <strong>${message || "Estoque insuficiente para um ou mais produtos."}</strong>
+    ${tableHTML}
+  `;
+
+  // Ajusta o estilo da caixa principal para ficar mais larga e evitar quebra
+  const content = messageText.closest(".message-content") as HTMLElement;
+  if (content) {
+    content.style.maxWidth = "700px";
+    content.style.width = "90%";
+    content.style.overflow = "visible";
+    content.style.textAlign = "center";
+  }
+
+  messageBox.classList.remove("hidden");
+
+  closeButton.onclick = () => {
+    messageBox.classList.add("hidden");
+  };
 };

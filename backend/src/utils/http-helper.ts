@@ -24,10 +24,17 @@ export const noContent = async (): Promise<httpResponse> => {
   }
 };
 
-export const badRequest = async (message: string): Promise<httpResponse> => {
+export const badRequest = async (message: string | object): Promise<httpResponse> => {
+  if (typeof message === 'string') {
+    return {
+      statusCode: 400,
+      body:  { message }
+    };
+  }
+
   return {
     statusCode: 400,
-    body: { message },
+    body: message,
   }
 };
 

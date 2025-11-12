@@ -74,44 +74,29 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
-    // Verifica se há estoque antes de salvar(Monta a mensagem para enviar ao front-end) + trigger de fallback no postgres.
-    if (data.itens && Array.isArray(data.itens)) {
-      const itensNegativos: estoqueNegativoItem[] = [];
-
-      for (const item of data.itens as salesItemModel[]) {
-        const saldoAtual = await salesRepository.getProductBalance(item.produto_id);
-        const estoqueFicaria = saldoAtual - item.quantidade;
-
-        if (estoqueFicaria < 0) {
-          const produtoInfo = await salesRepository.getProductInfo(item.produto_id);
-
-          itensNegativos.push({
-            produto: produtoInfo.nome,
-            codigo: produtoInfo.codigo,
-            estoqueAtual: saldoAtual,
-            tentativaSaida: item.quantidade,
-            estoqueFicaria,
-          });
-        }
-      }
-
-      if (itensNegativos.length > 0) {
-        return {
-          statusCode: 400,
-          body: {
-            tipo: "estoque_negativo",
-            message: "Estoque insuficiente para realizar a movimentação.",
-            itens: itensNegativos,
-          },
-        };
-      }
-    }
-
     const updatedSale = await salesRepository.updateSaleById(id, data);
     return ok(updatedSale);
   
   } catch (err: any) {
     console.error(err);
+
+    // Pega o erro vindo do PostgreSQL (trigger) code: P0001 = Estoque negativo.
+    if (err.code === 'P0001' && typeof err.message === 'string') {
+      try {
+        // Extrai o JSON da mensagem do postgres
+        const jsonMatch = err.message.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const detalhes = JSON.parse(jsonMatch[0]);
+          return badRequest({
+            message: 'Estoque insuficiente para um ou mais produtos.',
+            detalhes
+          });
+        }
+      } catch (parseError) {
+        console.error('Falha ao interpretar JSON da trigger:', parseError);
+      }
+    }
+
     return internalServerError('Erro ao atualizar venda.')
   }
 };
