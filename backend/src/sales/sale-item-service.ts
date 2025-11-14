@@ -63,8 +63,8 @@ export const updateSaleItemService = async (saleId: number, saleItemId: number, 
     }
 
     //Se estiver alterando o produto dentro do item (tabela itens_venda), verifica se o mesmo existe na tabela produtos.
-    if (data.id_produto) {
-      const productExists = await saleItemsRepository.verifyProduct(data.id_produto);
+    if (data.produto_id) {
+      const productExists = await saleItemsRepository.verifyProduct(data.produto_id);
       if (!productExists) {
         return notFound('Produto informado não existe.')
       }

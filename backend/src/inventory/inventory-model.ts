@@ -13,7 +13,7 @@ export interface inventoryListModel {
 }
 
 export interface InventoryMovementModel {
-  id: number;
+  id?: number;
   produto_id: number;
   tipo: "entrada" | "saida";
   quantidade: number;
@@ -22,6 +22,6 @@ export interface InventoryMovementModel {
   origem: string;
   referencia_id: number;
   usuario_id: number;
-  usuario_nome: string,
-  created_at: Date;
+  usuario_nome?: string,
+  created_at?: Date;
 };

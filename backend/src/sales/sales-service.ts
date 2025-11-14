@@ -1,3 +1,4 @@
+import { handleSaleInventoryMovementService } from "../inventory/inventory-service";
 import { estoqueNegativoItem, salesItemModel, salesModel } from "../sales/sales-model";
 import * as salesRepository from "../sales/sales-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
@@ -74,30 +75,26 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
+    // Busca venda antiga para comparar status
+    const oldSale = await salesRepository.getSaleByIdQuery(id);
     const updatedSale = await salesRepository.updateSaleById(id, data);
+
+    //Movimenta estoque se houver mudança de status que altera estoque
+    const saleStatusWithStockImpact = ['entregue', 'finalizado'];
+    if (data.status && oldSale.status !== data.status) {
+      await handleSaleInventoryMovementService(oldSale, updatedSale);
+    }
+
     return ok(updatedSale);
   
   } catch (err: any) {
     console.error(err);
 
-    // Pega o erro vindo do PostgreSQL (trigger) code: P0001 = Estoque negativo.
-    if (err.code === 'P0001' && typeof err.message === 'string') {
-      try {
-        // Extrai o JSON da mensagem do postgres
-        const jsonMatch = err.message.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const detalhes = JSON.parse(jsonMatch[0]);
-          return badRequest({
-            message: 'Estoque insuficiente para um ou mais produtos.',
-            detalhes
-          });
-        }
-      } catch (parseError) {
-        console.error('Falha ao interpretar JSON da trigger:', parseError);
-      }
+    if (err.message?.includes('Saldo insuficiente')) {
+      return badRequest({message: "Estoque insuficiente para um ou mais produtos."});
     }
 
-    return internalServerError('Erro ao atualizar venda.')
+    return internalServerError('Erro ao atualizar venda.');
   }
 };
 

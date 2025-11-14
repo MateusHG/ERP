@@ -109,8 +109,48 @@ query += `
 };
 
 // ***************************************************************************************** //
+// ***************************************************************************************** //
 
-// Registra a movimentação no estoque.
+// Consulta saldo dos produtos
+export async function getBalance(produto_id: number) {
+  const result = await db.query(
+    `SELECT * FROM estoque_saldo WHERE produto_id = $1`,
+    [produto_id]
+  );
+  return result.rows[0] || 0;
+};
+
+// ***************************************************************************************** //
+// ***************************************************************************************** //
+
+// Lista movimentações do produto(histórico).
+export async function listMovements(produto_id: number) {
+  const result = await db.query(
+    `
+    SELECT 
+      m.id,
+      m.produto_id,
+      m.tipo,
+      m.quantidade,
+      m.origem,
+      m.referencia_id,
+      m.usuario_id,
+      u.username AS usuario,
+      m.created_at
+    FROM movimentacoes_estoque m
+    INNER JOIN users u ON u.id = m.usuario_id
+    WHERE m.produto_id = $1
+    ORDER BY m.created_at DESC
+    `,
+    [produto_id]
+  );
+  return result.rows;
+};
+
+// ***************************************************************************************** //
+// ***************************************************************************************** //
+
+// Registra a movimentação de AJUSTE no estoque .
 //------------------------------------
 export async function registerMovement(mov: InventoryMovementModel) {
   const client = await db.connect();
@@ -171,37 +211,99 @@ export async function registerMovement(mov: InventoryMovementModel) {
   }
 };
 
+
+// *********************************************************************** //
 // *********************************************************************** //
 
-// Consulta saldo dos produtos
-//
-export async function getBalance(produto_id: number) {
-  const result = await db.query(
-    `SELECT * FROM estoque_saldo WHERE produto_id = $1`,
-    [produto_id]
-  );
-  return result.rows[0] || 0;
+// Movimentações de COMPRA.
+export async function registerPurchaseMovement(mov: InventoryMovementModel, client?: any) {
+  const localClient = client || (await db.connect());
+
+  try {
+    if (!client) await localClient.query("BEGIN");
+
+    const quantidade = Math.floor(Number(mov.quantidade));
+    const saldoRes = await localClient.query(
+      `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1 FOR UPDATE`,
+      [mov.produto_id]
+    );
+
+    const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
+    const fator = mov.tipo === "entrada" ? 1: -1;
+    const novoSaldo = saldoAtual + quantidade * fator;
+
+    await localClient.query(
+      `INSERT INTO movimentacoes_estoque
+      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+      VALUES ($1, $2, $3, $4, $5, $6)`,
+      [mov.produto_id, mov.tipo, quantidade, mov.origem, mov.referencia_id, mov.usuario_id, mov.preco_unitario ?? null]
+    );
+
+    await localClient.query(
+      `INSERT INTO estoque_saldo(produto_id, quantidade)
+      VALUES ($1, $2)
+      ON CONFLICT (produto_id)
+      DO UPDATE SET quantidade = $2`,
+      [mov.produto_id, novoSaldo]
+    );
+
+    if (!client) await localClient.query("COMMIT");
+  
+  } catch (error) {
+    if (!client) await localClient.query("ROLLBACK");
+    throw error;
+  } finally {
+    if (!client) localClient.release();
+  }
 };
 
-export async function listMovements(produto_id: number) {
-  const result = await db.query(
-    `
-    SELECT 
-      m.id,
-      m.produto_id,
-      m.tipo,
-      m.quantidade,
-      m.origem,
-      m.referencia_id,
-      m.usuario_id,
-      u.username AS usuario,
-      m.created_at
-    FROM movimentacoes_estoque m
-    INNER JOIN users u ON u.id = m.usuario_id
-    WHERE m.produto_id = $1
-    ORDER BY m.created_at DESC
-    `,
-    [produto_id]
-  );
-  return result.rows;
+// *********************************************************************** //
+// *********************************************************************** //
+
+// Movimentações de VENDA.
+
+export async function registerSaleMovement(mov: InventoryMovementModel, client?: any) {
+  const localClient = client || (await db.connect());
+
+  try {
+    if (!client) await localClient.query("BEGIN");
+
+    const quantidade = Math.floor(Number(mov.quantidade));
+
+    const saldoRes = await localClient.query(
+      `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1 FOR UPDATE`,
+      [mov.produto_id]
+    );
+
+    const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
+    const fator = mov.tipo === "saida" ? -1 : 1;
+    const novoSaldo = saldoAtual + quantidade * fator;
+
+    if (novoSaldo < 0) {
+      throw new Error(`Saldo insuficiente para registrar a saída. Saldo Atual: ${saldoAtual}, Tentativa de saída: ${quantidade}`);
+    }
+
+    await localClient.query(
+      `INSERT INTO movimentacoes_estoque
+      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [mov.produto_id, mov.tipo, quantidade, mov.origem, mov.referencia_id, mov.usuario_id, mov.preco_unitario ?? null]
+    );
+
+    await localClient.query(
+      `INSERT INTO estoque_saldo (produto_id, quantidade)
+      VALUES ($1, $2)
+      ON CONFLICT (produto_id)
+      DO UPDATE SET quantidade = $2`,
+      [mov.produto_id, novoSaldo]
+    );
+
+    if (!client) await localClient.query("COMMIT");
+
+  } catch (error) {
+    if (!client) await localClient.query("ROLLBACK");
+    throw error;
+  } finally {
+    if (!client) localClient.release();
+  }
 };

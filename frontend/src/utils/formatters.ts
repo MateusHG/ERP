@@ -21,7 +21,15 @@ export function formatDataAndTime(dataStr: string): string {
   const seconds = String(data.getSeconds()).padStart(2, "0");
 
   return `${day}/${month}/${year} às ${hours}:${minutes}:${seconds}`;
-}
+};
+
+// ========================================================================
+export const parseString = (value: FormDataEntryValue | null) => 
+    value && value.toString().trim() !== "" ? value.toString() : null;
+
+export const parseNumber = (value: FormDataEntryValue | null) => 
+    value ? Number(value.toString().replace(",", ".")) : null;
+// =============================================================================
 
 export function getCurrentMonthDateRange(): { start: string, end: string } {
   // Gera datas padrão para o mês atual

@@ -7,7 +7,7 @@ import { getFilterValues, renderSalesList } from "./sales-dom";
 import { updateSaleItemSummary } from "./sale-item-summary";
 import { updateTotalSaleDisplay } from "./sale-summary";
 import { collectSaleItems, lockSaleItems, unlockSaleItems } from "./sale-items-controller";
-import { getCurrentMonthDateRange } from "../utils/formatters";
+import { getCurrentMonthDateRange, parseNumber, parseString } from "../utils/formatters";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form")! as HTMLFormElement;
@@ -32,6 +32,8 @@ export async function openEditModal(id: number) {
   unlockSaleFormFields(form);
 
   const sale = await getSaleByIdAPI(id);
+
+  document.getElementById("edit-sale-id")!.textContent = String(sale.id);
 
   inputClienteSearch.value = sale.cliente_nome || "";
   inputClienteId.value = String(sale.cliente_id || "");
@@ -63,6 +65,7 @@ export async function openEditModal(id: number) {
   
   items.forEach(item => {
     addItemRowTo(itemsBody, {
+      id: item.id,
       produto_id: item.produto_id,
       produto_codigo: item.produto_codigo || "",
       produto_nome: item.produto_nome || "",
@@ -179,13 +182,6 @@ form.addEventListener("submit", async (event) => {
 
   const updatedSaleData: Partial<any> = {};
 
-  // Helpers
-  const parseString = (value: FormDataEntryValue | null) => 
-    value && value.toString().trim() !== "" ? value.toString() : null;
-
-  const parseNumber = (value: FormDataEntryValue | null) => 
-    value ? Number(value.toString().replace(",", ".")) : null;
-
   // Cabeçalho: compara com originalFormData, para depois enviar no corpo da requisição só o que foi alterado, evita reenviar todas as informações toda vez.
   const cliente_id = parseNumber(formData.get("edit-cliente-id"));
   if (cliente_id !== null && cliente_id !== Number(originalFormData["edit-cliente-id"])) {
@@ -207,12 +203,39 @@ form.addEventListener("submit", async (event) => {
   const status = parseString(formData.get("edit-status"));
   if (status !== originalFormData["edit-status"]) updatedSaleData.status = status;
 
+
+
   // Itens da venda: adiciona apenas se houver alteração
-  const changedItems = currentItems.filter((item, i) => {
-    const original = originalItems[i];
+  
+  // Normaliza os itens atuais(garante o ID de reconhecimento único do item)
+  const normalizedCurrentItems = currentItems.map(item => ({
+    id: item.id ?? null,
+    produto_id: item.produto_id,
+    quantidade: item.quantidade,
+    preco_unitario: item.preco_unitario,
+    desconto_volume: item.desconto_volume ?? 0,
+    valor_subtotal: item.valor_subtotal ?? 0
+  }));
+
+  // Normaliza os itens orginais para comparação
+  const normalizedOriginalItems = originalItems.map(item => ({
+    id: item.id ?? null,
+    produto_id: item.produto_id,
+    produto_quantidade: item.quantidade,
+    preco_unitario: item.preco_unitario,
+    desconto_volume: item.desconto_volume ?? 0,
+    valor_subtotal: item.valor_subtotal ?? 0
+  }));
+
+  // Detecta itens alterados
+  const changedItems = normalizedCurrentItems.filter((item, index) => {
+    const original = normalizedOriginalItems[index];
     return !original || JSON.stringify(item) !== JSON.stringify(original);
   });
-  if (changedItems.length > 0) updatedSaleData.itens = changedItems;
+
+  if (changedItems.length > 0) {
+    updatedSaleData.itens = changedItems;
+  }
 
   if (cliente_id === null) {
     showMessage('Selecione um cliente válido.');

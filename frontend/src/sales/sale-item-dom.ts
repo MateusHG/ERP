@@ -18,6 +18,10 @@ const makeCellInput = (name: string, type = "text", initial = "", placeholder = 
 export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTableRowElement {
   const tr = document.createElement("tr");
 
+  if (item?.id) {
+    tr.dataset.id = String(item.id);
+  }
+
   tr.dataset.status = isSaved ? "salvo" : "editando";
 
   const { td: tdProductId, input: inputProductId } = makeCellInput(
