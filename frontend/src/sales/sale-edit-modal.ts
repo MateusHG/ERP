@@ -203,8 +203,6 @@ form.addEventListener("submit", async (event) => {
   const status = parseString(formData.get("edit-status"));
   if (status !== originalFormData["edit-status"]) updatedSaleData.status = status;
 
-
-
   // Itens da venda: adiciona apenas se houver alteração
   
   // Normaliza os itens atuais(garante o ID de reconhecimento único do item)
@@ -301,32 +299,13 @@ form.addEventListener("submit", async (event) => {
     }
   }
 
-  // ================================
-  // Envia dados do cabeçalho + itens
-  // =========================
+// =========================================
+// Envia dados do cabeçalho + itens
+// =======================================
+try {
   const response = await updateSaleAPI(currentEditId, updatedSaleData);
 
-  console.log("Resposta estoque negativo back-end:", response);
-  console.log("Data:", response.data);
-
-  if (!response.ok) {
-    const errData = response.data || response;
-
-    // 🔹 Estoque insuficiente (suporte a múltiplos itens)
-    if (errData?.detalhes?.produtos) {
-      const itens = errData.detalhes.produtos;
-      showEstoqueNegativoMessage(itens);
-      return;
-    }
-
-    // Outros erros genéricos
-    await showMessage(errData.message || "Erro inesperado ao salvar venda.");
-    return;
-  }
-
-  // =========================
-  // Venda atualizada com sucesso
-  // =========================
+  // Se chegou aqui, deu certo — segue com o fluxo de sucesso
   await showMessage("Venda atualizada com sucesso.");
 
   const currentFilters = getFilterValues();
@@ -340,9 +319,32 @@ form.addEventListener("submit", async (event) => {
   renderSalesList(sales);
 
   modal.classList.add("hidden");
+  return;
+} catch (error: any) {
 
-} catch (err: any) {
-  const details = err.responseData; // caso venha do fetch-helper
-  console.error(details);
-  await showMessage(err?.message || "Erro de conexão com o servidor.");
-}})
+  console.log("Erro do back-end:", error);
+  const errData = error?.responseData || null;
+
+  const produtosNegativos = 
+    errData?.detalhes?.produtos ||
+    errData?.detalhes?.itens ||
+    errData?.produtos ||
+    errData?.itens ||
+    errData?.inconsistencies ||
+    null;
+
+  if (produtosNegativos && Array.isArray(produtosNegativos)) {
+    showEstoqueNegativoMessage(produtosNegativos);
+    return;
+  }
+
+  // Outros erros genéricos
+  await showMessage(errData?.message || error?.message || "Erro inesperado ao salvar venda.");
+  return;
+}
+
+} catch (error: any) {
+  console.error("Erro inesperado no bloco de validação", error);
+  await showMessage("Erro inesperado ao processar venda.");
+  return;
+}});

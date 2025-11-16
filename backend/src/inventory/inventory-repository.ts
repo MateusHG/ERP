@@ -304,12 +304,23 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
       };
     }
 
+    const usuarioId = Number(mov.usuario_id);
+    const referenciaId = Number(mov.referencia_id);
+
     // Se o estoque não for ficar negativo, segue com a movimentação.
     await localClient.query(
       `INSERT INTO movimentacoes_estoque
       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [mov.produto_id, mov.tipo, quantidade, mov.origem, mov.referencia_id, mov.usuario_id, mov.preco_unitario ?? null]
+      [
+        mov.produto_id,
+        mov.tipo,
+        quantidade,
+        mov.origem,
+        !isNaN(referenciaId) ? referenciaId : null,
+        !isNaN(usuarioId) ? usuarioId : null,
+        mov.preco_unitario
+      ]
     );
 
     await localClient.query(

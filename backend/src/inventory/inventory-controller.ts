@@ -77,8 +77,11 @@ export const handleSaleInventoryMovementController = async (req: Request, res: R
     }
     
     const newSaleData = req.body;
-    const updatedSale = await salesRepository.updateSaleById(saleId, newSaleData);
-    const httpResponse = await salesRepository.updateSaleById(oldSale, updatedSale);
+
+    const updatedSale = await salesRepository.updateSaleById(saleId, newSaleData, undefined);
+
+    const httpResponse = await salesRepository.updateSaleById(oldSale, updatedSale, undefined);
+
     res.status(httpResponse.statusCode).json(httpResponse.body);
 
   } catch (err: any) {

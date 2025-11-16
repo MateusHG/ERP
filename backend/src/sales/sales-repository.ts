@@ -171,13 +171,9 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
 // ========================================================================================
 export const updateSaleById = async (
   id: number,
-  fieldsToUpdate: Partial<salesModel>
+  fieldsToUpdate: Partial<salesModel>,
+  client: any
 ) => {
-  const client = await db.connect();
-
-  try {
-    await client.query("BEGIN");
-
     const { itens, ...saleFields } = fieldsToUpdate;
 
     // Atualiza itens
@@ -195,17 +191,7 @@ export const updateSaleById = async (
       await client.query(query, [...values, id]);
     }
 
-    await client.query("COMMIT");
-
     return getSaleByIdQuery(id);
-
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-    
-  } finally {
-    client.release();
-  }
 };
 
 // ====================================================================================

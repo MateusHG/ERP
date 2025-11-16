@@ -1,3 +1,4 @@
+import db from "../config/db";
 import { StockInsufficientError } from "../inventory/inventory-model";
 import { handleSaleInventoryMovementService } from "../inventory/inventory-service";
 import { estoqueNegativoItem, salesItemModel, salesModel } from "../sales/sales-model";
@@ -61,59 +62,66 @@ export const createSalesService = async (
   }
 };
 
-export const updateSaleByIdService = async (id: number, data: Partial<salesModel>) => {
+export const updateSaleByIdService = async (id: number, data: Partial<salesModel>, userId: number) => {
+  const client = await db.connect();
+
   try {
+    await client.query("BEGIN");
+
     if (isNaN(id)) {
-      return badRequest('ID da venda inválido.')
+      await client.query("ROLLBACK");
+      return badRequest('ID da venda inválido.');
     }
 
-    const saleExists = await salesRepository.verifySaleId(id);
-    if (!saleExists) {
-      return notFound('Venda informada não existe.')
+    const oldSale = await salesRepository.getSaleByIdQuery(id);
+    if (!oldSale) {
+      await client.query("ROLLBACK");
+      return notFound('Venda informada não existe.');
     }
 
     if ("data_emissao" in data && !data.data_emissao) {
-      return badRequest("Obrigatório informar a data da emissão")
+      await client.query("ROLLBACK");
+      return badRequest("Obrigatório informar a data da emissão.");
     }
 
     if (Object.keys(data).length === 0) {
-      return badRequest('Nenhum campo enviado para atualização.')
+      await client.query("ROLLBACK");
+      return badRequest('Nenhum campo enviado para atualização.');
     }
 
-    // Busca venda antiga para comparar status
-    const oldSale = await salesRepository.getSaleByIdQuery(id);
+    // Projeta a venda como ficaria após a atualização
+    const projectedSale: salesModel = {
+      ...oldSale,
+      ...data,
+      itens: data.itens ?? oldSale.itens, // garante que os itens existam
+    };
 
-    // ------------------------------------
-    // 1) VALIDAR ESTOQUE ANTES DO UPDATE
-    // ------------------------------------
+    // Verifica se o status mudou
     const saleStatusWithStockImpact = ['entregue', 'finalizado'];
     const statusChanged = data.status && oldSale.status !== data.status;
 
-    if (statusChanged && saleStatusWithStockImpact.includes(data.status!)) {
-
-      // Projeta como ficará a venda com o novo status antes de dar update.
-      const projectedSale = { ...oldSale, ...data };
-
-      // Chama o serviço de estoque para validar a movimentação
-      await handleSaleInventoryMovementService(oldSale, projectedSale);   // --> Chama o serviço no módulo de estoque.
+    if (statusChanged) {
+      // Chama o serviço de movimentação de estoque
+      await handleSaleInventoryMovementService(oldSale, projectedSale, userId);
     }
 
-    // ------------------------------------------
-    // 2) SÓ FAZ O UPDATE SE A VALIDAÇÃO PASSOU
-    // -------------------------------------------
-    const updatedSale = await salesRepository.updateSaleById(id, data);
+    // Atualiza a venda no banco
+    const updatedSale = await salesRepository.updateSaleById(id, data, client);
 
+    await client.query("COMMIT");
     return ok(updatedSale);
-  
+
   } catch (err: any) {
+    await client.query("ROLLBACK");
     console.error(err);
 
-    // Propaga o erro de estoque negativo para o controller tratar.
     if (err instanceof StockInsufficientError) {
       throw err;
     }
 
     return internalServerError('Erro ao atualizar venda.');
+  } finally {
+    client.release();
   }
 };
 

@@ -49,7 +49,6 @@ export async function postSaleAPI(newSaleData: any) {
 };
 
 export async function updateSaleAPI(saleId: number, updatedSaleData: any) {
-  try {
     const response = await authorizedFetch(`https://localhost:3000/api/vendas/${saleId}`, {
       method: "PATCH",
       body: JSON.stringify(updatedSaleData)
@@ -57,20 +56,18 @@ export async function updateSaleAPI(saleId: number, updatedSaleData: any) {
 
     const result = await response.json();
 
+    if (!response.ok) {
+      const err: any = new Error(result?.message || "Erro ao tualziar venda.");
+      err.responseData = result;
+      throw err;
+    }
+
     return {
-      ok: response.ok,
+      ok: true,
       message: result?.message || null,
       data: result?.data || result.body || null,
     };
-  } catch (err: any) {
-    console.error("Erro no updateSaleAPI:", err);
-    return {
-      ok: false,
-      message: err.responseData?.message || err.message || "Erro na requisição.",
-      data: err.responseData || null,
-    };
-  }
-};
+  };
 
 export async function getItemsBySaleIdAPI(id: number): Promise<saleItemModel[]> {
   const result = await authorizedFetch(`https://localhost:3000/api/venda-itens/${id}`, {
