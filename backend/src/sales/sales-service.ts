@@ -1,3 +1,4 @@
+import { StockInsufficientError } from "../inventory/inventory-model";
 import { handleSaleInventoryMovementService } from "../inventory/inventory-service";
 import { estoqueNegativoItem, salesItemModel, salesModel } from "../sales/sales-model";
 import * as salesRepository from "../sales/sales-repository";
@@ -81,21 +82,35 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
 
     // Busca venda antiga para comparar status
     const oldSale = await salesRepository.getSaleByIdQuery(id);
-    const updatedSale = await salesRepository.updateSaleById(id, data);
 
-    //Movimenta estoque se houver mudança de status que altera estoque
+    // ------------------------------------
+    // 1) VALIDAR ESTOQUE ANTES DO UPDATE
+    // ------------------------------------
     const saleStatusWithStockImpact = ['entregue', 'finalizado'];
-    if (data.status && oldSale.status !== data.status) {
-      await handleSaleInventoryMovementService(oldSale, updatedSale);   // --> Chama o serviço no módulo de estoque.
+    const statusChanged = data.status && oldSale.status !== data.status;
+
+    if (statusChanged && saleStatusWithStockImpact.includes(data.status!)) {
+
+      // Projeta como ficará a venda com o novo status antes de dar update.
+      const projectedSale = { ...oldSale, ...data };
+
+      // Chama o serviço de estoque para validar a movimentação
+      await handleSaleInventoryMovementService(oldSale, projectedSale);   // --> Chama o serviço no módulo de estoque.
     }
+
+    // ------------------------------------------
+    // 2) SÓ FAZ O UPDATE SE A VALIDAÇÃO PASSOU
+    // -------------------------------------------
+    const updatedSale = await salesRepository.updateSaleById(id, data);
 
     return ok(updatedSale);
   
   } catch (err: any) {
     console.error(err);
 
-    if (err.message?.includes('Saldo insuficiente')) {
-      return badRequest({message: "Estoque insuficiente para um ou mais produtos."});
+    // Propaga o erro de estoque negativo para o controller tratar.
+    if (err instanceof StockInsufficientError) {
+      throw err;
     }
 
     return internalServerError('Erro ao atualizar venda.');

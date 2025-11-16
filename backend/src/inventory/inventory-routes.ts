@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import authenticate from "../auth/auth-middleware";
-import { getBalanceController, handlePurchaseInventoryMovementController, handleSaleInventoryMovementController, listInventoryController, listMovementsController, registerMovementController } from './inventory-controller';
+import { handlePurchaseInventoryMovementController, handleSaleInventoryMovementController, listInventoryController, listMovementsController, registerMovementController } from './inventory-controller';
 
 const inventoryRouter = Router();
 
@@ -8,7 +8,6 @@ inventoryRouter.use(authenticate);
 
 inventoryRouter.get("/listar", listInventoryController);
 inventoryRouter.get("/movimentacoes/:id", listMovementsController);
-inventoryRouter.get("/saldo/:id", getBalanceController);
 inventoryRouter.post("/movimentar/ajuste", registerMovementController);
 
 inventoryRouter.patch("/compras/:id/movimentar", handlePurchaseInventoryMovementController);

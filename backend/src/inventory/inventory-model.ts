@@ -25,3 +25,36 @@ export interface InventoryMovementModel {
   usuario_nome?: string,
   created_at?: Date;
 };
+
+export interface InventoryMovementResult {
+  estoque_insuficiente: boolean;
+  produto_id?: number;
+  produto?: string | null;
+  codigo?: string | null;
+  estoque_atual?: number;
+  tentativa_saida?: number;
+  estoque_ficaria?: number;
+};
+
+export interface stockInsufficientErrorModel {
+  produto_id: number,
+  produto: string | null;
+  codigo: string | null;
+  estoque_atual: number;
+  tentativa_saida: number;
+  estoque_ficaria: number;
+};
+
+export class StockInsufficientError extends Error {
+  public inconsistencies: stockInsufficientErrorModel[];
+
+  constructor(message: string, inconsistencies: stockInsufficientErrorModel[]) {
+    super(message);
+    this.name = "StockInsufficientError";
+    this.inconsistencies = inconsistencies;
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, StockInsufficientError);
+    }
+  }
+}

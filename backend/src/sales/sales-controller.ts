@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createSalesService, deleteSaleByIdService, getAllSalesService, getSaleByIdService, updateSaleByIdService } from "../sales/sales-service";
+import { StockInsufficientError } from "../inventory/inventory-model";
 
 export const getSales = async (req: Request, res: Response) => {
   const filters = {
@@ -27,10 +28,20 @@ export const postSales = async (req: Request, res: Response) => {
 };
 
 export const patchSaleById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  const data = req.body;
-  const httpResponse = await updateSaleByIdService(id, data);
-  res.status(httpResponse.statusCode).json(httpResponse.body);
+  try {
+    const id = parseInt(req.params.id);
+    const data = req.body;
+    const httpResponse = await updateSaleByIdService(id, data);
+    res.status(httpResponse.statusCode).json(httpResponse.body);
+  
+  } catch (err: any) {
+    if (err instanceof StockInsufficientError) {
+      res.status(400).json({
+        message: err.message,
+        inconsistencies: err.inconsistencies
+      });
+    }
+  }
 };
 
 export const deleteSalesById = async (req: Request, res: Response) => {

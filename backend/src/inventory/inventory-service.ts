@@ -2,7 +2,7 @@ import * as inventoryRepository from "../inventory/inventory-repository";
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 import { salesItemModel, salesModel } from "../sales/sales-model";
 import { badRequest, internalServerError, ok } from "../utils/http-helper";
-import { InventoryMovementModel } from "./inventory-model";
+import { InventoryMovementModel, StockInsufficientError, stockInsufficientErrorModel } from "./inventory-model";
 
 export const listInventoryService = async(filters: { id?: number, codigo?: string, nome?: string, categoria?: string, status?: string, saldo?: string}) => {
   try {
@@ -33,18 +33,6 @@ export const registerMovementService = async (mov: InventoryMovementModel) => {
     }
     console.error(err);
     return internalServerError('Erro ao registrar movimentação.')
-  }
-};
-
-
-export const getBalanceService = async (produto_id: number) => {
-  try {
-    const balance = await inventoryRepository.getBalance(produto_id);
-    return ok(balance);
-  
-  } catch (err) {
-    console.error(err);
-    return internalServerError('Erro ao verificar saldo.')
   }
 };
 
@@ -105,6 +93,8 @@ export async function handlePurchaseInventoryMovementService(
   }
 };
 
+
+
 // Serviço para movimentar estoque á partir da venda.
 export async function handleSaleInventoryMovementService(
   oldSale: salesModel,
@@ -115,10 +105,15 @@ export async function handleSaleInventoryMovementService(
   try {
   const saleStatusWithStockImpact = ['entregue', 'finalizado'];
 
+  const inconsistencies: stockInsufficientErrorModel[] = [];
+
   for (const item of newSale.itens as salesItemModel[]) {
     // Saída de estoque
-    if (!saleStatusWithStockImpact.includes(oldSale.status) && saleStatusWithStockImpact.includes(newSale.status)) {
-      await inventoryRepository.registerSaleMovement({
+    if (
+      !saleStatusWithStockImpact.includes(oldSale.status) && 
+      saleStatusWithStockImpact.includes(newSale.status)
+    ) {
+      const res = await inventoryRepository.registerSaleMovement({
         produto_id: item.produto_id,
         quantidade: item.quantidade,
         tipo: 'saida',
@@ -126,12 +121,31 @@ export async function handleSaleInventoryMovementService(
         referencia_id: newSale.id,
         usuario_id: userId,
         preco_unitario: item.preco_unitario
-      }, client);
+      },
+       client
+      );
+
+      // Se houver algum produto que irá ficar com saldo negativo => acumula no array
+      if (res.estoque_insuficiente) {
+        inconsistencies.push({
+          produto_id: res.produto_id!,
+          produto: res.produto!,
+          codigo: res.codigo!,
+          estoque_atual: res.estoque_atual!,
+          tentativa_saida: res.tentativa_saida!,
+          estoque_ficaria: res.estoque_ficaria!
+        });
+        continue;
+      }
     }
 
     // Se moveu de 'finalizado' ou 'entregue' para algum outro status -> estorna a venda.
-    if (saleStatusWithStockImpact.includes(oldSale.status) && !saleStatusWithStockImpact.includes(newSale.status)) {
-      await inventoryRepository.registerSaleMovement({
+    if (
+      saleStatusWithStockImpact.includes(oldSale.status) && 
+      !saleStatusWithStockImpact.includes(newSale.status)
+    ) {
+      const res = await inventoryRepository.registerSaleMovement(
+      {
         produto_id: item.produto_id,
         quantidade: item.quantidade,
         tipo: 'entrada',
@@ -139,15 +153,39 @@ export async function handleSaleInventoryMovementService(
         referencia_id: newSale.id,
         usuario_id: userId,
         preco_unitario: item.preco_unitario
-      }, client);
+      }, 
+      client
+    );
+
+    if (res.estoque_insuficiente) {
+      inconsistencies.push({
+        produto_id: res.produto_id!,
+        produto: res.produto!,
+        codigo: res.codigo!,
+        estoque_atual: res.estoque_atual!,
+        tentativa_saida: res.tentativa_saida!,
+        estoque_ficaria: res.estoque_ficaria!
+      });
+      continue;
     }
+  }
 
     // Transição interna entre 'entregue' <-> 'finalizado' → não movimenta.
     }
 
+    if (inconsistencies.length > 0) {
+      throw new StockInsufficientError("Existem itens com saldo insuficiente para dar saída.", inconsistencies)
+    }
+
     return ok("Movimentou estoque á partir da venda com sucesso.")
+  
   } catch (error: any) {
     console.error(error);
+
+    if (error instanceof StockInsufficientError) {
+      throw error;
+    }
+
     return internalServerError("Erro ao movimentar estoque à partir da venda.");
   }
 };

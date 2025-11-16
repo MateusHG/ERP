@@ -1,4 +1,4 @@
-import { inventoryListModel, InventoryMovementModel } from "./inventory-model";
+import { inventoryListModel, InventoryMovementModel, InventoryMovementResult } from "./inventory-model";
 import db  from "../config/db";
 
 export const listInventoryItems = async(filters: { 
@@ -261,8 +261,8 @@ export async function registerPurchaseMovement(mov: InventoryMovementModel, clie
 // *********************************************************************** //
 
 // Movimentações de VENDA.
-
-export async function registerSaleMovement(mov: InventoryMovementModel, client?: any) {
+export async function registerSaleMovement(mov: InventoryMovementModel, client?: any  
+): Promise<InventoryMovementResult> {
   const localClient = client || (await db.connect());
 
   try {
@@ -270,19 +270,41 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
 
     const quantidade = Math.floor(Number(mov.quantidade));
 
-    const saldoRes = await localClient.query(
-      `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1 FOR UPDATE`,
+    // Buscar saldo + nome + código
+    const produtoRes = await localClient.query(
+      `SELECT
+      es.quantidade AS estoque_atual,
+      p.nome AS produto,
+      p.codigo
+      FROM estoque_saldo es
+      JOIN produtos p ON p.id = es.produto_id
+      WHERE es.produto_id = $1
+      FOR UPDATE`,
       [mov.produto_id]
     );
 
-    const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
-    const fator = mov.tipo === "saida" ? -1 : 1;
-    const novoSaldo = saldoAtual + quantidade * fator;
+    const estoque_atual = produtoRes.rows[0]?.estoque_atual || 0;
+    const produto_nome = produtoRes.rows[0]?.produto || null;
+    const codigo = produtoRes.rows[0]?.codigo || null;
 
-    if (novoSaldo < 0) {
-      throw new Error(`Saldo insuficiente para registrar a saída. Saldo Atual: ${saldoAtual}, Tentativa de saída: ${quantidade}`);
+    const fator = mov.tipo === "saida" ? -1 : 1;
+    const estoque_ficaria = estoque_atual + quantidade * fator;
+
+    // ==== Se algum dos itens forem ficar negativos, executa ROLLBACK e retorna um objeto JSON para enviar ao front-end. =======
+    if (estoque_ficaria < 0) {
+      if (!client) await localClient.query("ROLLBACK");
+      return {
+        estoque_insuficiente: true,
+        produto_id: mov.produto_id,
+        produto: produto_nome,
+        codigo,
+        estoque_atual,
+        tentativa_saida: quantidade,
+        estoque_ficaria
+      };
     }
 
+    // Se o estoque não for ficar negativo, segue com a movimentação.
     await localClient.query(
       `INSERT INTO movimentacoes_estoque
       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
@@ -295,11 +317,12 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
       VALUES ($1, $2)
       ON CONFLICT (produto_id)
       DO UPDATE SET quantidade = $2`,
-      [mov.produto_id, novoSaldo]
+      [mov.produto_id, estoque_ficaria]
     );
 
     if (!client) await localClient.query("COMMIT");
 
+    return { estoque_insuficiente : false };
   } catch (error) {
     if (!client) await localClient.query("ROLLBACK");
     throw error;
