@@ -71,6 +71,10 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return notFound('Venda informada não existe.')
     }
 
+    if ("data_emissao" in data && !data.data_emissao) {
+      return badRequest("Obrigatório informar a data da emissão")
+    }
+
     if (Object.keys(data).length === 0) {
       return badRequest('Nenhum campo enviado para atualização.')
     }
@@ -82,7 +86,7 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
     //Movimenta estoque se houver mudança de status que altera estoque
     const saleStatusWithStockImpact = ['entregue', 'finalizado'];
     if (data.status && oldSale.status !== data.status) {
-      await handleSaleInventoryMovementService(oldSale, updatedSale);
+      await handleSaleInventoryMovementService(oldSale, updatedSale);   // --> Chama o serviço no módulo de estoque.
     }
 
     return ok(updatedSale);

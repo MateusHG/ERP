@@ -60,7 +60,7 @@ export const listMovementsService = async (produto_id: number) => {
   }
 };
 
-
+// Serviço para movimentar estoque á partir da compra.
 export async function handlePurchaseInventoryMovementService(
   oldPurchase: purchaseModel,
   newPurchase: purchaseModel,
@@ -89,7 +89,7 @@ export async function handlePurchaseInventoryMovementService(
         produto_id: item.produto_id,
         quantidade: item.quantidade,
         tipo: 'saida', // saída pois é estorno da compra.
-        origem: 'compra',
+        origem: 'estorno_compra',
         referencia_id: newPurchase.id,
         usuario_id: userId,
         preco_unitario: item.preco_unitario
@@ -105,7 +105,7 @@ export async function handlePurchaseInventoryMovementService(
   }
 };
 
-
+// Serviço para movimentar estoque á partir da venda.
 export async function handleSaleInventoryMovementService(
   oldSale: salesModel,
   newSale: salesModel,
@@ -135,7 +135,7 @@ export async function handleSaleInventoryMovementService(
         produto_id: item.produto_id,
         quantidade: item.quantidade,
         tipo: 'entrada',
-        origem: "venda",
+        origem: "estorno_venda",
         referencia_id: newSale.id,
         usuario_id: userId,
         preco_unitario: item.preco_unitario

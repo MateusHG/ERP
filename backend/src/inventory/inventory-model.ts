@@ -19,7 +19,7 @@ export interface InventoryMovementModel {
   quantidade: number;
   preco_unitario?: number;
   valor_total?: number;
-  origem: string;
+  origem: "compra" | "venda" | "estorno_compra" | "estorno_venda";
   referencia_id: number;
   usuario_id: number;
   usuario_nome?: string,

@@ -1,6 +1,7 @@
 import * as purchasesRepository from "../purchases/purchase-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
+import { handlePurchaseInventoryMovementService } from "../inventory/inventory-service";
 
 export const getAllPurchasesService = async (
   filters: {id?: number, fornecedor_nome?: string, status?: string, data_emissao_inicio: string, data_emissao_final: string}
@@ -76,23 +77,39 @@ export const createPurchaseService = async (
 
 export const updatePurchaseByIdService = async (id: number, data: Partial<purchaseModel>) => {
   try {
+    if (isNaN(id)) {
+      return badRequest("ID da compra inválido.")
+    }
+
+    const purchaseExists = await purchasesRepository.verifyPurchaseId(id);
+    if (!purchaseExists) {
+      return notFound("Compra informada não existe.")
+    }
+
     if (Object.keys(data).length === 0) {
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
     if ("data_emissao" in data && !data.data_emissao) {
-      return badRequest("Obrigatório informar data da emissão.")
+      return badRequest("Obrigatório informar a data da emissão.")
     }
 
-    const updatedPurchase = purchasesRepository.updatePurchase(id, data);
+    // Lógica para movimentar estoque (mudou o status para recebido ou finalizado) -> chama serviço no módulo de estoque.
+    const oldPurchase = await purchasesRepository.getPurchaseByIdQuery(id);
+    const updatedPurchase = await purchasesRepository.updatePurchaseById(id, data);
+
+    const purchaseStatusWithStockImpact = ['recebido', 'finalizado'];
+    if (data.status && oldPurchase.status !== data.status) {
+      await handlePurchaseInventoryMovementService(oldPurchase, updatedPurchase);
+    }
+
     return ok(updatedPurchase);
 
-  } catch (err: any) {
+    } catch (err: any) {
     console.error("Erro ao atualizar a compra:", err);
 
-    // Se for erro de banco de dados (constraint violation), devolve mensagem clara
-    if (err.code === "23502") { // NOT NULL violation
-      return badRequest("Campo obrigatório não preenchido: " + err.column);
+    if (err.message?.includes('Saldo insuficiente')) {
+      return badRequest({message: "Estoque insuficiente para um ou mais produtos."});
     }
 
     return internalServerError('Erro ao atualizar compra.')

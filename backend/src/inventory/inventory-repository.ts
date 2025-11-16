@@ -235,12 +235,12 @@ export async function registerPurchaseMovement(mov: InventoryMovementModel, clie
     await localClient.query(
       `INSERT INTO movimentacoes_estoque
       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
-      VALUES ($1, $2, $3, $4, $5, $6)`,
+      VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [mov.produto_id, mov.tipo, quantidade, mov.origem, mov.referencia_id, mov.usuario_id, mov.preco_unitario ?? null]
     );
 
     await localClient.query(
-      `INSERT INTO estoque_saldo(produto_id, quantidade)
+      `INSERT INTO estoque_saldo (produto_id, quantidade)
       VALUES ($1, $2)
       ON CONFLICT (produto_id)
       DO UPDATE SET quantidade = $2`,

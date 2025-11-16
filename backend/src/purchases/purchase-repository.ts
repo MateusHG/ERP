@@ -186,20 +186,35 @@ export const insertPurchase = async (data: newPurchaseInput): Promise<purchaseMo
 //Verificar se existe um fornecedor com o ID informado antes de criar a compra.
 export const verifySupplierId = async (fornecedor_id: number): Promise<purchaseModel | null> => {
   const result = await db.query(
-    `SELECT * FROM fornecedores where id = $1 limit 1`,
+    `SELECT * FROM fornecedores WHERE id = $1 limit 1`,
     [fornecedor_id]
   );
 
   return result.rows[0] || null;
 };
 
+export const verifyPurchaseId = async (id: number): Promise<purchaseModel | null> => {
+  const result = await db.query(
+    `SELECT * FROM compras WHERE id = $1 limit 1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};
+
 // Atualizar compra + itens
-export const updatePurchase = async (id: number, fieldsToUpdate: Partial<purchaseModel>) => {
+export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>) => {
   const client = await db.connect();
+  
   try {
     await client.query("BEGIN");
 
     const { itens, ...purchaseFields } = fieldsToUpdate;
+
+    // Atualiza itens
+    if (itens && Array.isArray(itens)) {
+      await updatePurchaseItems(client, id, itens);
+    }
 
     const keys = Object.keys(purchaseFields);
     const values = Object.values(purchaseFields);
@@ -226,17 +241,17 @@ export const updatePurchase = async (id: number, fieldsToUpdate: Partial<purchas
 };
 
 // Atualizar itens
-const updatePurchaseItems = async (client: any, purchaseId: number, items: any[]) => {
+const updatePurchaseItems = async (client: any, purchaseId: number, items: purchaseItemModel[]) => {
   const currentItems = await client.query(
     `SELECT id FROM itens_compra WHERE compra_id = $1`,
     [purchaseId]
   );
   const currentItemIds = currentItems.rows.map((row: {id: number}) => row.id);
 
-  const itemsToUpdate = items.filter((item) => item.item_id !== undefined && item.item_id !== null);
-  const itemsToCreate = items.filter((item) => !item.item_id);
+  const itemsToUpdate = items.filter((item) => item.id);
+  const itemsToCreate = items.filter((item) => !item.id);
   const itemsToDelete = currentItemIds.filter(
-    (id: number) => !items.some((item) => item.item_id === id)
+    (id: number) => !items.some((item) => item.id === id)
   );
 
   // Deletar
@@ -260,7 +275,7 @@ const updatePurchaseItems = async (client: any, purchaseId: number, items: any[]
             item.quantidade,
             item.preco_unitario,
             item.desconto_volume || 0,
-            item.item_id,
+            item.id,
             purchaseId,
           ]
         )
