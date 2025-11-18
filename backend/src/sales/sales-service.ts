@@ -38,7 +38,7 @@ export const getSaleByIdService = async (id: number) => {
 };
 
 
-export const createSalesService = async (sale: NewSaleInput) => {
+export const createSalesService = async (sale: NewSaleInput, userId: number) => {
 
   const client = await db.connect();
 
@@ -83,7 +83,6 @@ export const createSalesService = async (sale: NewSaleInput) => {
         itens: [],
       };
 
-      const userId = 3;
       console.log("ITENS DA FULLSALE:", fullSale.itens);
       await handleSaleInventoryMovementService(oldSale, fullSale, userId, client);
     }    
