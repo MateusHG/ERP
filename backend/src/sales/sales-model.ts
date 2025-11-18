@@ -8,8 +8,8 @@ export interface salesModel {
   desconto_financeiro?: number;  // pagamento à vista, antecipado
   valor_bruto?: number;           // soma dos itens sem desconto
   valor_total?: number;           // valor final após descontos aplicados
-  status: 'aberto' | 'aguardando' | 'aprovado' | 'despachado' | 'cancelado';
-  itens: [];
+  status: SaleStatusType;
+  itens: salesItemModel[];
   data_cadastro: Date;
   data_atualizacao: Date;
 }
@@ -31,3 +31,20 @@ export interface estoqueNegativoItem {
   tentativaSaida: number;
   estoqueFicaria: number;
 }
+
+export type SaleStatusType = 
+  | 'aberto' 
+  | 'aguardando' 
+  | 'aprovado' 
+  | 'despachado' 
+  | 'entregue' 
+  | 'finalizado' 
+  | 'cancelado';
+
+export type NewSaleInput =
+  Omit<
+    salesModel,
+    'id' | 'data_cadastro' | 'data_atualizacao' | 'valor_bruto' | 'valor_total' | 'itens'
+  > & {
+    itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
+  };

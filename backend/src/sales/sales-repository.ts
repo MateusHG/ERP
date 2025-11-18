@@ -1,5 +1,5 @@
 import db from "../config/db"
-import { salesItemModel, salesModel } from "./sales-model"
+import { NewSaleInput, salesItemModel, salesModel } from "./sales-model"
 
 export const searchAllSales = async (
   filters: { id?: number, cliente_nome?: string, status?: string, data_emissao_inicio: string, data_emissao_final: string }
@@ -60,16 +60,7 @@ export const searchSaleById = async (id: number): Promise<salesModel | null> => 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-interface newSaleInput extends Omit<salesModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> {
-  itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
-}
-
-export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
-  const client = await db.connect();
-
-  //Inicío da transição
-  try {
-    await client.query('BEGIN');
+export const insertSale = async (client: any, data: NewSaleInput): Promise<salesModel> => {
 
     //Insert na tabela "vendas".
     const insertSaleQuery = `
@@ -82,15 +73,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
       status,
       data_cadastro,
       data_atualizacao
-      ) VALUES (
-       $1,
-       $2,
-       $3,
-       $4,
-       $5,
-       $6,
-       NOW (),
-       NOW () )
+      ) VALUES ($1, $2, $3, $4, $5, $6, NOW (), NOW ())
        RETURNING id`;
 
     //Guarda os valores no array
@@ -104,9 +87,16 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
     ];
 
     const result = await client.query( insertSaleQuery, saleValues );
+
     const saleId = result.rows[0].id;
 
-    //Insert na tabela "itens_venda"
+    await insertNewSaleItems(client, saleId, data.itens);  
+
+    return await getSaleByIdQuery(client, saleId);
+  };
+
+export const insertNewSaleItems = async (client: any, saleId: number, items: NewSaleInput["itens"]) => {
+  //Insert na tabela "itens_venda"
     const insertSaleItemQuery = `
     INSERT INTO itens_venda (
     venda_id,
@@ -116,7 +106,7 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
     desconto_volume
     ) VALUES ($1, $2, $3, $4, $5)`;
 
-      for (const item of data.itens) {
+      for (const item of items) {
       await client.query(insertSaleItemQuery, [
         saleId,
         item.produto_id,
@@ -125,50 +115,11 @@ export const insertSale = async (data: newSaleInput): Promise<salesModel> => {
         item.desconto_volume
       ]);
     }
-
-    //Se a transição ocorreu sem erros, executa COMMIT.
-    await client.query('COMMIT');
-
-    // SELECT para consulta, depois retorna todos os dados da venda inserida no JSON de resposta.
-    const insertedSaleResponse = `
-      SELECT
-        v.id AS venda_id,
-        v.cliente_id,
-        v.data_emissao,
-        v.tipo_pagamento,
-        v.desconto_comercial,
-        v.desconto_financeiro,
-        v.valor_bruto,
-        v.valor_total,
-        v.status,
-        v.data_cadastro,
-        v.data_atualizacao,
-
-        iv.id AS id_item,
-        iv.produto_id,
-        iv.quantidade,
-        iv.preco_unitario,
-        iv.desconto_volume,
-        iv.valor_subtotal
-      FROM vendas v
-      INNER JOIN itens_venda iv ON v.id = iv.venda_id
-      WHERE v.id = $1
-    `;
-
-    const selectResult = await client.query(insertedSaleResponse, [saleId]);
-    return selectResult.rows;
-  
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
 };
 
-// ========================================================================================
-// Atualiza a venda completa (itens + cabeçalho) usando transação(begin/commit/rollback).
-// ========================================================================================
+// =============================================
+// Atualiza a venda completa (itens + cabeçalho)
+// ==============================================
 export const updateSaleById = async (
   id: number,
   fieldsToUpdate: Partial<salesModel>,
@@ -191,7 +142,7 @@ export const updateSaleById = async (
       await client.query(query, [...values, id]);
     }
 
-    return getSaleByIdQuery(id);
+    return getSaleByIdQuery(client, id);
 };
 
 // ====================================================================================
@@ -264,15 +215,15 @@ async function updateSaleItems(client: any, saleId: number, items: salesItemMode
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
 // Buscar venda com itens
-export async function getSaleByIdQuery(id: number) {
-  const saleResult = await db.query(
+export async function getSaleByIdQuery(client: any, id: number) {
+  const saleResult = await client.query(
     `SELECT * FROM vendas WHERE id = $1`,
     [id]
   );
 
   if (saleResult.rows.length === 0) return null;
 
-  const itemsResult = await db.query(
+  const itemsResult = await client.query(
     `SELECT vi.*, p.codigo as produto_codigo, p.nome as produto_nome
      FROM itens_venda vi
      LEFT JOIN produtos p ON vi.produto_id = p.id

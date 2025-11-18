@@ -22,10 +22,22 @@ export const getSaleById = async (req: Request, res: Response) => {
 };
 
 export const postSales = async (req: Request, res: Response) => {
-  const sales = req.body
-  const httpResponse = await createSalesService(sales);
+  try {
+  const sale = req.body
+  const httpResponse = await createSalesService(sale);
   res.status(httpResponse.statusCode).json(httpResponse.body);
-};
+
+} catch (err: any) {
+  if (err instanceof StockInsufficientError) {
+    res.status(400).json({
+      message: err.message,
+      inconsistencies: err.inconsistencies
+    });
+  }
+  console.error(err);
+  res.status(500).json({ error: "Erro interno no servidor. "});
+}
+}
 
 export const patchSaleById = async (req: Request, res: Response) => {
   try {

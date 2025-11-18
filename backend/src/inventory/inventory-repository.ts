@@ -261,17 +261,15 @@ export async function registerPurchaseMovement(mov: InventoryMovementModel, clie
 // *********************************************************************** //
 
 // Movimentações de VENDA.
-export async function registerSaleMovement(mov: InventoryMovementModel, client?: any  
+export async function registerSaleMovement(mov: InventoryMovementModel, client: any  
 ): Promise<InventoryMovementResult> {
-  const localClient = client || (await db.connect());
 
   try {
-    if (!client) await localClient.query("BEGIN");
 
     const quantidade = Math.floor(Number(mov.quantidade));
 
     // Buscar saldo + nome + código
-    const produtoRes = await localClient.query(
+    const produtoRes = await client.query(
       `SELECT
       es.quantidade AS estoque_atual,
       p.nome AS produto,
@@ -292,7 +290,6 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
 
     // ==== Se algum dos itens forem ficar negativos, executa ROLLBACK e retorna um objeto JSON para enviar ao front-end. =======
     if (estoque_ficaria < 0) {
-      if (!client) await localClient.query("ROLLBACK");
       return {
         estoque_insuficiente: true,
         produto_id: mov.produto_id,
@@ -308,7 +305,7 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
     const referenciaId = Number(mov.referencia_id);
 
     // Se o estoque não for ficar negativo, segue com a movimentação.
-    await localClient.query(
+    await client.query(
       `INSERT INTO movimentacoes_estoque
       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
@@ -323,7 +320,7 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
       ]
     );
 
-    await localClient.query(
+    await client.query(
       `INSERT INTO estoque_saldo (produto_id, quantidade)
       VALUES ($1, $2)
       ON CONFLICT (produto_id)
@@ -331,13 +328,9 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client?:
       [mov.produto_id, estoque_ficaria]
     );
 
-    if (!client) await localClient.query("COMMIT");
-
     return { estoque_insuficiente : false };
-  } catch (error) {
-    if (!client) await localClient.query("ROLLBACK");
+  } catch (error: any) {
+    console.error(error)
     throw error;
-  } finally {
-    if (!client) localClient.release();
   }
 };

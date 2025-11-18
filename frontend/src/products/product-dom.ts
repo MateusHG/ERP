@@ -21,7 +21,7 @@ export function renderProductsList(products: productModel[]): void {
     const tr = document.createElement("tr");
     
     const textCell = (value: string | number): HTMLTableCellElement => {
-      const td = document.createElement("td");
+      const td = document.createElement("td"); // td = table data
       td.textContent = String(value);
       return td;
     };
@@ -44,7 +44,7 @@ export function renderProductsList(products: productModel[]): void {
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-edit";
     btnEdit.textContent = "✏️";
-    btnEdit.dataset.id = product.id.toString();
+    btnEdit.dataset.id = product.id.toString(); // Guarda o id do produto vindo do backend no botão de editar.
 
     const btnDelete = document.createElement("button");
     btnDelete.className = "btn-delete";

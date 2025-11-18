@@ -1,7 +1,7 @@
 import db from "../config/db";
 import { StockInsufficientError } from "../inventory/inventory-model";
 import { handleSaleInventoryMovementService } from "../inventory/inventory-service";
-import { estoqueNegativoItem, salesItemModel, salesModel } from "../sales/sales-model";
+import { estoqueNegativoItem, NewSaleInput, salesItemModel, salesModel } from "../sales/sales-model";
 import * as salesRepository from "../sales/sales-repository";
 import { badRequest, created, internalServerError, notFound, ok } from "../utils/http-helper";
 
@@ -37,30 +37,75 @@ export const getSaleByIdService = async (id: number) => {
     }
 };
 
-export const createSalesService = async (
-  //Omitindo campos que são gerados automaticamente pelo banco de dados.
-  sale: Omit<salesModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> & {
-  itens: Omit<salesItemModel, 'id'  | 'valor_subtotal'>[]}
-) => {
+
+export const createSalesService = async (sale: NewSaleInput) => {
+
+  const client = await db.connect();
+
   try {
+    await client.query("BEGIN");
+
     if ( !sale.status || !sale.cliente_id || !sale.tipo_pagamento || !sale.itens ) {
+      await client.query("ROLLBACK");
       return badRequest(
         'Campos obrigatórios estão ausentes: status da venda, cliente, tipo de pagamento ou itens. ')
     }
 
     const clientExists = await salesRepository.verifyClientId(sale.cliente_id);
     if (!clientExists) {
+      await client.query("ROLLBACK");
       return badRequest('Cliente informado não existe.')
     }
 
-    const insertedSale = await salesRepository.insertSale(sale);
-    return created(insertedSale);
+    if (sale.itens.length === 0) {
+      await client.query("ROLLBACK");
+      return badRequest("A venda deve possuir pelo menos um item.")
+    }
+
+    if (!sale.data_emissao) {
+      await client.query("ROLLBACK");
+      return badRequest("Obrigatório informar a data da emissão.");
+    }
+
+    // ================================
+    // Projeção da venda ANTES de criar
+    // ==================================
+    const insertedSale = await salesRepository.insertSale(client, sale);
+
+    const fullSale = await salesRepository.getSaleByIdQuery(client, insertedSale.id);
+
+    const salesStatusWithStockImpact = ["entregue", "finalizado"];
+
+    if (salesStatusWithStockImpact.includes(fullSale.status)) {
+      const oldSale: salesModel = {
+        ...fullSale,
+        status: "aberto",
+        itens: [],
+      };
+
+      const userId = 3;
+      console.log("ITENS DA FULLSALE:", fullSale.itens);
+      await handleSaleInventoryMovementService(oldSale, fullSale, userId, client);
+    }    
+
+    await client.query("COMMIT");
+    return created(fullSale);
   
-  } catch (err) {
+  } catch (err: any) {
+    await client.query("ROLLBACK");
     console.error(err);
-    return internalServerError('Erro ao cadastrar venda.')
+
+    if (err instanceof StockInsufficientError) {
+      throw err;
+    }
+
+    return internalServerError('Erro ao cadastrar venda.');
+  
+  } finally {
+    client.release();
   }
 };
+
 
 export const updateSaleByIdService = async (id: number, data: Partial<salesModel>, userId: number) => {
   const client = await db.connect();
@@ -73,7 +118,7 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return badRequest('ID da venda inválido.');
     }
 
-    const oldSale = await salesRepository.getSaleByIdQuery(id);
+    const oldSale = await salesRepository.getSaleByIdQuery(client, id);
     if (!oldSale) {
       await client.query("ROLLBACK");
       return notFound('Venda informada não existe.');
@@ -102,7 +147,7 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
 
     if (statusChanged) {
       // Chama o serviço de movimentação de estoque
-      await handleSaleInventoryMovementService(oldSale, projectedSale, userId);
+      await handleSaleInventoryMovementService(oldSale, projectedSale, userId, client);
     }
 
     // Atualiza a venda no banco

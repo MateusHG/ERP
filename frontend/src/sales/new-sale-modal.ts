@@ -2,7 +2,7 @@ import { setupCustomerAutoComplete } from "../utils/autocomplete";
 import { resetSaleItemSummary } from "./sale-item-summary";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { setupCurrencyInputs } from "../utils/formatters";
-import { showConfirm, showMessage } from "../utils/messages";
+import { showConfirm, showEstoqueNegativoMessage, showMessage } from "../utils/messages";
 import { renderSalesList } from "./sales-dom";
 import { loadSalesAPI, postSaleAPI } from "./sales-service";
 
@@ -76,17 +76,63 @@ form.addEventListener("submit", async (e) => {
     itens
   }
 
-  try {
-    const response = await postSaleAPI(newSaleData);
+ try {
+  // =========================
+  // Validação de status
+  // =========================
+  const currentStatus = (newSaleData.status || "").toLowerCase();
 
-    showMessage(response.message || "Venda cadastrada com sucesso.");
+  const statusesFinalized = ["finalizado", "entregue"];
+  const statusesOpen = ["aberto", "aguardando", "aprovado", "despachado", "cancelado"];
 
-    newSaleModal.classList.add("hidden");
+  const isFinalized = statusesFinalized.includes(currentStatus);
 
-    renderSalesList(await loadSalesAPI());
-  
-  } catch (err: any) {
-    console.error("Erro ao cadastrar venda:", err);
-    showMessage(err.message || "Erro desconhecido ao cadastrar venda.")
+  // Em nova venda, só existe a transição: Aberto → Finalizado
+  if (isFinalized) {
+    const confirmed = await showConfirm(
+      "<b>🛑 Atenção! 🛑</b><br><br>" +
+      "Salvar a venda com status <b>'Finalizado'</b> ou <b>'Entregue'</b> fará o sistema <b>dar saída no estoque.</b><br><br>" +
+      "<b>Deseja continuar?</b>"
+    );
+
+    if (!confirmed) {
+      await showMessage(
+        "<b>Operação cancelada ✅</b><br><br>" +
+        "- Estoque não foi alterado."
+      );
+      return;  // ← agora está corretamente dentro do IF
+    }
   }
-});
+
+  // =========================
+  // Envio da venda ao backend
+  // =========================
+  const response = await postSaleAPI(newSaleData);
+
+  await showMessage(response.message || "Venda cadastrada com sucesso.");
+
+  newSaleModal.classList.add("hidden");
+
+  renderSalesList(await loadSalesAPI());
+
+} catch (err: any) {
+  console.error("Erro ao cadastrar venda:", err);
+
+  const errData = err?.responseData || null;
+
+  const produtosNegativos =
+    errData?.detalhes?.produtos ||
+    errData?.detalhes?.itens ||
+    errData?.produtos ||
+    errData?.itens ||
+    errData?.inconsistencies ||
+    null;
+
+  if (produtosNegativos && Array.isArray(produtosNegativos)) {
+    showEstoqueNegativoMessage(produtosNegativos);
+    return;
+  }
+
+  await showMessage(errData?.message || err?.message || "Erro desconhecido ao cadastrar venda.");
+
+}});

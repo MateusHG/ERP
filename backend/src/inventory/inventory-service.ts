@@ -100,15 +100,13 @@ export async function handlePurchaseInventoryMovementService(
 export async function handleSaleInventoryMovementService(
   oldSale: salesModel,
   newSale: salesModel,
-  userId: number
+  userId: number,
+  client: any
 ) {
   const saleStatusWithStockImpact = ['entregue', 'finalizado'];
   const inconsistencies: stockInsufficientErrorModel[] = [];
-  const client = await db.connect();
 
   try {
-    await client.query("BEGIN");
-
     // === Saída de estoque: de status aberto → finalizado/entregue ===
     if (
       !saleStatusWithStockImpact.includes(oldSale.status) &&
@@ -174,23 +172,18 @@ export async function handleSaleInventoryMovementService(
     // === Transição interna entre 'entregue' <-> 'finalizado' → não faz nada ===
 
     if (inconsistencies.length > 0) {
-      await client.query("ROLLBACK");
       throw new StockInsufficientError(
         "Existem itens com saldo insuficiente para dar saída.",
         inconsistencies
       );
     }
 
-    await client.query("COMMIT");
     return ok("Movimentou estoque à partir da venda com sucesso.");
     
   } catch (error: any) {
-    await client.query("ROLLBACK");
     console.error(error);
 
     if (error instanceof StockInsufficientError) throw error;
     return internalServerError("Erro ao movimentar estoque à partir da venda.");
-  } finally {
-    client.release();
   }
 }
