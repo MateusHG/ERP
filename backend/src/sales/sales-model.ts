@@ -12,6 +12,8 @@ export interface salesModel {
   itens: salesItemModel[];
   data_cadastro: Date;
   data_atualizacao: Date;
+  created_by: number;
+  updated_by: number;
 }
 
 export interface salesItemModel {
@@ -22,6 +24,8 @@ export interface salesItemModel {
   preco_unitario: number;
   desconto_volume?: number;    // desconto por item por quantidade
   // valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
+  created_by: number;
+  updated_by: number;
 }
 
 export interface estoqueNegativoItem {
@@ -32,19 +36,8 @@ export interface estoqueNegativoItem {
   estoqueFicaria: number;
 }
 
-export type SaleStatusType = 
-  | 'aberto' 
-  | 'aguardando' 
-  | 'aprovado' 
-  | 'despachado' 
-  | 'entregue' 
-  | 'finalizado' 
-  | 'cancelado';
+export type SaleStatusType = | 'aberto' | 'aguardando'  | 'aprovado' | 'despachado' | 'entregue' | 'finalizado' | 'cancelado';
 
-export type NewSaleInput =
-  Omit<
-    salesModel,
-    'id' | 'data_cadastro' | 'data_atualizacao' | 'valor_bruto' | 'valor_total' | 'itens'
-  > & {
+export type NewSaleInput =Omit<salesModel,'id' | 'data_cadastro' | 'data_atualizacao' | 'valor_bruto' | 'valor_total' | 'itens'> & {
     itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
   };

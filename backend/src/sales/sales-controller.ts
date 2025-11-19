@@ -24,7 +24,8 @@ export const getSaleById = async (req: Request, res: Response) => {
 export const postSales = async (req: Request, res: Response) => {
   try {
   const sale = req.body
-  const httpResponse = await createSalesService(sale);
+  const userId = req.user!.id;
+  const httpResponse = await createSalesService(sale, userId);
   res.status(httpResponse.statusCode).json(httpResponse.body);
 
 } catch (err: any) {
@@ -43,7 +44,8 @@ export const patchSaleById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const data = req.body;
-    const httpResponse = await updateSaleByIdService(id, data);
+    const userId = req.user!.id;
+    const httpResponse = await updateSaleByIdService(id, data, userId);
     res.status(httpResponse.statusCode).json(httpResponse.body);
   
   } catch (err: any) {

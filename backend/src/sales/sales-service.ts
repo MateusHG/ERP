@@ -39,7 +39,6 @@ export const getSaleByIdService = async (id: number) => {
 
 
 export const createSalesService = async (sale: NewSaleInput, userId: number) => {
-
   const client = await db.connect();
 
   try {
@@ -70,7 +69,7 @@ export const createSalesService = async (sale: NewSaleInput, userId: number) => 
     // ================================
     // Projeção da venda ANTES de criar
     // ==================================
-    const insertedSale = await salesRepository.insertSale(client, sale);
+    const insertedSale = await salesRepository.insertSale(client, sale, userId);
 
     const fullSale = await salesRepository.getSaleByIdQuery(client, insertedSale.id);
 

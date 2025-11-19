@@ -60,7 +60,7 @@ export const searchSaleById = async (id: number): Promise<salesModel | null> => 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------
 
-export const insertSale = async (client: any, data: NewSaleInput): Promise<salesModel> => {
+export const insertSale = async (client: any, data: NewSaleInput, userId: number): Promise<salesModel> => {
 
     //Insert na tabela "vendas".
     const insertSaleQuery = `
@@ -71,9 +71,11 @@ export const insertSale = async (client: any, data: NewSaleInput): Promise<sales
       desconto_comercial,
       desconto_financeiro,
       status,
+      created_by,
+      updated_by,
       data_cadastro,
       data_atualizacao
-      ) VALUES ($1, $2, $3, $4, $5, $6, NOW (), NOW ())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $7, NOW (), NOW ())
        RETURNING id`;
 
     //Guarda os valores no array
@@ -83,19 +85,20 @@ export const insertSale = async (client: any, data: NewSaleInput): Promise<sales
       data.tipo_pagamento,
       data.desconto_comercial,
       data.desconto_financeiro,
-      data.status
+      data.status,
+      userId
     ];
 
     const result = await client.query( insertSaleQuery, saleValues );
 
     const saleId = result.rows[0].id;
 
-    await insertNewSaleItems(client, saleId, data.itens);  
+    await insertNewSaleItems(client, saleId, data.itens, userId);  
 
     return await getSaleByIdQuery(client, saleId);
   };
 
-export const insertNewSaleItems = async (client: any, saleId: number, items: NewSaleInput["itens"]) => {
+export const insertNewSaleItems = async (client: any, saleId: number, items: NewSaleInput["itens"], userId: number) => {
   //Insert na tabela "itens_venda"
     const insertSaleItemQuery = `
     INSERT INTO itens_venda (
@@ -103,8 +106,10 @@ export const insertNewSaleItems = async (client: any, saleId: number, items: New
     produto_id,
     quantidade,
     preco_unitario,
-    desconto_volume
-    ) VALUES ($1, $2, $3, $4, $5)`;
+    desconto_volume,
+    created_by,
+    updated_by
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
 
       for (const item of items) {
       await client.query(insertSaleItemQuery, [
@@ -112,7 +117,9 @@ export const insertNewSaleItems = async (client: any, saleId: number, items: New
         item.produto_id,
         item.quantidade,
         item.preco_unitario,
-        item.desconto_volume
+        item.desconto_volume,
+        userId, // created_by
+        userId  // updated_by
       ]);
     }
 };

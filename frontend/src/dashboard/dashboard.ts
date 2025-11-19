@@ -17,12 +17,14 @@ async function loadDashboardWithFilter(dataInicial: string, dataFinal: string) {
     (document.getElementById('total-sales-count') as HTMLElement).textContent = `Finalizadas: ${data.total_vendas_finalizadas ?? 0}`;
     (document.getElementById('total-sales-value') as HTMLElement).textContent = `Total: ${formatCurrency(data.total_vendas_finalizadas_valores)}`;
     (document.getElementById('total-sales-pending') as HTMLElement).textContent = `Vendas Pendentes: ${data.total_vendas_pendentes}`;
+    (document.getElementById('total-sales-pending-approval') as HTMLElement).textContent = `Aguardando Aprovação: ${data.total_vendas_aguardando_aprovacao}`;
 
 
     // ========== Compras ==============
     (document.getElementById('total-purchases-count') as HTMLElement).textContent = `Finalizadas: ${data.total_compras_finalizadas ?? 0}`;
     (document.getElementById('total-purchases-value') as HTMLElement).textContent = `Total: ${formatCurrency(data.total_compras_valores)}`;
     (document.getElementById('total-purchases-pending') as HTMLElement).textContent = `Compras Pendentes: ${data.total_compras_pendentes}`;
+    (document.getElementById('total-purchases-pending-approval') as HTMLElement).textContent = `Aguardando Aprovação: ${data.total_compras_aguardando_aprovacao}`;
 
 
     // ========== Estoque ==============
