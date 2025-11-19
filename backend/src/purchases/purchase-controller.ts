@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createPurchaseService, deletePurchaseByIdService, getAllPurchasesService, getPurchaseByIdService, updatePurchaseByIdService } from "../purchases/purchase-service";
+import { StockInsufficientError } from "../inventory/inventory-model";
 
 
 export const getPurchases = async (req: Request, res: Response) => {
@@ -22,16 +23,39 @@ export const getPurchaseById = async (req: Request, res: Response) => {
 }
 
 export const postPurchase = async (req: Request, res: Response) => {
-  const purchase = req.body
-  const httpResponse = await createPurchaseService(purchase);
-  res.status(httpResponse.statusCode).json(httpResponse.body);
+  try {
+    const purchase = req.body
+    const userId = req.user!.id;
+    const httpResponse = await createPurchaseService(purchase, userId);
+    res.status(httpResponse.statusCode).json(httpResponse.body);
+  
+  } catch (err: any) {
+    if (err instanceof StockInsufficientError) {
+      res.status(400).json({
+        message: err.message,
+        inconsistencies: err.inconsistencies
+      });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
 };
 
 export const patchPurchaseById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  const data = req.body;
-  const httpResponse = await updatePurchaseByIdService(id, data);
-  res.status(httpResponse.statusCode).json(httpResponse.body);
+  try {
+    const id = parseInt(req.params.id);
+    const data = req.body;
+    const userId = req.user!.id;
+    const httpResponse = await updatePurchaseByIdService(id, data, userId);
+    res.status(httpResponse.statusCode).json(httpResponse.body);
+  } catch (err: any) {
+    if (err instanceof StockInsufficientError) {
+      res.status(400).json({
+        message: err.message,
+        inconsistencies: err.inconsistencies
+      });
+    }
+  }
 };
 
 export const deletePurchaseById = async (req: Request, res: Response) => {

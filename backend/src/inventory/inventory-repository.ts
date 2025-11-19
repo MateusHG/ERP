@@ -216,44 +216,72 @@ export async function registerMovement(mov: InventoryMovementModel) {
 // *********************************************************************** //
 
 // Movimentações de COMPRA.
-export async function registerPurchaseMovement(mov: InventoryMovementModel, client?: any) {
-  const localClient = client || (await db.connect());
+export async function registerPurchaseMovement(mov: InventoryMovementModel, client: any): Promise<InventoryMovementResult> {
 
   try {
-    if (!client) await localClient.query("BEGIN");
 
     const quantidade = Math.floor(Number(mov.quantidade));
-    const saldoRes = await localClient.query(
-      `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1 FOR UPDATE`,
+
+    const produtoRes = await client.query(
+      `SELECT
+      es.quantidade AS estoque_atual,
+      p.nome AS produto,
+      p.codigo
+      FROM estoque_saldo es
+      JOIN produtos p ON p.id = es.produto_id
+      WHERE es.produto_id = $1
+      FOR UPDATE`,
       [mov.produto_id]
     );
 
-    const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
+    const estoque_atual = produtoRes.rows[0]?.estoque_atual || 0;
+    const produto_nome = produtoRes.rows[0]?.produto || null;
+    const codigo = produtoRes.rows[0]?.codigo || null;
+    
     const fator = mov.tipo === "entrada" ? 1: -1;
-    const novoSaldo = saldoAtual + quantidade * fator;
+    const estoque_ficaria = estoque_atual + quantidade * fator;
 
-    await localClient.query(
+    if (estoque_ficaria < 0) {
+      return {
+        estoque_insuficiente: true,
+        produto_id: mov.produto_id,
+        produto: produto_nome,
+        codigo,
+        estoque_atual,
+        tentativa_saida: quantidade,
+        estoque_ficaria
+      };
+    }
+
+    const usuarioId = Number(mov.usuario_id);
+    const referenciaId = Number(mov.referencia_id);
+
+    await client.query(
       `INSERT INTO movimentacoes_estoque
       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [mov.produto_id, mov.tipo, quantidade, mov.origem, mov.referencia_id, mov.usuario_id, mov.preco_unitario ?? null]
+      [
+        mov.produto_id,
+        mov.tipo,
+        quantidade,
+        mov.origem,
+        !isNaN(referenciaId) ? referenciaId : null,
+        !isNaN(usuarioId) ? usuarioId : null,
+        mov.preco_unitario ?? null]
     );
 
-    await localClient.query(
+    await client.query(
       `INSERT INTO estoque_saldo (produto_id, quantidade)
       VALUES ($1, $2)
       ON CONFLICT (produto_id)
       DO UPDATE SET quantidade = $2`,
-      [mov.produto_id, novoSaldo]
+      [mov.produto_id, estoque_ficaria]
     );
 
-    if (!client) await localClient.query("COMMIT");
-  
-  } catch (error) {
-    if (!client) await localClient.query("ROLLBACK");
+    return { estoque_insuficiente : false};
+  } catch (error: any) {
+    console.error(error)
     throw error;
-  } finally {
-    if (!client) localClient.release();
   }
 };
 

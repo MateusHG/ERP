@@ -1,4 +1,3 @@
-import db from "../config/db";
 import * as inventoryRepository from "../inventory/inventory-repository";
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 import { salesItemModel, salesModel } from "../sales/sales-model";
@@ -49,45 +48,89 @@ export const listMovementsService = async (produto_id: number) => {
   }
 };
 
+
+
 // Serviço para movimentar estoque á partir da compra.
 export async function handlePurchaseInventoryMovementService(
   oldPurchase: purchaseModel,
   newPurchase: purchaseModel,
   userId: number,
-  client?: any
+  client: any
 ) {
-  try {
   const purchaseStatusWithStockImpact = ['recebido', 'finalizado'];
+  const inconsistencies: stockInsufficientErrorModel[] = [];
+  
+  try {
+    if (
+      !purchaseStatusWithStockImpact.includes(oldPurchase.status) &&
+      purchaseStatusWithStockImpact.includes(newPurchase.status)
+    ) {
+      for (const item of newPurchase.itens as purchaseItemModel[]) {
+          const res = await inventoryRepository.registerPurchaseMovement({
+          produto_id: item.produto_id,
+          quantidade: item.quantidade,
+          tipo: 'entrada',
+          origem: 'compra',
+          referencia_id: newPurchase.id,
+          usuario_id: userId,
+          preco_unitario: item.preco_unitario ?? null
+        }, client);
 
-  for (const item of newPurchase.itens as purchaseItemModel[]) {
-    if (!purchaseStatusWithStockImpact.includes(oldPurchase.status) && purchaseStatusWithStockImpact.includes(newPurchase.status)) {
-      await inventoryRepository.registerPurchaseMovement({
-        produto_id: item.produto_id,
-        quantidade: item.quantidade,
-        tipo: 'entrada',
-        origem: 'compra',
-        referencia_id: newPurchase.id,
-        usuario_id: userId,
-        preco_unitario: item.preco_unitario
-      }, client);
+        if (res.estoque_insuficiente) {
+          inconsistencies.push({
+            produto_id: res.produto_id!,
+            produto: res.produto!,
+            codigo: res.codigo!,
+            estoque_atual: res.estoque_atual!,
+            tentativa_saida: res.tentativa_saida!,
+            estoque_ficaria: res.estoque_ficaria!
+          });
+        }
+      }
     }
-
+    
     // Se reverter de 'recebido, finalizado' para outro status -> estorna a movimentação.
-    if (purchaseStatusWithStockImpact.includes(oldPurchase.status) && !purchaseStatusWithStockImpact.includes(newPurchase.status)) {
-      await inventoryRepository.registerPurchaseMovement({
-        produto_id: item.produto_id,
-        quantidade: item.quantidade,
-        tipo: 'saida', // saída pois é estorno da compra.
-        origem: 'estorno_compra',
-        referencia_id: newPurchase.id,
-        usuario_id: userId,
-        preco_unitario: item.preco_unitario
-      }, client);
-    }
-    // Se for mudança de 'recebido' para 'finalizado' e vice-versa, não muda nada.
-  }
+    const purchaseWasReopened =
+    purchaseStatusWithStockImpact.includes(oldPurchase.status) &&
+    !purchaseStatusWithStockImpact.includes(newPurchase.status);
 
-    return ok('Movimentou estoque á partir da compra com sucesso.');
+    if (purchaseWasReopened) {
+      console.log('Processando estorno de estoque....');
+      console.log('Itens á estornar:', oldPurchase.itens);
+
+      for (const item of oldPurchase.itens as purchaseItemModel[]) {
+        const res = await inventoryRepository.registerPurchaseMovement({
+          produto_id: item.produto_id,
+          quantidade: item.quantidade,
+          tipo: 'saida',
+          origem: "estorno_compra",
+          referencia_id: newPurchase.id,
+          usuario_id: userId,
+          preco_unitario: item.preco_unitario ?? null
+        }, client);
+
+        if (res.estoque_insuficiente) {
+          inconsistencies.push({
+            produto_id: res.produto_id!,
+            produto: res.produto!,
+            codigo: res.codigo!,
+            estoque_atual: res.estoque_atual!,
+            tentativa_saida: res.tentativa_saida!,
+            estoque_ficaria: res.estoque_ficaria!
+          });
+        }
+      }
+    }
+
+    if (inconsistencies.length > 0) {
+      throw new StockInsufficientError(
+        "Existem itens com saldo insuficiente para estornar.",
+        inconsistencies
+      );
+    }
+
+    return ok("Movimentou estoque á partir da compra com sucesso.")
+  
   } catch (error: any) {
     console.error(error);
     return internalServerError('Erro ao movimentar estoque á partir da compra.');

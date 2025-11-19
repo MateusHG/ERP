@@ -8,11 +8,13 @@ export interface purchaseModel {
   desconto_financeiro?: number;  // pagamento à vista, antecipado
   valor_bruto?: number;           // soma dos itens sem desconto
   valor_total?: number;           // valor final após descontos aplicados
-  status: 'aberto' | 'aguardando' | 'aprovado' | 'recebido' | 'finalizado' | 'cancelado';
-  itens: [];
+  status: PurchaseStatusType;
+  itens: purchaseItemModel[];
   data_cadastro: Date;
   data_atualizacao: Date;
-}
+  created_by: number;
+  updated_by: number;
+};
 
 export interface purchaseItemModel {
   id: number;
@@ -24,5 +26,12 @@ export interface purchaseItemModel {
   preco_unitario: number;
   desconto_volume?: number;    // desconto por item por quantidade
  // valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
-}
+ created_by: number;
+ updated_by: number;
+};
 
+export type PurchaseStatusType = | 'aberto' | 'aguardando' | 'aprovado' | 'recebido' | 'finalizado' | 'cancelado';
+
+export type NewPurchaseInput = Omit<purchaseModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> & {
+  itens: Omit<purchaseItemModel, 'id' | 'valor_subtotal'>[];
+};

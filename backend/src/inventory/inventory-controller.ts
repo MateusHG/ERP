@@ -58,8 +58,8 @@ export const handlePurchaseInventoryMovementController = async (req: Request, re
 
     const newPurchaseData = req.body;
 
-    const updatedPurchase = await purchaseRepository.updatePurchaseById(purchaseId, newPurchaseData);
-    const httpResponse = await purchaseRepository.updatePurchaseById(oldPurchase, updatedPurchase)
+    const updatedPurchase = await purchaseRepository.updatePurchaseById(purchaseId, newPurchaseData, undefined);
+    const httpResponse = await purchaseRepository.updatePurchaseById(oldPurchase, updatedPurchase, undefined);
     res.status(httpResponse.statusCode).json(httpResponse.body);
 
   } catch (err) {

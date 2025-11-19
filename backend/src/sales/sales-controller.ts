@@ -47,7 +47,6 @@ export const patchSaleById = async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const httpResponse = await updateSaleByIdService(id, data, userId);
     res.status(httpResponse.statusCode).json(httpResponse.body);
-  
   } catch (err: any) {
     if (err instanceof StockInsufficientError) {
       res.status(400).json({

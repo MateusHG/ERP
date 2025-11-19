@@ -1,5 +1,5 @@
 import db from "../config/db";
-import { purchaseModel, purchaseItemModel } from "../purchases/purchase-model";
+import { purchaseModel, purchaseItemModel, NewPurchaseInput } from "../purchases/purchase-model";
 
 export const searchAllPurchases = async (
   filters: { id?: number, fornecedor_nome?: string, status?: string,  data_emissao_inicio: string, data_emissao_final: string}
@@ -57,16 +57,7 @@ export const searchPurchaseById = async (id: number): Promise<purchaseModel | nu
   return result.rows[0];
 };
 
-//Omite os valores que  não são necessários declarar no INSERT, os mesmos são gerados automaticamente pelo banco de dados.
-interface newPurchaseInput extends Omit<purchaseModel, 'id' | 'data_cadastro' | 'data_atualizacao' | 'itens' | 'valor_bruto' | 'valor_total'> {
-  itens: Omit<purchaseItemModel, 'id' | 'valor_subtotal'>[];
-}
-
-export const insertPurchase = async (data: newPurchaseInput): Promise<purchaseModel> => {
-  const client = await db.connect();
-
-  try {        //Roda o BEGIN pra caso ocorra algum erro, no final executa ROLLBACK, evita gravações parciais.
-    await client.query('BEGIN');
+export const insertPurchase = async (client: any, data: NewPurchaseInput, userId: number): Promise<purchaseModel> => {
 
     //Insert para tabela "compras"
     const insertPurchaseQuery = `
@@ -77,9 +68,11 @@ export const insertPurchase = async (data: newPurchaseInput): Promise<purchaseMo
         desconto_comercial,
         desconto_financeiro,
         status,
+        created_by,
+        updated_by,
         data_cadastro,
         data_atualizacao
-      ) VALUES ( $1, $2, $3, $4, $5, $6, NOW(), NOW() )
+      ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $7, NOW(), NOW())
        RETURNING id`;
 
     //Guarda os valores no array   
@@ -89,97 +82,42 @@ export const insertPurchase = async (data: newPurchaseInput): Promise<purchaseMo
         data.tipo_pagamento,
         data.desconto_comercial,
         data.desconto_financeiro,
-        data.status
+        data.status,
+        userId
     ];
   
     const result = await client.query( insertPurchaseQuery, purchaseValues );
+    
     const purchaseId = result.rows[0].id;
 
-    //Insert na tabela "itens_compra", não precisa enviar subtotal, o mesmo é calculado direto na coluna no banco de dados.
-    const insertItemQuery = `
+    await insertNewPurchaseItems(client, purchaseId, data.itens, userId);
+
+    return await getPurchaseByIdQuery(client, purchaseId);
+  }
+
+  export const insertNewPurchaseItems = async (client: any, purchaseId: number, items: NewPurchaseInput["itens"], userId: number) => {
+
+    const insertPurchaseItemQuery = `
       INSERT INTO itens_compra (
       compra_id,
       produto_id,
       quantidade,
       preco_unitario,
-      desconto_volume
-      ) VALUES ($1, $2, $3, $4, $5)`;
+      desconto_volume,
+      created_by,
+      updated_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
 
-    for (const item of data.itens) {
-    await client.query(insertItemQuery, [
+    for (const item of items) {
+    await client.query(insertPurchaseItemQuery, [
       purchaseId,
       item.produto_id,
       item.quantidade,
       item.preco_unitario,
-      item.desconto_volume
+      item.desconto_volume,
+      userId,
+      userId
     ]);
-  }
-  
-    //Caso a query dê certo, dá o COMMIT e retorna a compra.
-    await client.query('COMMIT');
-
-    // SELECT para consulta, depois retorna todos os dados da compra inserida no JSON de resposta.
-    const insertedPurchaseResponse = `
-      SELECT
-        c.id AS compra_id,
-        c.fornecedor_id,
-        c.data_emissao,
-        c.tipo_pagamento,
-        c.desconto_comercial,
-        c.desconto_financeiro,
-        c.valor_bruto,
-        c.valor_total,
-        c.status,
-        c.data_cadastro,
-        c.data_atualizacao,
-
-        ic.id AS item_id,
-        ic.produto_id,
-        ic.quantidade,
-        ic.preco_unitario,
-        ic.desconto_volume,
-        ic.valor_subtotal
-      FROM compras c
-      INNER JOIN itens_compra ic ON c.id = ic.compra_id
-      WHERE c.id = $1
-    `;
-
-    const selectResult = await client.query(insertedPurchaseResponse, [purchaseId]);
-    const rows = selectResult.rows;
-
-    //Modelo de resposta da compra
-    const compra: purchaseModel = {
-      id: rows[0].compra_id,
-      fornecedor_id: rows[0].fornecedor_id,
-      fornecedor_nome: rows[0].fornecedor_nome,
-      data_emissao: rows[0].data_emissao,
-      tipo_pagamento: rows[0].tipo_pagamento,
-      desconto_comercial: rows[0].desconto_comercial,
-      desconto_financeiro: rows[0].desconto_financeiro,
-      valor_bruto: rows[0].valor_bruto,
-      valor_total: rows[0].valor_total,
-      status: rows[0].status,
-      data_cadastro: rows[0].data_cadastro,
-      data_atualizacao: rows[0].data_atualizacao,
-      itens: rows.map((row: any) => ({
-        id: row.item_id,
-        purchase_id: row.compra_id,
-        produto_id: row.produto_id,
-        quantidade: row.quantidade,
-        preco_unitario: row.preco_unitario,
-        desconto_volume: row.desconto_volume,
-        valor_subtotal: row.valor_subtotal
-      }))
-    };
-
-    return compra;
-
-    //Caso dê erro, executa rollback e joga o erro.
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
   }
 };
 
@@ -202,13 +140,11 @@ export const verifyPurchaseId = async (id: number): Promise<purchaseModel | null
   return result.rows[0] || null;
 };
 
-// Atualizar compra + itens
-export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>) => {
-  const client = await db.connect();
-  
-  try {
-    await client.query("BEGIN");
 
+
+// Atualizar compra + itens
+export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>, client: any
+) => {
     const { itens, ...purchaseFields } = fieldsToUpdate;
 
     // Atualiza itens
@@ -225,27 +161,16 @@ export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<pur
       await client.query(query, [...values, id]);
     }
 
-    if (itens && Array.isArray(itens)) {
-      await updatePurchaseItems(client, id, itens);
-    }
-
-    await client.query("COMMIT");
-
-    return getPurchaseByIdQuery(id); // Retorna a compra completa
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+    return getPurchaseByIdQuery(client, id);
 };
 
 // Atualizar itens
-const updatePurchaseItems = async (client: any, purchaseId: number, items: purchaseItemModel[]) => {
+async function updatePurchaseItems(client: any, purchaseId: number, items: purchaseItemModel[]) {
   const currentItems = await client.query(
     `SELECT id FROM itens_compra WHERE compra_id = $1`,
     [purchaseId]
   );
+
   const currentItemIds = currentItems.rows.map((row: {id: number}) => row.id);
 
   const itemsToUpdate = items.filter((item) => item.id);
@@ -305,15 +230,15 @@ const updatePurchaseItems = async (client: any, purchaseId: number, items: purch
 };
 
 // Buscar compra com itens
-export async function getPurchaseByIdQuery(id: number) {
-  const purchaseResult = await db.query(
+export async function getPurchaseByIdQuery(client: any, id: number) {
+  const purchaseResult = await client.query(
     `SELECT * FROM compras WHERE id = $1`,
     [id]
   );
 
   if (purchaseResult.rows.length === 0) return null;
 
-  const itemsResult = await db.query(
+  const itemsResult = await client.query(
     `SELECT ci.*, p.codigo as produto_codigo, p.nome as produto_nome
      FROM itens_compra ci
      LEFT JOIN produtos p ON ci.produto_id = p.id
@@ -325,7 +250,7 @@ export async function getPurchaseByIdQuery(id: number) {
     ...purchaseResult.rows[0],
     itens: itemsResult.rows,
   };
-}
+};
 
 export const deletePurchaseById = async (id: number): Promise<boolean> => {
   const client = await db.connect()

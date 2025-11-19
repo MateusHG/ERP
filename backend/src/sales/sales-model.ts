@@ -26,7 +26,7 @@ export interface salesItemModel {
   // valor_subtotal: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
   created_by: number;
   updated_by: number;
-}
+};
 
 export interface estoqueNegativoItem {
   produto: string;
@@ -34,10 +34,10 @@ export interface estoqueNegativoItem {
   estoqueAtual: number;
   tentativaSaida: number;
   estoqueFicaria: number;
-}
+};
 
 export type SaleStatusType = | 'aberto' | 'aguardando'  | 'aprovado' | 'despachado' | 'entregue' | 'finalizado' | 'cancelado';
 
 export type NewSaleInput =Omit<salesModel,'id' | 'data_cadastro' | 'data_atualizacao' | 'valor_bruto' | 'valor_total' | 'itens'> & {
-    itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
-  };
+  itens: Omit<salesItemModel, 'id' | 'valor_subtotal'>[];
+};
