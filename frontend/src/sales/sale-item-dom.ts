@@ -1,6 +1,6 @@
 import { formatCurrency, makeCurrencyCellInput } from "../utils/formatters";
 import { attachItemAutoComplete } from "../utils/autocomplete";
-import { setupItemRowEvents } from "./sale-items-controller";
+import { setupItemRowEvents, setViewMode  } from "./sale-items-controller";
 
 const makeCellInput = (name: string, type = "text", initial = "", placeholder = "") => {
   const td = document.createElement("td");
@@ -88,6 +88,10 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   btnSave.title = "Salvar";
   btnSave.disabled = isSaved;
 
+  btnSave.addEventListener("click", () => {
+  setViewMode(tr, true); // salva e trava inputs
+});
+
   const btnEdit = document.createElement("button");
   btnEdit.type = "button";
   btnEdit.textContent = "✏️";
@@ -96,8 +100,7 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
 
   btnEdit.addEventListener("click", () => {
     tr.dataset.status = "editando";
-    btnEdit.disabled = true;
-    btnEdit.disabled = false;
+    setViewMode(tr, false);
   });
 
   const btnRemove = document.createElement("button");
@@ -119,15 +122,14 @@ export function addItemRowTo(
   prefix: "new" | "edit" = "new",
   isSaved: boolean = false
 ): HTMLTableRowElement {
-  if (!container) {
-    console.error("Container não encontrado para adicionar item.");
-    throw new Error("Container não encontrado.");
-  }
 
   const tr = createEditableRow(item, isSaved);
-  container.appendChild(tr);
 
-  setupItemRowEvents(tr, container, prefix, isSaved);
+  container.appendChild(tr);       // 1) primeiro coloca no DOM
+
+  setViewMode(tr, isSaved);        // 2) só depois aplica modo salvo/edição
+
+  setupItemRowEvents(tr, container, prefix, isSaved);  // 3) por último registra eventos
 
   return tr;
 };

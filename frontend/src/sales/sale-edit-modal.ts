@@ -6,8 +6,10 @@ import { showConfirm, showEstoqueNegativoMessage, showMessage } from "../utils/m
 import { getFilterValues, renderSalesList } from "./sales-dom";
 import { updateSaleItemSummary } from "./sale-item-summary";
 import { updateTotalSaleDisplay } from "./sale-summary";
-import { collectSaleItems, lockSaleItems, unlockSaleItems } from "./sale-items-controller";
+import { collectSaleItems } from "./sale-items-controller";
 import { getCurrentMonthDateRange, parseNumber, parseString } from "../utils/formatters";
+import { lockFormFields, lockItemRows, unlockFormFields, unlockItemRows } from "../utils/form-locks";
+import { setViewMode } from "../sales/sale-items-controller";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form")! as HTMLFormElement;
@@ -28,8 +30,6 @@ let originalItems: any[] = [];
 
 export async function openEditModal(id: number) {
   currentEditId = id;
-
-  unlockSaleFormFields(form);
 
   const sale = await getSaleByIdAPI(id);
 
@@ -55,16 +55,19 @@ export async function openEditModal(id: number) {
 
   inputStatus.value = sale.status || "";
 
-  // Carrega os itens da venda;
+
+  // ---------------------------------------------------------------------
+  // 1. Carrega os itens da venda
+  // ---------------------------------------------------------------------
   const itemsBody = modal.querySelector('#items-body-edit-modal') as HTMLTableSectionElement;
-  unlockSaleItems(itemsBody);
+  
   itemsBody.innerHTML = "";
 
   const items = await getItemsBySaleIdAPI(id);
   originalItems = JSON.parse(JSON.stringify(items)); // Guarda os itens originais para comparação.
   
   items.forEach(item => {
-    addItemRowTo(itemsBody, {
+    const row = addItemRowTo(itemsBody, {
       id: item.id,
       produto_id: item.produto_id,
       produto_codigo: item.produto_codigo || "",
@@ -74,80 +77,46 @@ export async function openEditModal(id: number) {
       desconto_volume: item.desconto_volume || "0.00",
       valor_subtotal: item.valor_subtotal,
     }, "edit", true); // prefixo = "edit", isSaved = true
+
+    setViewMode(row, true);
   });
 
   updateSaleItemSummary(itemsBody, "edit");
   updateTotalSaleDisplay("edit");
 
-  // Bloqueio: Caso o status da venda for entregue/finalizado, desabilita a edição dos dados.
-  function lockSaleFormFields(form: HTMLFormElement, helperMessage: string) {
-    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
-    fields.forEach(field => {
-      // Permite apenas alteração do status para o usuário poder reabrir a venda.
-      if (field.name === "edit-status") return;
+  // ---------------------------------------------------------------------
+  // 3. Travar ou destravar campos dependendo do status da venda
+  // ---------------------------------------------------------------------
+  const lockedStatuses = ["entregue", "finalizado"];
 
-      if (field instanceof HTMLInputElement) {
-        field.readOnly = true;
+  if (lockedStatuses.includes(sale.status)) {
+     lockFormFields(
+      form,
+      "Venda entregue/finalizada - Reabra a venda para editar.",
+      {
+        allowNames: ["edit-status"]
+      }
+    );
 
-      } else if (field instanceof HTMLSelectElement) { 
-      field.dataset.locked = "true";
-      field.style.pointerEvents = "none";
-      field.style.background = "#f5f5f5";
-      field.style.color = "#777";
-      return;
-    };
+    // Trava apenas os itens
+    lockItemRows(
+      itemsBody,
+      "Itens bloqueados - venda entregue/finalizada - reabra para editar.",
+      {
+        addButtonSelector: "#add-item-edit-modal"
+      }
+    );
 
-      field.title = helperMessage;
-      field.style.cursor = "not-allowed";
-  });
-}
-
-  function unlockSaleFormFields(form: HTMLFormElement) {
-    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
-
-    fields.forEach(field => {
-    // Reativa os campos, exceto o ID da venda (se existir)
-      if (field.name === "edit-id") return;
-
-      // Campos que devem permanecer bloqueados(cálculos automáticos)
-      const lockedReadOnlyFields = [
+  } else {
+    // Libera o formulário 
+    unlockFormFields(form, {
+      readOnlyNames: [
         "desconto-itens",
         "descontos-totais",
         "valor-bruto",
         "valor-total"
-      ];
-
-      if (lockedReadOnlyFields.includes(field.name)) {
-        if (field instanceof HTMLInputElement) {
-          field.readOnly = true;
-          field.style.cursor = "not-allowed";
-        }
-        field.title = "Campo de visualização - calculado automaticamente.";
-        return;
-      }
-
-      if (field instanceof HTMLInputElement) {
-        field.readOnly = false;
-        field.style.cursor = "text";
-    
-      } else if (field instanceof HTMLSelectElement) {
-        field.dataset.locked = "false";
-        field.style.pointerEvents = "auto";
-        field.style.background = "";
-        field.style.color = "";
-      }
-
-      field.title = "";
-  });
-}
-
-  const lockedStatuses = ["entregue", "finalizado"];
-  if (lockedStatuses.includes(sale.status)) {
-    const headerHelper = "Venda entregue/finalizada - Reabra a venda para editar.";
-    const itemHelper = "Itens não podem ser alterados em vendas com status Entregue ou Finalizado.";
-
-    lockSaleFormFields(form, headerHelper);
-    lockSaleItems(itemsBody, itemHelper);
+      ]
+    });
   }
 
   modal.classList.remove("hidden");

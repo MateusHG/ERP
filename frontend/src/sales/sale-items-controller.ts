@@ -4,72 +4,11 @@ import { recalcLine, updateSaleItemSummary } from "./sale-item-summary";
 import { updateTotalSaleDisplay } from "./sale-summary";
 import { fetchProductSuggestions } from "./sales-service";
 
-// Bloqueia botões de adição/edição de itens caso a venda já esteja entregue/finalizada.
-export function lockSaleItems(container: HTMLElement, helperMessage: string) {
-  const buttons = container.querySelectorAll("button");
-  const inputs = container.querySelectorAll("input");
-
-  const addBtn = document.querySelector("#add-item-edit-modal");
-  if (addBtn instanceof HTMLButtonElement) {
-    addBtn.disabled = true;
-    addBtn.title = helperMessage;
-    addBtn.style.cursor = "not-allowed";
-  }
-
-  buttons.forEach((btn) => {
-    btn.disabled = true;
-    btn.title = helperMessage;
-    btn.style.cursor = "not-allowed";
-  });
-
-  inputs.forEach((inp) => {
-    inp.readOnly = true;
-    inp.style.background = "#f5f5f5";
-    inp.title = helperMessage;
-    inp.style.cursor = "not-allowed";
-  });
-};
-
-export function unlockSaleItems(itemsBody: HTMLElement) {
-  const rows = itemsBody.querySelectorAll("tr");
-
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
-
-    inputs.forEach(input => {
-      if (input instanceof HTMLInputElement) {
-        input.readOnly = false;
-      }
-
-      if (input instanceof HTMLSelectElement) {
-        input.disabled = false;
-      }
-
-      input.style.pointerEvents = "auto";
-      input.style.background = "";
-      input.style.color = "";
-      input.title = "";
-      input.style.cursor = "text";
-    });
-
-    const buttons = row.querySelectorAll("button");
-    buttons.forEach(btn => {
-      btn.disabled = false;
-      btn.title = "";
-      btn.style.cursor = "pointer";
-    });
-  });
-
-    const addBtn = document.querySelector("#add-item-edit-modal");
-    if (addBtn instanceof HTMLButtonElement) {
-      addBtn.disabled = false;
-      addBtn.title = "";
-      addBtn.style.cursor = "pointer";
-    }
-  }  
-
 // Atualiza o estado de visualização ou edição de uma linha.
 export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
+  // Se a linha estiver travada por lockItemRows, não mexe nela
+  if (tr.dataset.locked === "true") return;
+
   const inputs = tr.querySelectorAll("input");
   inputs.forEach((input) => {
     const inp = input as HTMLInputElement;
@@ -77,11 +16,21 @@ export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
     inp.style.background = isView ? "#f9f9f9" : "white";
   });
 
-  const btnSave = tr.querySelector("button[title='Salvar']") as HTMLButtonElement;
-  const btnEdit = tr.querySelector("button[title='Editar']") as HTMLButtonElement;
+  const btnSave   = tr.querySelector("button[title='Salvar']")   as HTMLButtonElement | null;
+  const btnEdit   = tr.querySelector("button[title='Editar']")   as HTMLButtonElement | null;
+  const btnRemove = tr.querySelector("button[title='Remover']") as HTMLButtonElement | null;
 
-  btnSave.disabled = isView;
-  btnEdit.disabled = !isView;
+  if (!btnSave || !btnEdit || !btnRemove) return;
+
+  if (isView) {
+    btnSave.disabled   = true;
+    btnEdit.disabled   = false;
+    btnRemove.disabled = false;
+  } else {
+    btnSave.disabled   = false;
+    btnEdit.disabled   = true;
+    btnRemove.disabled = false;
+  }
 
   tr.dataset.status = isView ? "salvo" : "editando";
 };
@@ -93,6 +42,7 @@ export function setupItemRowEvents(
   prefix: "new" | "edit" = "new",
   isSaved = false
 ) {
+  
   setViewMode(tr, isSaved);
   recalcLine(tr);
 
@@ -167,7 +117,7 @@ export function setupItemRowEvents(
       const inputId = tr.querySelector('input[name="item-product-id"]') as HTMLInputElement;
       const inputCode = tr.querySelector('input[name="item-code"]') as HTMLInputElement;
       const inputName = tr.querySelector('input[name="item-name"]') as HTMLInputElement;
-      const priceUnit = tr.querySelector('input[name="item-unit-price"]') as HTMLInputElement;
+      const inputQuantity = tr.querySelector('input[name="item-quantity"]') as HTMLInputElement;
 
       //Validação para caso o usuário altere os campos do código e nome, ao salvar substitui os campos com as informações corretas buscando o produto pelo id.
       if (!inputId || !inputId.value) {
@@ -175,10 +125,10 @@ export function setupItemRowEvents(
         return;
       }
 
-      const priceUnitValue = parseFloat(priceUnit.value.replace(",", ".") || "0");
+      const inputQuantityValue = Number(inputQuantity.value);
 
-      if (priceUnitValue <= 0) {
-        await showMessage("Obrigatório informar um preço unitário válido e maior que R$ 0,00.");
+      if (inputQuantityValue <= 0) {
+        await showMessage("Obrigatório informar uma quantidade maior que 0.");
         return;
       }
 

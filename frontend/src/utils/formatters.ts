@@ -68,73 +68,124 @@ export const formatCurrency = (value: number | string ): string  => {
   });
 };
 
-// Formatar os valores ao abrir os modais de edição/criação de nova compra.
-export function parseCurrency(value: string | null): number {
-  if (!value) return NaN;
+export function parseCurrency(value: string | null | undefined): number {
+  if (!value) return 0;
 
-  // remove tudo que não for número, vírgula, ponto ou sinal
+  // mantém somente números, vírgula, ponto
   value = value.replace(/[^\d,.\-]/g, "");
 
   // remove pontos de milhar
-  value = value.replace(/\./g, "");
+  value = value.replace(/\.(?=\d{3})/g, "");
 
-  // troca a última vírgula por ponto
-  value = value.replace(/,/, ".");
+  // normaliza para vírgula (caso tenha vindo com ponto)
+  value = value.replace(/\./g, ",");
 
-  return parseFloat(value);
+  // separa parte inteira e decimal
+  const [inteira, decimal] = value.split(",");
+
+  // garante somente números na parte inteira
+  const intPart = inteira.replace(/\D/g, "") || "0";
+
+  // limita decimais a no máximo 2
+  let decPart = (decimal || "").replace(/\D/g, "");
+  if (decPart.length > 2) decPart = decPart.slice(0, 2);
+
+  // monta número normalizado no formato JS (com ponto)
+  const finalValue = decPart ? `${intPart}.${decPart}` : intPart;
+
+  const num = parseFloat(finalValue);
+  return isNaN(num) ? 0 : num;
 };
 
-// Aplica a máscara (formatação) no input mantendo o cursor próximo da posição correta
-function applyCurrencyMask(input: HTMLInputElement) {
-  // Guarda posição do cursor antes da formatação
-  const cursorPos = input.selectionStart ?? 0;
-  const oldLength = input.value.length;
 
-  // Pega valor numérico limpo (parse de string formatada)
+// Aplica a máscara somente para inputs READONLY
+// mantendo compatibilidade sem interferir em campos de edição
+function applyCurrencyMask(input: HTMLInputElement) {
+
+  // Só formata campos READONLY
+  if (!input.readOnly) {
+    return; // agora NÃO mexemos em campos editáveis
+  }
+
+  // Converter para número
   const numericValue = parseCurrency(input.value);
 
-  if (input.readOnly) {
-    input.value = formatCurrency(numericValue);
-  } else {
-    input.value = formatCurrency(numericValue).replace("R$", "").trim();
-  }
+  // Formatar moeda
+  input.value = formatCurrency(numericValue);
+};
 
-  if (!input.readOnly) {
-  const newLength = input.value.length;
-  const diff = newLength - oldLength;
-  const newCursorPos = Math.max(0, cursorPos + diff);
-  input.setSelectionRange(newCursorPos, newCursorPos);
-  }
-}
 
 // Inicializa os inputs para aplicar máscara no evento 'input'
+// Inicializa os inputs para aplicar máscara no evento 'input'
 export function setupCurrencyInputs(): void {
-    const currencyInputs = document.querySelectorAll<HTMLInputElement>(
-       "#desconto-itens, #descontos-totais, #valor-bruto, #valor-total, #edit-desconto-financeiro, #edit-desconto-comercial"
-    );
+  const currencyInputs = document.querySelectorAll<HTMLInputElement>(
+    "#desconto-itens, #descontos-totais, #valor-bruto, #valor-total, \
+     #new-desconto-financeiro, #new-desconto-comercial, \
+     #edit-desconto-financeiro, #edit-desconto-comercial"
+  );
 
-    currencyInputs.forEach((input) => {
-      applyCurrencyMask(input);
+  currencyInputs.forEach((input) => {
 
-    if (!input.readOnly) {
-      input.addEventListener("input", () => applyCurrencyMask(input));
-
-      input.addEventListener("paste", (event) => {
-        event.preventDefault();
-        const pastText = event.clipboardData?.getData("text") ?? "";
-        input.value = formatCurrency(parseCurrency(pastText)).replace("R$", "").trim();
-      });
+    // ===============================
+    // FORMATAR APENAS CAMPOS READONLY
+    // ===============================
+    if (input.readOnly) {
+      const num = parseCurrency(input.value);
+      input.value = formatCurrency(num);
+      return; // nada de listeners para readonly
     }
 
-    // Opcional: tratar colar para manter formato
+    // ===============================
+    // DIGITAÇÃO LIVRE (sem moeda)
+    // ===============================
+    input.addEventListener("input", () => {
+      let v = input.value;
+
+      // remover hífens
+      v = v.replace(/-/g, "");
+
+      // manter apenas números + vírgula
+      v = v.replace(/[^\d,]/g, "");
+
+      // permitir apenas UMA vírgula
+      const parts = v.split(",");
+      if (parts.length > 2) {
+        v = parts[0] + "," + parts.slice(1).join("");
+      }
+
+      // limitar a 2 dígitos após a vírgula
+      const [inteiro, decimal] = v.split(",");
+      if (decimal && decimal.length > 2) {
+        v = inteiro + "," + decimal.slice(0, 2);
+      }
+
+      input.value = v;
+    });
+
+    // ===============================
+    // COLAR — sempre limpar e limitar
+    // ===============================
     input.addEventListener("paste", (event) => {
       event.preventDefault();
-      const pasteText = event.clipboardData?.getData("text") ?? "";
-      const numericValue = parseCurrency(pasteText);
-      input.value = formatCurrency(numericValue);
+
+      const pasted = event.clipboardData?.getData("text") ?? "";
+      let v = pasted.replace(/[^\d,]/g, "");
+
+      const parts = v.split(",");
+      if (parts.length > 2) {
+        v = parts[0] + "," + parts.slice(1).join("");
+      }
+
+      const [inteiro, decimal] = v.split(",");
+      if (decimal && decimal.length > 2) {
+        v = inteiro + "," + decimal.slice(0, 2);
+      }
+
+      input.value = v;
     });
   });
-}
+};
+
 
 //Gera um <span> com R$, para usar nos campos de itens que são criados dinamicamente.
 // Formata número para pt-BR sem R$

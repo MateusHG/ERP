@@ -104,7 +104,7 @@ export function setupItemRowEvents(
     const inputId = tr.querySelector('input[name="item-product-id"]') as HTMLInputElement;
     const inputCode = tr.querySelector('input[name="item-code"]') as HTMLInputElement;
     const inputName = tr.querySelector('input[name="item-name"]') as HTMLInputElement;
-    const priceUnit = tr.querySelector('input[name="item-unit-price"]') as HTMLInputElement;
+    const inputQuantity = tr.querySelector('input[name="item-quantity"]') as HTMLInputElement;
 
     //Validação para caso o usuário altere os campos do código e nome, ao salvar substitui os campos com as informações corretas buscando o produto pelo id.
     if (!inputId || !inputId.value) {
@@ -112,10 +112,10 @@ export function setupItemRowEvents(
       return;
     }
 
-    const priceUnitValue = parseFloat(priceUnit.value.replace(",", ".") || "0");
+    const itemQuantityValue = Number(inputQuantity.value);
 
-    if (priceUnitValue <= 0) {
-      await showMessage("Obrigatório informar um preço unitário válido e maior que R$ 0,00.");
+    if (itemQuantityValue <= 0) {
+      await showMessage("Obrigatório informar uma quantidade maior que 0.");
       return;
     }
 

@@ -24,10 +24,10 @@ export const listInventoryItems = async(filters: {
      -- Cálculo de preço médio de compra ponderado.
 
      COALESCE(SUM(CASE
-        WHEN m.tipo IN('entrada') AND m.preco_unitario IS NOT NULL THEN m.quantidade * m.preco_unitario
+        WHEN m.tipo IN('entrada') AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0 THEN m.quantidade * m.preco_unitario
         ELSE 0 
      END) / NULLIF(SUM(CASE
-        WHEN m.tipo IN ('entrada') AND m.preco_unitario IS NOT NULL THEN m.quantidade
+        WHEN m.tipo IN ('entrada') AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0 THEN m.quantidade
         ELSE 0
      END), 0), 0) AS preco_medio_compra,
 
@@ -35,11 +35,11 @@ export const listInventoryItems = async(filters: {
      -- Preço médio de venda ponderado.
     COALESCE(
     SUM(CASE
-      WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL
+      WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0
       THEN m.quantidade * m.preco_unitario
       ELSE 0
       END) / NULLIF(SUM(CASE
-        WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL
+        WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0
         THEN m.quantidade
         ELSE 0
       END), 0),

@@ -1,16 +1,9 @@
-import { formatCurrency } from "../utils/formatters";
+import { formatCurrency, parseCurrency } from "../utils/formatters";
 
 document.addEventListener("itemsUpdated", (e: any) => {
   const prefix = e.detail?.prefix || "new";
   updateTotalSaleDisplay(prefix);
 });
-
-/** Converte texto de moeda (R$ 1.234,56) para número */
-function parseCurrency(value: string | null | undefined): number {
-  if (!value) return 0;
-  const num = parseFloat(value.replace(/[^\d,-]/g, "").replace(",", "."));
-  return isNaN(num) ? 0 : num;
-};
 
 export function calcTotalSale(
   gross: number,

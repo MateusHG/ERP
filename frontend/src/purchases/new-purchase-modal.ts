@@ -59,14 +59,8 @@ export function openNewPurchaseModal() {
     return showMessage("Obrigatório salvar todos os itens antes de salvar a compra.")
   }
 
-  const totalPurchaseEl =  document.getElementById("new-valor-total") as HTMLInputElement;
-  const raw = totalPurchaseEl.value?.trim() || "";
-
-  const totalPurchaseValue =  parseCurrency(raw);
-
-  if (isNaN(totalPurchaseValue)) {
-    return showMessage("Erro ao calcular o valor total da compra.");
-  }
+  const totalPurchase =  document.getElementById("new-valor-total") as HTMLInputElement;
+  const totalPurchaseValue = parseCurrency(totalPurchase.value);
 
   if (totalPurchaseValue < 0) {
     return showMessage("O valor total da compra não pode ser negativo.");
