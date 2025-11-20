@@ -6,7 +6,7 @@ import { addItemRowTo } from "./purchase-item-dom";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";
-import { collectPurchaseItems } from "./purchase-items-controller";
+import { collectPurchaseItems, lockPurchaseItems, unlockPurchaseItems } from "./purchase-items-controller";
 import { getCurrentMonthDateRange } from "../utils/formatters";
 
 const modal = document.getElementById("edit-modal")!;
@@ -28,6 +28,8 @@ let originalItems: any[] = [];
  
 export async function openEditModal(id: number) {
   currentEditId = id;
+
+  unlockPurchaseFormFields(form);
 
   const purchase = await getPurchaseByIdAPI(id);
 
@@ -53,8 +55,12 @@ export async function openEditModal(id: number) {
 
   inputStatus.value = purchase.status || "";
 
-  // Carrega os itens da compra
+  // ---------------------------------------------------------------------
+  // 1. Carrega os itens da compra
+  // ---------------------------------------------------------------------
   const itemsBody = modal.querySelector("#items-body-edit-modal") as HTMLTableSectionElement;
+  unlockPurchaseItems(itemsBody);
+
   itemsBody.innerHTML = "";
 
   const items = await getItemsByPurchaseIdAPI(id);
@@ -74,6 +80,74 @@ export async function openEditModal(id: number) {
 
   updatePurchaseItemSummary(itemsBody, "edit");
   updateTotalPurchaseDisplay("edit");
+
+  // Bloqueio: Caso o status da compra for entregue/finalizado, desabilita a edição dos dados.
+  function lockPurchaseFormFields(form: HTMLFormElement, helperMessage: string) {
+    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
+    fields.forEach(field => {
+      if (field.name === "edit-status") return;
+
+      if (field instanceof HTMLInputElement) {
+        field.readOnly = true;
+      
+      } else if (field instanceof HTMLSelectElement) {
+        field.dataset.locked = "true";
+        field.style.pointerEvents = "none";
+        field.style.background = "#f5f5f5";
+        field.style.color = "#777";
+        return;
+      }
+
+        field.title = helperMessage;
+        field.style.cursor = "not-allowed";
+    });
+  }
+
+  function unlockPurchaseFormFields(form: HTMLFormElement) {
+    const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
+
+    fields.forEach(field => {
+      if (field.name === "edit-id") return;
+
+      const lockedReadOnlyFields = [
+        "desconto-itens",
+        "descontos-totais",
+        "valor-bruto",
+        "valor-total"
+      ];
+
+      if (lockedReadOnlyFields.includes(field.name)) {
+        if (field instanceof HTMLInputElement) {
+          field.readOnly = true;
+          field.style.cursor = "not-allowed";
+        }
+        field.title = "Campo de visualização - calculado automaticamente.";
+        return;
+      }
+
+      if (field instanceof HTMLInputElement) {
+        field.readOnly = false;
+        field.style.cursor = "text";
+      
+      } else if (field instanceof HTMLSelectElement) {
+        field.dataset.locked = "false";
+        field.style.pointerEvents = "auto";
+        field.style.background = "";
+        field.style.color = "";
+      }
+
+      field.title = "";
+    });
+  }
+
+  const lockedStatuses = ["entregue", "finalizado"];
+  if (lockedStatuses.includes(purchase.status)) {
+    const headerHelper = "Compra recebida/finalizada - Reabra para editar.";
+    const itemHelper = "Itens não podem ser alterados em compras com status Recebido ou Finalizado.";
+
+    lockPurchaseFormFields(form, headerHelper);
+    lockPurchaseItems(itemsBody, itemHelper);
+  }
 
   modal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);

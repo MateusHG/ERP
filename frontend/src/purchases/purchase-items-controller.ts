@@ -190,3 +190,67 @@ export async function collectPurchaseItems(container: HTMLElement) {
     })
     .filter((item): item is NonNullable<typeof item> => item !== null); // remove nulos
 };
+
+// Bloqueia botões de adição/edição de itens caso a compra já esteja recebida/finalizada
+export function lockPurchaseItems(container: HTMLElement, helperMessage: string) {
+  const buttons = container.querySelectorAll("button");
+  const inputs = container.querySelectorAll("input");
+
+  const addBtn = document.querySelector("#add-item-edit-modal");
+  if (addBtn instanceof HTMLButtonElement) {
+    addBtn.disabled = true;
+    addBtn.title = helperMessage;
+    addBtn.style.cursor = "not-allowed";
+  }
+
+  buttons.forEach((btn) => {
+    btn.disabled = true;
+    btn.title = helperMessage;
+    btn.style.cursor = "not-allowed";
+  });
+
+  inputs.forEach((inp) => {
+    inp.readOnly = true;
+    inp.style.background = "#f5f5f5";
+    inp.title = helperMessage;
+    inp.style.cursor = "not-allowed";
+  });
+};
+
+export function unlockPurchaseItems(itemsBody: HTMLElement) {
+  const rows = itemsBody.querySelectorAll("tr");
+
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
+
+    inputs.forEach(input => {
+      if (input instanceof HTMLInputElement) {
+        input.readOnly = false;
+      }
+
+      if (input instanceof HTMLSelectElement) {
+        input.disabled = false;
+      }
+
+      input.style.pointerEvents = "auto";
+      input.style.background = "";
+      input.style.color = "";
+      input.title = "";
+      input.style.cursor = "text";
+    });
+  
+    const buttons = row.querySelectorAll("button")
+    buttons.forEach(btn => {
+      btn.disabled = false;
+      btn.title = "";
+      btn.style.cursor = "pointer";
+    });
+  });
+
+  const addBtn = document.querySelector("#add-item-edit-modal");
+  if (addBtn instanceof HTMLButtonElement) {
+    addBtn.disabled = false;
+    addBtn.title = "";
+    addBtn.style.cursor = "pointer";
+  }
+};
