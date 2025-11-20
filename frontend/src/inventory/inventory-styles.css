@@ -383,7 +383,7 @@ body {
   border-radius: 6px;
 }
 
-.filter-date-period {
+.filtros {
   display: flex;
   align-items: center;
   gap: 10px;
