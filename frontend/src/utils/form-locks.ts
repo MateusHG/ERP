@@ -11,8 +11,13 @@ export function lockFormFields(
   const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
 
   fields.forEach(field => {
+    // Ignora inputs que estão dentro da tabela de itens
+    if (field.closest("#items-table")) return;
+
+
     // Campos que devem continuar editávies
     if (options?.allowNames?.includes(field.name)) return;
+
 
     if (field instanceof HTMLInputElement) {
       field.readOnly = true;
@@ -39,6 +44,8 @@ export function unlockFormFields(
   const fields = form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select");
 
   fields.forEach(field => {
+    if (field.closest("#items-table")) return;
+    
     // Nunca desbloquear o ID
     if (field.name === "edit-id") return;
 

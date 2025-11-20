@@ -88,10 +88,6 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   btnSave.title = "Salvar";
   btnSave.disabled = isSaved;
 
-  btnSave.addEventListener("click", () => {
-  setViewMode(tr, true); // salva e trava inputs
-});
-
   const btnEdit = document.createElement("button");
   btnEdit.type = "button";
   btnEdit.textContent = "✏️";
@@ -100,7 +96,8 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
 
   btnEdit.addEventListener("click", () => {
     tr.dataset.status = "editando";
-    setViewMode(tr, false);
+    btnEdit.disabled = true;
+    btnEdit.disabled = false;
   });
 
   const btnRemove = document.createElement("button");
@@ -125,11 +122,11 @@ export function addItemRowTo(
 
   const tr = createEditableRow(item, isSaved);
 
-  container.appendChild(tr);       // 1) primeiro coloca no DOM
+  container.appendChild(tr);       
 
-  setViewMode(tr, isSaved);        // 2) só depois aplica modo salvo/edição
+  setViewMode(tr, isSaved);        
 
-  setupItemRowEvents(tr, container, prefix, isSaved);  // 3) por último registra eventos
+  setupItemRowEvents(tr, container, prefix, isSaved);
 
   return tr;
 };
