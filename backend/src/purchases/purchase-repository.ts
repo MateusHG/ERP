@@ -143,13 +143,13 @@ export const verifyPurchaseId = async (id: number): Promise<purchaseModel | null
 
 
 // Atualizar compra + itens
-export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>, client: any
+export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>, client: any, userId: number
 ) => {
     const { itens, ...purchaseFields } = fieldsToUpdate;
 
     // Atualiza itens
     if (itens && Array.isArray(itens)) {
-      await updatePurchaseItems(client, id, itens);
+      await updatePurchaseItems(client, id, itens, userId);
     }
 
     const keys = Object.keys(purchaseFields);
@@ -165,7 +165,7 @@ export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<pur
 };
 
 // Atualizar itens
-async function updatePurchaseItems(client: any, purchaseId: number, items: purchaseItemModel[]) {
+async function updatePurchaseItems(client: any, purchaseId: number, items: purchaseItemModel[], userId: number) {
   const currentItems = await client.query(
     `SELECT id FROM itens_compra WHERE compra_id = $1`,
     [purchaseId]
@@ -193,7 +193,7 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
       itemsToUpdate.map((item) =>
         client.query(
           `UPDATE itens_compra
-           SET produto_id = $1, quantidade = $2, preco_unitario = $3, desconto_volume = $4
+           SET produto_id = $1, quantidade = $2, preco_unitario = $3, desconto_volume = $4, updated_by = $7
            WHERE id = $5 AND compra_id = $6`,
           [
             item.produto_id,
@@ -202,6 +202,7 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
             item.desconto_volume || 0,
             item.id,
             purchaseId,
+            userId
           ]
         )
       )
@@ -214,14 +215,16 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
       itemsToCreate.map((item) =>
         client.query(
           `INSERT INTO itens_compra (
-            compra_id, produto_id, quantidade, preco_unitario, desconto_volume
-          ) VALUES ($1, $2, $3, $4, $5)`,
+            compra_id, produto_id, quantidade, preco_unitario, desconto_volume, created_by, updated_by
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             purchaseId,
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
             item.desconto_volume || 0,
+            userId,
+            userId
           ]
         )
       )

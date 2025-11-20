@@ -69,28 +69,20 @@ export const formatCurrency = (value: number | string ): string  => {
 };
 
 // Formatar os valores ao abrir os modais de edição/criação de nova compra.
-export function parseCurrency(value: string): number {
-  if (!value) return 0;
+export function parseCurrency(value: string | null): number {
+  if (!value) return NaN;
 
-  // Remove tudo que não seja número, vírgula ou ponto
-  // Remove "R$", espaços e pontos de milhar
-  const cleaned = value
-    .replace(/\s/g, "")
-    .replace("R$", "")
-    .replace(/\./g, "")
-    .replace(/,/g, ".");
+  // remove tudo que não for número, vírgula, ponto ou sinal
+  value = value.replace(/[^\d,.\-]/g, "");
 
-  const parsed = parseFloat(cleaned);
-  return isNaN(parsed) ? 0 : parsed;
-}
+  // remove pontos de milhar
+  value = value.replace(/\./g, "");
 
-const currencyInputIds = [
-  "desconto-itens",
-  "descontos-totais",
-  "valor-bruto",
-  "valor-total",
+  // troca a última vírgula por ponto
+  value = value.replace(/,/, ".");
 
-];
+  return parseFloat(value);
+};
 
 // Aplica a máscara (formatação) no input mantendo o cursor próximo da posição correta
 function applyCurrencyMask(input: HTMLInputElement) {

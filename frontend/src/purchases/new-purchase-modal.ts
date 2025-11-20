@@ -3,9 +3,8 @@ import { showConfirm, showMessage } from "../utils/messages";
 import { renderPurchasesList } from "./purchases-dom";
 import { loadPurchasesAPI, postPurchaseAPI } from "./purchases-service";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
-import { formatCurrency, setupCurrencyInputs } from "../utils/formatters";
+import { parseCurrency, setupCurrencyInputs } from "../utils/formatters";
 import { resetPurchaseItemSummary } from "./purchase-item-summary";
-import { addItemRowTo } from "./purchase-item-dom";
 
 const newPurchaseModal = document.getElementById("new-purchase-modal")!;
 const form = document.getElementById("new-purchase-form") as HTMLFormElement;
@@ -60,6 +59,19 @@ export function openNewPurchaseModal() {
     return showMessage("Obrigatório salvar todos os itens antes de salvar a compra.")
   }
 
+  const totalPurchaseEl =  document.getElementById("new-valor-total") as HTMLInputElement;
+  const raw = totalPurchaseEl.value?.trim() || "";
+
+  const totalPurchaseValue =  parseCurrency(raw);
+
+  if (isNaN(totalPurchaseValue)) {
+    return showMessage("Erro ao calcular o valor total da compra.");
+  }
+
+  if (totalPurchaseValue < 0) {
+    return showMessage("O valor total da compra não pode ser negativo.");
+  }
+
   const itens = itemRows.map(row => ({
     produto_id: (row.querySelector('input[name="item-product-id"]') as HTMLInputElement).value,
     quantidade: (row.querySelector('input[name="item-quantity"]') as HTMLInputElement).value,
@@ -78,6 +90,36 @@ export function openNewPurchaseModal() {
   }
 
   try {
+    // =========================
+    // Validação de status
+    // =========================
+    const currentStatus = (newPurchaseData.status || "").toLocaleLowerCase();
+
+    const statusesFinalized = ["recebido", "finalizado"];
+    const statusesOpen = ["aberto", "aguardando", "aprovado", "cancelado"];
+
+    const isFinalized = statusesFinalized.includes(currentStatus);
+
+    if (isFinalized) {
+      const confirmed = await showConfirm(
+        "<b>🛑 Atenção! 🛑</b><br><br>" +
+        "Salvar a compra com status <b>'Finalizado'</b> ou <b>'Recebido'</b> fará o sistema <b>dar entrada no estoque.</b><br><br>" +
+        "<b>Deseja continuar?</b>"
+      );
+
+      if (!confirmed) {
+        await showMessage(
+          "<b>Operação cancelada ✅</b><br><br>" +
+          "- Estoque não foi alterado."
+        );
+        return;
+      }
+    }
+
+    
+    // =========================
+    // Envio compra ao backend
+    // =========================
     const response = await postPurchaseAPI(newPurchaseData);
 
     showMessage(response.message || 'Compra cadastrado com sucesso.');

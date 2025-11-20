@@ -1,12 +1,13 @@
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
-import { showConfirm, showMessage } from "../utils/messages";
+import { showConfirm, showEstoqueNegativoMessage, showMessage } from "../utils/messages";
 import { getItemsByPurchaseIdAPI, getPurchaseByIdAPI, loadPurchasesAPI, updatePurchaseAPI } from "./purchases-service";
-import { renderPurchasesList } from "./purchases-dom";
+import { getFilterValues, renderPurchasesList } from "./purchases-dom";
 import { addItemRowTo } from "./purchase-item-dom";
 import { setupSupplierAutoComplete } from "../utils/autocomplete";
 import { updatePurchaseItemSummary } from "./purchase-item-summary";
 import { updateTotalPurchaseDisplay } from "./purchase-summary";
 import { collectPurchaseItems } from "./purchase-items-controller";
+import { getCurrentMonthDateRange } from "../utils/formatters";
 
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
@@ -146,22 +147,105 @@ form.addEventListener("submit", async (event) => {
     }
 
   try {
-  // Envia dados do cabeçalho + itens juntos.
+    // =========================
+    // Validação de status
+    // =========================
+    const previousStatus = originalFormData["edit-status"]?.toLowerCase();
+    const currentStatus = (updatedPurchaseData.status || previousStatus)?.toLowerCase();
+
+    const statusFinalized = ["recebido", "finalizado"];
+    const statusOpen = ["aberto", "aguardando", "aprovado", "cancelado"];
+
+    const wasFinalized = statusFinalized.includes(previousStatus);
+    const isFinalized = statusFinalized.includes(currentStatus);
+
+    const wasOpen = statusOpen.includes(previousStatus);
+    const isOpen = statusOpen.includes(currentStatus);
+
+    // Ignora transição entre status "recebido" e "finalizado"(Não movimenta estoque).
+    const isInternalTransition = 
+      statusFinalized.includes(previousStatus) &&
+      statusFinalized.includes(currentStatus);
+
+    if (!isInternalTransition) {
+      if (wasOpen && isFinalized) {
+        const confirmed = await showConfirm(
+          "<b>🛑 Atenção! 🛑</b><br><br>" +
+          "Alterar o status para <b>'Finalizado'</b> ou <b>'Recebido'</b> fará o sistema <b>dar entrada no estoque.</b><br><br>" +
+          "<b>Deseja continuar?</b>"
+        );
+
+        if (!confirmed) {
+          await showMessage(
+            "<b>Operação cancelada ✅</b><br><br>" +
+          "- Estoque não foi alterado."
+          );
+          return;
+        }
+      }
+
+      if (wasFinalized && isOpen) {
+        const confirmed = await showConfirm(
+          "<b>🛑 Atenção! 🛑</b><br><br>" +
+          "<b>Esta compra já movimentou o estoque.</b><br><br>" +
+          "Ao alterar o status, o sistema irá <b>reverter a movimentação</b>.<br><br>" +
+          "<b>Deseja realmente continuar?</b>"
+        );
+
+        if (!confirmed) {
+          await showMessage(
+            "<b>Operação cancelada ✅</b><br><br>" +
+            "- Estoque não foi alterado."
+          );
+          return;
+        }
+      }
+    }
+
+// =========================================
+// Envia dados do cabeçalho + itens
+// =======================================
+try {
   const response = await updatePurchaseAPI(currentEditId, updatedPurchaseData);
 
-  if (!response.ok) {
-  await showMessage(response.message || "Erro inesperado ao salvar compra.");
-  return;
-}
+  await showMessage("Compra atualizada com sucesso.");
+  
+  const currentFilters = getFilterValues();
+  if (!currentFilters.data_emissao_inicio || !currentFilters.data_emissao_final) {
+    const { start, end } = getCurrentMonthDateRange();
+    currentFilters.data_emissao_inicio = start;
+    currentFilters.data_emissao_final = end;
+  }
 
-await showMessage("Compra atualizada com sucesso.");
-
-  modal.classList.add("hidden");
-
-  // garante que a lista vai ser recarregada com os dados atualizados
   const purchases = await loadPurchasesAPI();
   renderPurchasesList(purchases);
 
+   modal.classList.add("hidden");
+   return;
+} catch (error: any) {
+
+  const errData = error?.responseData || null;
+
+  const produtosNegativos = 
+    errData?.detalhes?.produtos ||
+    errData?.detalhes?.itens ||
+    errData?.produtos ||
+    errData?.itens ||
+    errData?.inconsistencies ||
+    null;
+
+  if (produtosNegativos && Array.isArray(produtosNegativos)) {
+    showEstoqueNegativoMessage(produtosNegativos);
+    return;
+  }
+
+  // Outros erros genéricos
+  await showMessage(errData?.message || error?.message || "Erro inesperado ao salvar compra.");
+  return;
+}
+  
+
 } catch (err: any) {
-  await showMessage(err?.message || "Erro de conexão com o servidor.");
+  await showMessage(err?.message || "Erro interno no servidor.");
+  return;
 }});

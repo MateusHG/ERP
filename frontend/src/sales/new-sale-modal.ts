@@ -100,7 +100,7 @@ form.addEventListener("submit", async (e) => {
         "<b>Operação cancelada ✅</b><br><br>" +
         "- Estoque não foi alterado."
       );
-      return;  // ← agora está corretamente dentro do IF
+      return;
     }
   }
 

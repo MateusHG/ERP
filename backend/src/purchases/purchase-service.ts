@@ -154,7 +154,7 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
       await handlePurchaseInventoryMovementService(oldPurchase, projectedPurchase, userId, client);
     }
 
-    const updatedPurchase = await purchasesRepository.updatePurchaseById(id, data, client);
+    const updatedPurchase = await purchasesRepository.updatePurchaseById(id, data, client, userId);
 
     await client.query("COMMIT");
     return ok(updatedPurchase);
