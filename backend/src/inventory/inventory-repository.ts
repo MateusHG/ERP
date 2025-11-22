@@ -130,13 +130,47 @@ export async function listMovements(produto_id: number) {
     SELECT 
       m.id,
       m.produto_id,
+
+      -- quantidade com sinal (entrada +, saída -)
+      CASE 
+        WHEN LOWER(m.tipo::text) IN ('saida') THEN -m.quantidade
+        ELSE m.quantidade
+      END AS qtd_movimentada,
+
       m.tipo,
-      m.quantidade,
       m.origem,
       m.referencia_id,
       m.usuario_id,
       u.username AS usuario,
-      m.created_at
+      m.created_at,
+
+
+      -- saldo antes da movimentação
+
+      COALESCE(
+        SUM(
+          CASE
+            WHEN LOWER(m.tipo::text) IN ('saida') THEN -m.quantidade ELSE m.quantidade END
+        ) OVER (
+        PARTITION BY m.produto_id
+        ORDER BY m.created_at
+        ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+      ), 0
+    ) AS saldo_anterior,
+
+    -- saldo depois da movimentação
+
+      COALESCE(
+        SUM(
+          CASE
+            WHEN LOWER(m.tipo::text) IN ('saida') THEN -m.quantidade ELSE m.quantidade END
+        ) OVER (
+          PARTITION BY m.produto_id
+          ORDER BY m.created_at, m.id
+          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ), 0
+      ) AS saldo_posterior
+    
     FROM movimentacoes_estoque m
     INNER JOIN users u ON u.id = m.usuario_id
     WHERE m.produto_id = $1

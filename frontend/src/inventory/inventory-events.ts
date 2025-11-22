@@ -31,8 +31,10 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
           <tr>
             <th>Data e Horário</th>
             <th>Tipo</th>
-            <th>Quantidade</th>
             <th>Origem</th>
+            <th>Saldo Anterior</th>
+            <th>Qtd Movimentada</th>
+            <th>Novo Saldo</th>
             <th>Preço Unitário</th>
             <th>Total</th>
             <th>Usuário</th>
@@ -58,8 +60,10 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
    <tr>
           <td>${m.created_at ? formatDataAndTime(m.created_at) : "-"}</td>
           <td>${m.tipo || "-"}</td>
-          <td>${m.quantidade ?? "-"}</td>
           <td>${m.origem ?? "-"}</td>
+          <td>${m.saldo_anterior ?? "-"}</td>
+          <td>${m.qtd_movimentada ?? "-"}</td>
+          <td>${m.saldo_posterior ?? "-"}</td>
           <td>${m.valor_unitario ? formatCurrency(m.valor_unitario) : "-"}</td>
           <td>${m.valor_unitario ? formatCurrency(m.total) : "-"}</td>
           <td>${m.usuario || "-"}</td>
