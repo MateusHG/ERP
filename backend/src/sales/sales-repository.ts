@@ -70,12 +70,14 @@ export const insertSale = async (client: any, data: NewSaleInput, userId: number
       tipo_pagamento,
       desconto_comercial,
       desconto_financeiro,
+      desconto_volume,
+      valor_bruto,
       status,
       created_by,
       updated_by,
       data_cadastro,
       data_atualizacao
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $7, NOW (), NOW ())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9, NOW (), NOW ())
        RETURNING id`;
 
     //Guarda os valores no array
@@ -85,6 +87,8 @@ export const insertSale = async (client: any, data: NewSaleInput, userId: number
       data.tipo_pagamento,
       data.desconto_comercial,
       data.desconto_financeiro,
+      data.desconto_volume,
+      data.valor_bruto,
       data.status,
       userId
     ];
@@ -101,12 +105,12 @@ export const insertSale = async (client: any, data: NewSaleInput, userId: number
 export const insertNewSaleItems = async (client: any, saleId: number, items: NewSaleInput["itens"], userId: number) => {
   //Insert na tabela "itens_venda"
     const insertSaleItemQuery = `
-    INSERT INTO itens_venda (
+    INSERT INTO vendas_itens (
     venda_id,
     produto_id,
     quantidade,
     preco_unitario,
-    desconto_volume,
+    desconto_unitario,
     created_by,
     updated_by
     ) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
@@ -116,8 +120,8 @@ export const insertNewSaleItems = async (client: any, saleId: number, items: New
         saleId,
         item.produto_id,
         item.quantidade,
-        item.preco_unitario,
-        item.desconto_volume,
+        item.preco_unitario ?? 0,
+        item.desconto_unitario ?? 0,
         userId, // created_by
         userId  // updated_by
       ]);
@@ -127,17 +131,27 @@ export const insertNewSaleItems = async (client: any, saleId: number, items: New
 // =============================================
 // Atualiza a venda completa (itens + cabeçalho)
 // ==============================================
-export const updateSaleById = async (
-  id: number,
-  fieldsToUpdate: Partial<salesModel>,
-  client: any
+export const updateSaleById = async (id: number,fieldsToUpdate: Partial<salesModel>,client: any,userId: number
 ) => {
     const { itens, ...saleFields } = fieldsToUpdate;
 
     // Atualiza itens
     if (itens && Array.isArray(itens)) {
-      await updateSaleItems(client, id, itens);
-    }
+      await updateSaleItems(client, id, itens, userId);
+
+      // Recalcula totais baseados nos itens atuais
+    const result = await client.query(
+      `SELECT
+        COALESCE(SUM(valor_bruto), 0) AS total_bruto,
+        COALESCE(SUM(valor_desconto), 0) AS total_desc_volume
+      FROM vendas_itens
+      WHERE venda_id = $1`,
+      [id]
+    );
+
+    saleFields.valor_bruto = Number(result.rows[0].total_bruto);
+    saleFields.desconto_volume = Number(result.rows[0].total_desc_volume);
+  }
 
     // Atualiza cabeçalho da venda
     const keys = Object.keys(saleFields);
@@ -155,9 +169,9 @@ export const updateSaleById = async (
 // ====================================================================================
 // Atualiza itens da venda. ===========================================================
 // ====================================================================================
-async function updateSaleItems(client: any, saleId: number, items: salesItemModel[]) {
+async function updateSaleItems(client: any, saleId: number, items: salesItemModel[], userId: number) {
   const currentItems = await client.query(
-    `SELECT id FROM itens_venda WHERE venda_id = $1`,
+    `SELECT id FROM vendas_itens WHERE venda_id = $1`,
     [saleId]
   );
 
@@ -171,7 +185,7 @@ async function updateSaleItems(client: any, saleId: number, items: salesItemMode
 
   if (itemsToDelete.length > 0) {
     await client.query(
-      `DELETE FROM itens_venda WHERE id = ANY($1) AND venda_id = $2`,
+      `DELETE FROM vendas_itens WHERE id = ANY($1) AND venda_id = $2`,
       [itemsToDelete, saleId]
     );
   }
@@ -180,17 +194,20 @@ async function updateSaleItems(client: any, saleId: number, items: salesItemMode
     await Promise.all(
       itemsToUpdate.map((item) =>
         client.query(
-          `UPDATE itens_venda
+          `UPDATE vendas_itens
            SET produto_id = $1,
                quantidade = $2,
                preco_unitario = $3,
-               desconto_volume = $4
-           WHERE id = $5 AND venda_id = $6`,
+               desconto_unitario = $4
+               updated_by = $5,
+               data_atualizacao = NOW()
+           WHERE id = $6 AND venda_id = $7`,
           [
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
-            item.desconto_volume || 0,
+            item.desconto_unitario ?? 0,
+            userId,
             item.id,
             saleId,
           ]
@@ -203,15 +220,17 @@ async function updateSaleItems(client: any, saleId: number, items: salesItemMode
     await Promise.all(
       itemsToCreate.map((item) =>
         client.query(
-          `INSERT INTO itens_venda (
-            venda_id, produto_id, quantidade, preco_unitario, desconto_volume
-           ) VALUES ($1, $2, $3, $4, $5)`,
+          `INSERT INTO vendas_itens (
+            venda_id, produto_id, quantidade, preco_unitario, desconto_unitario, created_by, updated_by
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             saleId,
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
-            item.desconto_volume || 0,
+            item.desconto_unitario || 0,
+            userId,
+            userId
           ]
         )
       )
@@ -232,7 +251,7 @@ export async function getSaleByIdQuery(client: any, id: number) {
 
   const itemsResult = await client.query(
     `SELECT vi.*, p.codigo as produto_codigo, p.nome as produto_nome
-     FROM itens_venda vi
+     FROM vendas_itens vi
      LEFT JOIN produtos p ON vi.produto_id = p.id
      WHERE vi.venda_id = $1`,
      [id]

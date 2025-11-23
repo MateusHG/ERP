@@ -29,7 +29,7 @@ export const insertSaleItem = async (
     produto_id,
     quantidade,
     preco_unitario,
-    desconto_volume
+    desconto_unitario
   } = saleItem
 
   const result = await db.query(
@@ -42,7 +42,7 @@ export const insertSaleItem = async (
     ) VALUES (
      $1, $2, $3, $4, $5
     ) RETURNING *`,
-     [saleId, produto_id, quantidade, preco_unitario, desconto_volume]
+     [saleId, produto_id, quantidade, preco_unitario, desconto_unitario]
   );
 
   return result.rows[0];

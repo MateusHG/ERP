@@ -57,7 +57,11 @@ export const searchPurchaseById = async (id: number): Promise<purchaseModel | nu
   return result.rows[0];
 };
 
-export const insertPurchase = async (client: any, data: NewPurchaseInput, userId: number): Promise<purchaseModel> => {
+
+// --------------------------------------------------------------------------------
+// Cadastro de nova compra
+// --------------------------------------------------------------------------------
+export const insertNewPurchase = async (client: any, data: NewPurchaseInput, userId: number): Promise<purchaseModel> => {
 
     //Insert para tabela "compras"
     const insertPurchaseQuery = `
@@ -67,12 +71,14 @@ export const insertPurchase = async (client: any, data: NewPurchaseInput, userId
         tipo_pagamento,
         desconto_comercial,
         desconto_financeiro,
+        desconto_volume,
+        valor_bruto,
         status,
         created_by,
         updated_by,
         data_cadastro,
         data_atualizacao
-      ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $7, NOW(), NOW())
+      ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $9, NOW(), NOW())
        RETURNING id`;
 
     //Guarda os valores no array   
@@ -82,6 +88,8 @@ export const insertPurchase = async (client: any, data: NewPurchaseInput, userId
         data.tipo_pagamento,
         data.desconto_comercial,
         data.desconto_financeiro,
+        data.desconto_volume,
+        data.valor_bruto,
         data.status,
         userId
     ];
@@ -98,12 +106,12 @@ export const insertPurchase = async (client: any, data: NewPurchaseInput, userId
   export const insertNewPurchaseItems = async (client: any, purchaseId: number, items: NewPurchaseInput["itens"], userId: number) => {
 
     const insertPurchaseItemQuery = `
-      INSERT INTO itens_compra (
+      INSERT INTO compras_itens (
       compra_id,
       produto_id,
       quantidade,
       preco_unitario,
-      desconto_volume,
+      desconto_unitario,
       created_by,
       updated_by
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)`;
@@ -113,34 +121,13 @@ export const insertPurchase = async (client: any, data: NewPurchaseInput, userId
       purchaseId,
       item.produto_id,
       item.quantidade,
-      item.preco_unitario,
-      item.desconto_volume,
+      item.preco_unitario ?? 0,
+      item.desconto_unitario ?? 0,
       userId,
       userId
     ]);
   }
 };
-
-//Verificar se existe um fornecedor com o ID informado antes de criar a compra.
-export const verifySupplierId = async (fornecedor_id: number): Promise<purchaseModel | null> => {
-  const result = await db.query(
-    `SELECT * FROM fornecedores WHERE id = $1 limit 1`,
-    [fornecedor_id]
-  );
-
-  return result.rows[0] || null;
-};
-
-export const verifyPurchaseId = async (id: number): Promise<purchaseModel | null> => {
-  const result = await db.query(
-    `SELECT * FROM compras WHERE id = $1 limit 1`,
-    [id]
-  );
-
-  return result.rows[0] || null;
-};
-
-
 
 // Atualizar compra + itens
 export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<purchaseModel>, client: any, userId: number
@@ -150,6 +137,19 @@ export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<pur
     // Atualiza itens
     if (itens && Array.isArray(itens)) {
       await updatePurchaseItems(client, id, itens, userId);
+
+      // Recalcula totais baseados nos itens atuais
+      const result = await client.query(
+        `SELECT
+          COALESCE(SUM(valor_bruto), 0) AS total_bruto,
+          COALESCE(SUM(valor_desconto), 0) AS total_desc_volume
+        FROM compras_itens
+        WHERE compra_id = $1`,
+        [id]
+      );
+
+      purchaseFields.valor_bruto = Number(result.rows[0].total_bruto);
+      purchaseFields.desconto_volume = Number(result.rows[0].total_desc_volume);
     }
 
     const keys = Object.keys(purchaseFields);
@@ -167,7 +167,7 @@ export const updatePurchaseById = async (id: number, fieldsToUpdate: Partial<pur
 // Atualizar itens
 async function updatePurchaseItems(client: any, purchaseId: number, items: purchaseItemModel[], userId: number) {
   const currentItems = await client.query(
-    `SELECT id FROM itens_compra WHERE compra_id = $1`,
+    `SELECT id FROM compras_itens WHERE compra_id = $1`,
     [purchaseId]
   );
 
@@ -182,7 +182,7 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
   // Deletar
   if (itemsToDelete.length > 0) {
     await client.query(
-      `DELETE FROM itens_compra WHERE id = ANY($1) AND compra_id = $2`,
+      `DELETE FROM compras_itens WHERE id = ANY($1) AND compra_id = $2`,
       [itemsToDelete, purchaseId]
     );
   }
@@ -192,17 +192,22 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
     await Promise.all(
       itemsToUpdate.map((item) =>
         client.query(
-          `UPDATE itens_compra
-           SET produto_id = $1, quantidade = $2, preco_unitario = $3, desconto_volume = $4, updated_by = $7
-           WHERE id = $5 AND compra_id = $6`,
+          `UPDATE compras_itens
+           SET produto_id = $1,
+               quantidade = $2,
+               preco_unitario = $3,
+               desconto_unitario = $4,
+               updated_by = $5,
+               data_atualizacao = NOW()
+           WHERE id = $6 AND compra_id = $7`,
           [
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
-            item.desconto_volume || 0,
+            item.desconto_unitario ?? 0,
+            userId,
             item.id,
-            purchaseId,
-            userId
+            purchaseId
           ]
         )
       )
@@ -214,15 +219,15 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
     await Promise.all(
       itemsToCreate.map((item) =>
         client.query(
-          `INSERT INTO itens_compra (
-            compra_id, produto_id, quantidade, preco_unitario, desconto_volume, created_by, updated_by
+          `INSERT INTO compras_itens (
+            compra_id, produto_id, quantidade, preco_unitario, desconto_unitario, created_by, updated_by
           ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             purchaseId,
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
-            item.desconto_volume || 0,
+            item.desconto_unitario,
             userId,
             userId
           ]
@@ -243,7 +248,7 @@ export async function getPurchaseByIdQuery(client: any, id: number) {
 
   const itemsResult = await client.query(
     `SELECT ci.*, p.codigo as produto_codigo, p.nome as produto_nome
-     FROM itens_compra ci
+     FROM compras_itens ci
      LEFT JOIN produtos p ON ci.produto_id = p.id
      WHERE ci.compra_id = $1`,
     [id]
@@ -261,7 +266,7 @@ export const deletePurchaseById = async (id: number): Promise<boolean> => {
     await client.query(`BEGIN`);
 
     //Delete primeiro na itens_compra por chave estrangeira (FK)
-    await client.query(`DELETE FROM itens_compra where compra_id = $1`, [id]);
+    await client.query(`DELETE FROM compras_itens where compra_id = $1`, [id]);
 
     //Delete na tabela compras
     const result = await client.query(`DELETE FROM compras where id = $1`, [id]);
@@ -277,4 +282,24 @@ export const deletePurchaseById = async (id: number): Promise<boolean> => {
   } finally {
     client.release();
   }
+};
+
+
+//Verificar se existe um fornecedor com o ID informado antes de criar a compra.
+export const verifySupplierId = async (fornecedor_id: number): Promise<purchaseModel | null> => {
+  const result = await db.query(
+    `SELECT * FROM fornecedores WHERE id = $1 limit 1`,
+    [fornecedor_id]
+  );
+
+  return result.rows[0] || null;
+};
+
+export const verifyPurchaseId = async (id: number): Promise<purchaseModel | null> => {
+  const result = await db.query(
+    `SELECT * FROM compras WHERE id = $1 limit 1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
 };

@@ -221,7 +221,7 @@ export async function registerMovement(mov: InventoryMovementModel) {
         mov.origem,
         mov.referencia_id,
         mov.usuario_id,
-        mov.preco_unitario ?? null,
+        mov.preco_unitario_liquido ?? null,
       ]
     );
 
@@ -292,7 +292,7 @@ export async function registerPurchaseMovement(mov: InventoryMovementModel, clie
 
     await client.query(
       `INSERT INTO movimentacoes_estoque
-      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario_liquido)
       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [
         mov.produto_id,
@@ -301,7 +301,7 @@ export async function registerPurchaseMovement(mov: InventoryMovementModel, clie
         mov.origem,
         !isNaN(referenciaId) ? referenciaId : null,
         !isNaN(usuarioId) ? usuarioId : null,
-        mov.preco_unitario ?? null]
+        mov.preco_unitario_liquido ?? null]
     );
 
     await client.query(
@@ -369,7 +369,7 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client: 
     // Se o estoque não for ficar negativo, segue com a movimentação.
     await client.query(
       `INSERT INTO movimentacoes_estoque
-      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+      (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario_liquido)
       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [
         mov.produto_id,
@@ -378,7 +378,7 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client: 
         mov.origem,
         !isNaN(referenciaId) ? referenciaId : null,
         !isNaN(usuarioId) ? usuarioId : null,
-        mov.preco_unitario
+        mov.preco_unitario_liquido ?? null
       ]
     );
 

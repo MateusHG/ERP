@@ -17,7 +17,7 @@ export interface InventoryMovementModel {
   produto_id: number;
   tipo: "entrada" | "saida";
   quantidade: number;
-  preco_unitario?: number;
+  preco_unitario_liquido?: number;
   valor_total?: number;
   origem: "compra" | "venda" | "estorno_compra" | "estorno_venda";
   referencia_id: number;

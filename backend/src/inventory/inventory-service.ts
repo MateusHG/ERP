@@ -15,7 +15,7 @@ export const listInventoryService = async(filters: { id?: number, codigo?: strin
   }
 };
 
-
+// Movimento de AJUSTE DE ESTOQUE.
 export const registerMovementService = async (mov: InventoryMovementModel) => {
   try {
 
@@ -66,14 +66,19 @@ export async function handlePurchaseInventoryMovementService(
       purchaseStatusWithStockImpact.includes(newPurchase.status)
     ) {
       for (const item of newPurchase.itens as purchaseItemModel[]) {
-          const res = await inventoryRepository.registerPurchaseMovement({
+
+        const precoLiquido =
+          Number(item.preco_unitario | 0) -
+          Number(item.desconto_unitario || 0);
+
+        const res = await inventoryRepository.registerPurchaseMovement({
           produto_id: item.produto_id,
           quantidade: item.quantidade,
           tipo: 'entrada',
           origem: 'compra',
           referencia_id: newPurchase.id,
           usuario_id: userId,
-          preco_unitario: item.preco_unitario ?? null
+          preco_unitario_liquido: precoLiquido
         }, client);
 
         if (res.estoque_insuficiente) {
@@ -99,6 +104,11 @@ export async function handlePurchaseInventoryMovementService(
       console.log('Itens á estornar:', oldPurchase.itens);
 
       for (const item of oldPurchase.itens as purchaseItemModel[]) {
+
+        const precoLiquido =
+          Number(item.preco_unitario || 0) -
+          Number(item.desconto_unitario || 0);
+
         const res = await inventoryRepository.registerPurchaseMovement({
           produto_id: item.produto_id,
           quantidade: item.quantidade,
@@ -106,7 +116,7 @@ export async function handlePurchaseInventoryMovementService(
           origem: "estorno_compra",
           referencia_id: newPurchase.id,
           usuario_id: userId,
-          preco_unitario: item.preco_unitario ?? null
+          preco_unitario_liquido: precoLiquido
         }, client);
 
         if (res.estoque_insuficiente) {
@@ -156,6 +166,11 @@ export async function handleSaleInventoryMovementService(
       saleStatusWithStockImpact.includes(newSale.status)
     ) {
       for (const item of newSale.itens as salesItemModel[]) {
+
+        const precoLiquido =
+          Number(item.preco_unitario || 0) -
+          Number(item.desconto_unitario || 0);
+
         const res = await inventoryRepository.registerSaleMovement({
           produto_id: item.produto_id,
           quantidade: item.quantidade,
@@ -163,7 +178,7 @@ export async function handleSaleInventoryMovementService(
           origem: "venda",
           referencia_id: newSale.id,
           usuario_id: userId,
-          preco_unitario: item.preco_unitario ?? null
+          preco_unitario_liquido: precoLiquido
         }, client);
 
         if (res.estoque_insuficiente) {
@@ -189,6 +204,11 @@ export async function handleSaleInventoryMovementService(
       console.log('Itens a estornar:', oldSale.itens);
       
       for (const item of oldSale.itens as salesItemModel[]) {
+
+        const precoLiquido = 
+          Number(item.preco_unitario || 0) -
+          Number(item.desconto_unitario || 0);
+
         const res = await inventoryRepository.registerSaleMovement({
           produto_id: item.produto_id,
           quantidade: item.quantidade,
@@ -196,7 +216,7 @@ export async function handleSaleInventoryMovementService(
           origem: "estorno_venda",
           referencia_id: newSale.id,
           usuario_id: userId,
-          preco_unitario: item.preco_unitario ?? null
+          preco_unitario_liquido: precoLiquido
         }, client);
 
         if (res.estoque_insuficiente) {

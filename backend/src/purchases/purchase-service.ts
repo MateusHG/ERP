@@ -75,13 +75,31 @@ export const createPurchaseService = async (purchase: NewPurchaseInput, userId: 
       return badRequest('Fornecedor informado não existe.')
     }
 
+    // Cálculos da Compra
+    let totalBruto = 0;
+    let totalDescontoVolume = 0;
+
+    for (const item of purchase.itens) {
+      const quantidade = Number(item.quantidade);
+      const precoUnit = Number(item.preco_unitario);
+      const descUnit = Number(item.desconto_unitario ?? 0);
+
+      totalBruto += precoUnit * quantidade;
+      totalDescontoVolume += descUnit * quantidade;
+    }
+
+    // Injeta cálculos para fazer o INSERT
+    purchase.valor_bruto = totalBruto;
+    purchase.desconto_volume = totalDescontoVolume;
+
     // ================================
     // Projeção da compra ANTES de criar
     // ==================================
-    const insertedPurchase = await purchasesRepository.insertPurchase(client, purchase, userId);
-
+    const insertedPurchase = await purchasesRepository.insertNewPurchase(client, purchase, userId);
     const fullPurchase = await purchasesRepository.getPurchaseByIdQuery(client, insertedPurchase.id);
 
+
+    // Movimentação de estoque
     const purchaseStatusWithStockImpact = ["recebido", "finalizado"];
 
     if (purchaseStatusWithStockImpact.includes(fullPurchase.status)) {
@@ -125,9 +143,25 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
     }
 
     const oldPurchase = await purchasesRepository.getPurchaseByIdQuery(client, id);
+
     if (!oldPurchase) {
       await client.query("ROLLBACK");
       return notFound("Compra informada não existe.")
+    }
+
+    // Bloqueio de alteração: Caso compra já tenha movimentado estoque, não permite alterar, deve-se reabrir(estornar) para poder mexer novamente.
+    const blockedStatuses = ["recebido", "finalizado"];
+    if (blockedStatuses.includes(oldPurchase.status)) {
+
+      // Permite alterar apenas o status
+      const onlyStatusBeingUpdated = Object.keys(data).length === 1 && "status" in data;
+
+      if (!onlyStatusBeingUpdated) {
+        await client.query("ROLLBACK");
+        return badRequest(
+          "Esta compra já foi recebida ou finalizada e não pode ser alterada, altere apenas o status para 'aberto' para estornar e poder editar novamente."
+        );
+      }
     }
 
     if (Object.keys(data).length === 0) {
@@ -140,15 +174,34 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
       return badRequest("Obrigatório informar a data da emissão.")
     }
 
-    // Projeta a compra como ficaria após a atualização
+    // Projetar itens para recálculo
+    const projectedItems = data.itens ?? oldPurchase.itens;
+
+    // Recalcular campos derivados da compras_itens
+    let totalBruto = 0;
+    let totalDescontoVolume = 0;
+
+    for (const item of projectedItems) {
+      const quantidade = Number(item.quantidade);
+      const precoUnit = Number(item.preco_unitario);
+      const descUnit = Number(item.desconto_unitario);
+
+      totalBruto += quantidade * precoUnit;
+      totalDescontoVolume += descUnit * quantidade
+    }
+
+    data.valor_bruto = totalBruto;
+    data.desconto_volume = totalDescontoVolume;
+
+    // Projeta a compra como ficaria após a atualização (necessário para enviar ao inventory validar se o estoque ficará negativo ou não.)
     const projectedPurchase: purchaseModel = {
       ...oldPurchase,
       ...data,
-      itens: data.itens ?? oldPurchase.itens // garante que os itens existam
+      itens: projectedItems // garante que os itens existam
     };
 
-    const purchaseStatusWithStockImpact = ['recebido', 'finalizado'];
     const statusChanged = data.status && oldPurchase.status !== data.status;
+    const purchaseStatusWithStockImpact = ['recebido', 'finalizado'];
     
     if (statusChanged) {
       await handlePurchaseInventoryMovementService(oldPurchase, projectedPurchase, userId, client);

@@ -66,11 +66,27 @@ export const createSalesService = async (sale: NewSaleInput, userId: number) => 
       return badRequest("Obrigatório informar a data da emissão.");
     }
 
+    // Cálculos da venda
+    let totalBruto = 0;
+    let totalDescontoVolume = 0;
+
+    for (const item of sale.itens) {
+      const quantidade = Number(item.quantidade);
+      const precoUnit = Number(item.preco_unitario);
+      const descUnit = Number(item.desconto_unitario ?? 0);
+
+      totalBruto += precoUnit * quantidade;
+      totalDescontoVolume += descUnit * quantidade;
+    }
+
+    // Injeta cálculos para fazer o INSERT
+    sale.valor_bruto = totalBruto;
+    sale.desconto_volume = totalDescontoVolume;
+
     // ================================
     // Projeção da venda ANTES de criar
     // ==================================
     const insertedSale = await salesRepository.insertSale(client, sale, userId);
-
     const fullSale = await salesRepository.getSaleByIdQuery(client, insertedSale.id);
 
     const salesStatusWithStockImpact = ["entregue", "finalizado"];
@@ -117,9 +133,25 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
     }
 
     const oldSale = await salesRepository.getSaleByIdQuery(client, id);
+
     if (!oldSale) {
       await client.query("ROLLBACK");
       return notFound('Venda informada não existe.');
+    }
+
+    // Bloqueio de alteração: Caso a venda já tenha movimentado estoque, não permite alterar, deve-se reabrir(estornar) para poder mexer novamente.
+    const blockedStatuses = ["entregue", "finalizado"];
+
+    if (blockedStatuses.includes(oldSale.status)) {
+
+      // Permite alterar apenas o status
+      const onlyStatusBeingUpdated = 
+        Object.keys(data).length === 1 && "status" in data;
+
+        if (!onlyStatusBeingUpdated) {
+          await client.query("ROLLBACK");
+          return badRequest("Esta venda já foi entregue ou finalizada e não pode ser alterada, altere apenas o status para 'aberto' para estornar e poder editar novamente.");
+        }
     }
 
     if ("data_emissao" in data && !data.data_emissao) {
@@ -149,7 +181,7 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
     }
 
     // Atualiza a venda no banco
-    const updatedSale = await salesRepository.updateSaleById(id, data, client);
+    const updatedSale = await salesRepository.updateSaleById(id, data, client, userId);
 
     await client.query("COMMIT");
     return ok(updatedSale);
