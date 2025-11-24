@@ -227,7 +227,7 @@ async function updatePurchaseItems(client: any, purchaseId: number, items: purch
             item.produto_id,
             item.quantidade,
             item.preco_unitario,
-            item.desconto_unitario,
+            item.desconto_unitario || 0,
             userId,
             userId
           ]

@@ -182,7 +182,7 @@ export async function collectPurchaseItems(container: HTMLElement) {
       produto_nome: get("item-name"),
       quantidade: Number(get("item-quantity")) || 0,
       preco_unitario: parseFloat(get("item-unit-price").replace(",", ".")) || 0,
-      desconto_volume: parseFloat(get("item-discount-volume").replace(",", ".")) || 0,
+      desconto_unitario: parseFloat(get("item-discount-volume").replace(",", ".")) || 0,
       valor_subtotal: parseFloat(
           totalText.replace(/[^\d,.-]/g, "").replace(",", ".")
         ) || 0,

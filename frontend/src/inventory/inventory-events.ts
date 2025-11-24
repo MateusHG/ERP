@@ -58,14 +58,14 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
   tbodyMov.innerHTML = movimentacoes.length
   ? movimentacoes.map((m: any) => `
    <tr>
-          <td>${m.created_at ? formatDataAndTime(m.created_at) : "-"}</td>
+          <td>${m.data_hora ? formatDataAndTime(m.data_hora) : "-"}</td>
           <td>${m.tipo || "-"}</td>
           <td>${m.origem ?? "-"}</td>
           <td>${m.saldo_anterior ?? "-"}</td>
           <td>${m.qtd_movimentada ?? "-"}</td>
           <td>${m.saldo_posterior ?? "-"}</td>
-          <td>${m.valor_unitario ? formatCurrency(m.valor_unitario) : "-"}</td>
-          <td>${m.valor_unitario ? formatCurrency(m.total) : "-"}</td>
+          <td>${m.preco_unitario_liquido ? formatCurrency(m.preco_unitario_liquido) : "-"}</td>
+          <td>${m.valor_total_liquido ? formatCurrency(m.valor_total_liquido) : "-"}</td>
           <td>${m.usuario || "-"}</td>
         </tr>
       `).join("")

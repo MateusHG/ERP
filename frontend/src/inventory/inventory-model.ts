@@ -11,11 +11,11 @@ export interface inventoryListModel {
 };
 
 export interface inventoryMovementsModel {
-  data: string,
+  data_hora: string,
   tipo_mov: string,
   origem: string,
   quantidade: number,
-  valor_un: string,
-  total: string,
+  preco_unitario_liquido: string,
+  valor_total_liquido: string,
   user: string
 };

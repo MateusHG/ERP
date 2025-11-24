@@ -24,10 +24,10 @@ export const listInventoryItems = async(filters: {
      -- Cálculo de preço médio de compra ponderado.
 
      COALESCE(SUM(CASE
-        WHEN m.tipo IN('entrada') AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0 THEN m.quantidade * m.preco_unitario
+        WHEN m.tipo IN('entrada') AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0 THEN m.quantidade * m.preco_unitario_liquido
         ELSE 0 
      END) / NULLIF(SUM(CASE
-        WHEN m.tipo IN ('entrada') AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0 THEN m.quantidade
+        WHEN m.tipo IN ('entrada') AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0 THEN m.quantidade
         ELSE 0
      END), 0), 0) AS preco_medio_compra,
 
@@ -35,11 +35,11 @@ export const listInventoryItems = async(filters: {
      -- Preço médio de venda ponderado.
     COALESCE(
     SUM(CASE
-      WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0
-      THEN m.quantidade * m.preco_unitario
+      WHEN m.tipo = 'saida' AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0
+      THEN m.quantidade * m.preco_unitario_liquido
       ELSE 0
       END) / NULLIF(SUM(CASE
-        WHEN m.tipo = 'saida' AND m.preco_unitario IS NOT NULL AND m.preco_unitario > 0
+        WHEN m.tipo = 'saida' AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0
         THEN m.quantidade
         ELSE 0
       END), 0),
@@ -140,9 +140,11 @@ export async function listMovements(produto_id: number) {
       m.tipo,
       m.origem,
       m.referencia_id,
+      m.preco_unitario_liquido,
+      m.valor_total_liquido,
       m.usuario_id,
       u.username AS usuario,
-      m.created_at,
+      m.created_at AS data_hora,
 
 
       -- saldo antes da movimentação
@@ -211,7 +213,7 @@ export async function registerMovement(mov: InventoryMovementModel) {
     // Insert no log de movimentações
     const result = await client.query(
       `INSERT INTO movimentacoes_estoque
-       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario)
+       (produto_id, tipo, quantidade, origem, referencia_id, usuario_id, preco_unitario_liquido)
        VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING *`,
       [
