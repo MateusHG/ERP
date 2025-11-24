@@ -198,7 +198,7 @@ async function updateSaleItems(client: any, saleId: number, items: salesItemMode
            SET produto_id = $1,
                quantidade = $2,
                preco_unitario = $3,
-               desconto_unitario = $4
+               desconto_unitario = $4,
                updated_by = $5,
                data_atualizacao = NOW()
            WHERE id = $6 AND venda_id = $7`,

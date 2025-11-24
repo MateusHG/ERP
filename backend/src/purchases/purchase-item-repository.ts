@@ -11,9 +11,9 @@ export const searchAllPurchaseItems = async (purchaseId: number): Promise<purcha
          p.nome AS produto_nome,
          ic.quantidade,
          ic.preco_unitario,
-         ic.desconto_volume,
-         ic.valor_subtotal
-  FROM itens_compra ic
+         ic.desconto_unitario,
+         ic.valor_liquido
+  FROM compras_itens ic
   JOIN produtos p ON p.id = ic.produto_id
   WHERE ic.compra_id = $1
   ORDER BY ic.id
@@ -31,20 +31,20 @@ export const insertPurchaseItem = async (
       produto_id,
       quantidade,
       preco_unitario,
-      desconto_volume
+      desconto_unitario
     } = purchaseItem
   
   const result = await db.query(
-    `INSERT INTO itens_compra (
+    `INSERT INTO compras_itens (
       compra_id,
       produto_id,
       quantidade,
       preco_unitario,
-      desconto_volume
+      desconto_unitario
     ) VALUES ( 
       $1, $2, $3, $4, $5
     ) RETURNING *`,
-     [purchaseId, produto_id, quantidade, preco_unitario, desconto_volume]
+     [purchaseId, produto_id, quantidade, preco_unitario, desconto_unitario]
   );
 
   return result.rows[0];
@@ -58,7 +58,7 @@ export const updatePurchaseItem = async (
 ): Promise<purchaseItemModel | null> => {
 
   //Cria um filtro para campos permitidos na alteração
-  const allowedFields = ['produto_id','quantidade', 'preco_unitario', 'desconto_volume'];
+  const allowedFields = ['produto_id','quantidade', 'preco_unitario', 'desconto_unitario'];
   const keys = Object.keys(fieldsToUpdate).filter(key => allowedFields.includes(key));
   const values = keys.map(key => fieldsToUpdate[key as keyof typeof fieldsToUpdate]);
 
@@ -68,7 +68,7 @@ export const updatePurchaseItem = async (
   
   // WHERE com dois filtros: id (item) e compra_id (compra)
   const query = `
-    UPDATE itens_compra
+    UPDATE compras_itens
     SET ${setClause}
     WHERE id = $${keys.length + 1} AND compra_id = $${keys.length + 2} 
     RETURNING *;
@@ -92,11 +92,11 @@ export const verifyProduct = async (productId: number): Promise<boolean> => {
 
 //Validação para ver se o id do item dentro da compra existe, mover depois para um arquivo separado.
 export const verifyPurchaseItem = async (productItemId: number): Promise<boolean> => {
-  const result = await db.query(`SELECT * FROM itens_compra where id = $1 limit 1`,[productItemId]);
+  const result = await db.query(`SELECT * FROM compras_itens WHERE id = $1 limit 1`,[productItemId]);
   return result.rows[0] || null;
 };
 
 export const deletePurchaseItem = async (purchaseId: number, purchaseItemId: number): Promise<boolean> => {
-  const result = await db.query(`DELETE FROM itens_compra where compra_id = $1 and id = $2`, [purchaseId, purchaseItemId])
+  const result = await db.query(`DELETE FROM compras_itens WHERE compra_id = $1 and id = $2`, [purchaseId, purchaseItemId])
   return result.rowCount> 0;
 };

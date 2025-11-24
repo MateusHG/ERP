@@ -59,24 +59,24 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
 );
   tr.appendChild(tdUnitPrice);
 
-// Desconto por volume
+// Desconto por unidade
 const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
   "item-discount-volume",
-   item?.desconto_volume != null ?  item.desconto_volume : 0
+   item?.desconto_unitario != null ?  item.desconto_unitario : 0
 );
   tr.appendChild(tdDiscount);
 
   // Total desconto
   const tdTotalDiscount = document.createElement("td");
   tdTotalDiscount.classList.add("item-total-discount");
-  const discountValue = item?.desconto_volume && item?.quantidade
-    ? Number(item.desconto_volume) * Number(item.quantidade)
+  const discountValue = item?.desconto_unitario && item?.quantidade
+    ? Number(item.desconto_unitario) * Number(item.quantidade)
     : 0;
   tdTotalDiscount.textContent = formatCurrency(discountValue); // garante R$
   tr.appendChild(tdTotalDiscount);
 
   const tdTotal = document.createElement("td");
-  tdTotal.textContent = item ? formatCurrency(Number(item.valor_subtotal || 0)) : formatCurrency(0);
+  tdTotal.textContent = item ? formatCurrency(Number(item.valor_total || 0)) : formatCurrency(0);
   tdTotal.classList.add("item-line-total");
   tr.appendChild(tdTotal);
 

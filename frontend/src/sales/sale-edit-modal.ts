@@ -75,8 +75,8 @@ export async function openEditModal(id: number) {
       produto_nome: item.produto_nome || "",
       quantidade: item.quantidade,
       preco_unitario: item.preco_unitario,
-      desconto_volume: item.desconto_volume || "0.00",
-      valor_subtotal: item.valor_subtotal,
+      desconto_unitario: item.desconto_unitario || "0.00",
+      valor_total: item.valor_total,
     }, "edit", true); // prefixo = "edit", isSaved = true
 
   });
@@ -167,6 +167,7 @@ cancelBtn?.addEventListener("click", async () => {
   currentEditId = null;
 });
 
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!currentEditId) return;
@@ -214,8 +215,8 @@ form.addEventListener("submit", async (event) => {
     produto_id: item.produto_id,
     quantidade: item.quantidade,
     preco_unitario: item.preco_unitario,
-    desconto_volume: item.desconto_volume ?? 0,
-    valor_subtotal: item.valor_subtotal ?? 0
+    desconto_unitario: item.desconto_unitario ?? 0,
+    valor_total: item.valor_total ?? 0
   }));
 
   // Normaliza os itens orginais para comparação
@@ -224,8 +225,8 @@ form.addEventListener("submit", async (event) => {
     produto_id: item.produto_id,
     produto_quantidade: item.quantidade,
     preco_unitario: item.preco_unitario,
-    desconto_volume: item.desconto_volume ?? 0,
-    valor_subtotal: item.valor_subtotal ?? 0
+    desconto_unitario: item.desconto_unitario ?? 0,
+    valor_subtotal: item.valor_total ?? 0
   }));
 
   // Detecta itens alterados
@@ -242,12 +243,34 @@ form.addEventListener("submit", async (event) => {
     showMessage('Selecione um cliente válido.');
     return;
   }
-
+  
   try {
+    // Bloqueio de venda finalizada/entregue
+    // Permite alterar apenas o STATUS
+    const previousStatus = originalFormData["edit-status"]?.toLowerCase();
+    const lockedStatuses = ["finalizado", "entregue"];
+    const isLocked = lockedStatuses.includes(previousStatus);
+
+    const isChangingOnlyStatus =
+      updatedSaleData.status && 
+      updatedSaleData.status.toLowerCase() !== previousStatus;
+
+      if (isLocked) {
+
+        if (!isChangingOnlyStatus) {
+          await showMessage("Esta venda está Finalizada/Entregue. Só é permitido alterar o status.");
+          return;
+        }
+
+        // Força o envio apenas do status quando está finalizado ou entregue.
+        const newStatus = updatedSaleData.status;
+        for (const key in updatedSaleData) delete updatedSaleData[key];
+        updatedSaleData.status = newStatus 
+      }
+
   // =========================
   // Validação de status
   // =========================
-  const previousStatus = originalFormData["edit-status"]?.toLowerCase();
   const currentStatus = (updatedSaleData.status || previousStatus)?.toLowerCase();
 
   const statusesFinalized = ["finalizado", "entregue"];

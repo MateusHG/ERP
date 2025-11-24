@@ -21,8 +21,8 @@ export interface saleItemModel {
   produto_nome: string,
   quantidade: number;
   preco_unitario: number;
-  desconto_volume?: number;    // desconto por item por quantidade
-  valor_subtotal?: number;               // (preco_unitario - desconto_volume) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
+  desconto_unitario?: number;    // desconto por item por quantidade
+  valor_total?: number;               // (preco_unitario - desconto_unitario) * quantidade -- FEITO DIRETO NO BANCO DE DADOS.
 }
 
 export const paymentLabels: Record<string, string> = {

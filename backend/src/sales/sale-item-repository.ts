@@ -10,9 +10,9 @@ export const searchAllSaleItems = async (saleId: number): Promise<salesItemModel
          p.nome AS produto_nome,
          iv.quantidade,
          iv.preco_unitario,
-         iv.desconto_volume,
-         iv.valor_subtotal
-  FROM itens_venda iv
+         iv.desconto_unitario,
+         iv.valor_liquido
+  FROM vendas_itens iv
   JOIN produtos p ON p.id = iv.produto_id
   WHERE iv.venda_id = $1
   ORDER BY iv.id`;

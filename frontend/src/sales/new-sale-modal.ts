@@ -63,7 +63,7 @@ form.addEventListener("submit", async (e) => {
     produto_id: (row.querySelector('input[name="item-product-id"]') as HTMLInputElement).value,
     quantidade: (row.querySelector('input[name="item-quantity"]') as HTMLInputElement).value,
     preco_unitario: Number((row.querySelector('input[name="item-unit-price"]') as HTMLInputElement).value.replace(",", ".")),
-    desconto_volume: Number((row.querySelector('input[name="item-discount-volume"]') as HTMLInputElement).value.replace(",", ".")),
+    desconto_unitario: Number((row.querySelector('input[name="item-discount-volume"]') as HTMLInputElement).value.replace(",", ".")),
   }));
 
   const newSaleData = {

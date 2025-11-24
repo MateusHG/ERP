@@ -73,8 +73,8 @@ export async function openEditModal(id: number) {
       produto_nome: item.produto_nome || "",
       quantidade: item.quantidade,
       preco_unitario: item.preco_unitario,
-      desconto_volume: item.desconto_volume || "0.00",
-      valor_subtotal: item.valor_subtotal,
+      desconto_unitario: item.desconto_unitario|| "0.00",
+      valor_total: item.valor_total,
     }, "edit", true); // prefix = "edit", isSaved = true
   });
 
@@ -225,6 +225,28 @@ form.addEventListener("submit", async (event) => {
     // Validação de status
     // =========================
     const previousStatus = originalFormData["edit-status"]?.toLowerCase();
+    const lockedStatuses = ["recebido", "finalizado"];
+    const isLocked = lockedStatuses.includes(previousStatus);
+
+    const isChangingOnlyStatus =
+      updatedPurchaseData.status &&
+      updatedPurchaseData.status.toLowerCase() !== previousStatus;
+
+      if (isLocked) {
+
+        if (!isChangingOnlyStatus) {
+          await showMessage("Essa compra já está Finalizada/Recebida. Só é permitido alterar o status.");
+          return;
+        }
+
+        // Força o envio apenas do status quando está finalizado ou recebido.
+        const newStatus = updatedPurchaseData.status;
+        for (const key in updatedPurchaseData) delete updatedPurchaseData[key];
+        updatedPurchaseData.status = newStatus;
+      }
+
+
+    // Validação de status
     const currentStatus = (updatedPurchaseData.status || previousStatus)?.toLowerCase();
 
     const statusFinalized = ["recebido", "finalizado"];
