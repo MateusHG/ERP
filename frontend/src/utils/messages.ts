@@ -136,6 +136,7 @@ export function showEstoqueNegativoMessage(itens: any[], message?: string) {
 
   // Atualiza o conteúdo do modal de mensagem
   messageText.innerHTML = `
+    <strong>⛔ Operação Cancelada ⛔</strong><br><br>
     <strong>${message || "Estoque insuficiente para dar saída em um ou mais produtos." }</strong>
     ${tableHTML}
   `;

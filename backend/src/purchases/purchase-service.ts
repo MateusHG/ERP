@@ -151,11 +151,11 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
 
     // Bloqueio de alteração: Caso compra já tenha movimentado estoque, não permite alterar, deve-se reabrir(estornar) para poder mexer novamente.
     const blockedStatuses = ["recebido", "finalizado"];
-    if (blockedStatuses.includes(oldPurchase.status)) {
+    const isBlocked = blockedStatuses.includes(oldPurchase.status);
 
-      // Permite alterar apenas o status
+    if (isBlocked) {
       const onlyStatusBeingUpdated = Object.keys(data).length === 1 && "status" in data;
-
+    
       if (!onlyStatusBeingUpdated) {
         await client.query("ROLLBACK");
         return badRequest(
@@ -199,6 +199,8 @@ export const updatePurchaseByIdService = async (id: number, data: Partial<purcha
       ...data,
       itens: projectedItems // garante que os itens existam
     };
+
+    // Bloqueio
 
     const statusChanged = data.status && oldPurchase.status !== data.status;
     const purchaseStatusWithStockImpact = ['recebido', 'finalizado'];

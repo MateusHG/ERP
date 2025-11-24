@@ -141,22 +141,17 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
 
     // Bloqueio de alteração: Caso a venda já tenha movimentado estoque, não permite alterar, deve-se reabrir(estornar) para poder mexer novamente.
     const blockedStatuses = ["entregue", "finalizado"];
+    const isBlocked = blockedStatuses.includes(oldSale.status);
 
-    if (blockedStatuses.includes(oldSale.status)) {
-
-      // Permite alterar apenas o status
+    if (isBlocked) {
+       // Permite alterar apenas o status
       const onlyStatusBeingUpdated = 
         Object.keys(data).length === 1 && "status" in data;
 
-        if (!onlyStatusBeingUpdated) {
-          await client.query("ROLLBACK");
-          return badRequest("Esta venda já foi entregue ou finalizada e não pode ser alterada, altere apenas o status para 'aberto' para estornar e poder editar novamente.");
-        }
-    }
-
-    if ("data_emissao" in data && !data.data_emissao) {
-      await client.query("ROLLBACK");
-      return badRequest("Obrigatório informar a data da emissão.");
+      if (!onlyStatusBeingUpdated) {
+        await client.query("ROLLBACK");
+        return badRequest("Esta venda já foi entregue ou finalizada e não pode ser alterada, altere apenas o status para 'aberto' para estornar e poder editar novamente.");
+      }
     }
 
     if (Object.keys(data).length === 0) {
@@ -164,11 +159,34 @@ export const updateSaleByIdService = async (id: number, data: Partial<salesModel
       return badRequest('Nenhum campo enviado para atualização.');
     }
 
-    // Projeta a venda como ficaria após a atualização
+    if ("data_emissao" in data && !data.data_emissao) {
+      await client.query("ROLLBACK");
+      return badRequest("Obrigatório informar a data da emissão.");
+    }
+
+    // Projetar itens para recálculo de valores
+    const projectedItems = data.itens ?? oldSale.itens;
+
+    let totalBruto = 0;
+    let totalDescontoVolume = 0;
+
+    for (const item of projectedItems) {
+      const quantidade = Number(item.quantidade);
+      const precoUnit = Number(item.preco_unitario);
+      const descUnit = Number(item.desconto_unitario);
+
+      totalBruto += quantidade * precoUnit;
+      totalDescontoVolume += descUnit * quantidade;
+    }
+
+    data.valor_bruto = totalBruto
+    data.desconto_volume = totalDescontoVolume;
+
+    // Projeta a venda como ficaria após a atualização (necessário para enviar ao inventory validar se o estoque ficará negativo ou não.)
     const projectedSale: salesModel = {
       ...oldSale,
       ...data,
-      itens: data.itens ?? oldSale.itens, // garante que os itens existam
+      itens: projectedItems
     };
 
     // Verifica se o status mudou

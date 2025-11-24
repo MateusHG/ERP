@@ -59,11 +59,22 @@ export const handlePurchaseInventoryMovementController = async (req: Request, re
     const newPurchaseData = req.body;
 
     const updatedPurchase = await purchaseRepository.updatePurchaseById(purchaseId, newPurchaseData, undefined);
+    
     const httpResponse = await purchaseRepository.updatePurchaseById(oldPurchase, updatedPurchase, undefined);
+
     res.status(httpResponse.statusCode).json(httpResponse.body);
 
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+
+    // Repassa pra o front-end o erro de estoque negativo.
+    if (err instanceof StockInsufficientError) {
+      res.status(400).json({
+        message: err.message,
+        inconsistencies: err.inconsistencies,
+      });
+    }
+
     res.status(500).json({error: 'Erro interno do servidor ao processar movimentação de estoque à partir da compra.'});
   }
 };

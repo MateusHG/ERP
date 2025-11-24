@@ -143,11 +143,11 @@ export async function handlePurchaseInventoryMovementService(
   
   } catch (error: any) {
     console.error(error);
+
+    if (error instanceof StockInsufficientError) throw error;
     return internalServerError('Erro ao movimentar estoque á partir da compra.');
   }
 };
-
-
 
 // Serviço para movimentar estoque a partir da venda.
 export async function handleSaleInventoryMovementService(
