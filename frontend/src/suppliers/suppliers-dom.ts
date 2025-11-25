@@ -40,12 +40,16 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
 
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-edit";
-    btnEdit.textContent = "✏️";
+    btnEdit.dataset.id = supplier.id.toString();
+    btnEdit.innerHTML = `<img src="/erpicons/edit.svg" alt="Editar" class="icon-btn" />`;
+    btnEdit.title = "Clique para editar fornecedor"
     btnEdit.dataset.id = supplier.id.toString();
 
     const btnDelete = document.createElement("button");
     btnDelete.className = "btn-delete";
-    btnDelete.textContent = "❌";
+    btnDelete.dataset.id = supplier.id.toString();
+    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar" class="icon-btn" />`;
+    btnDelete.title = "Clique para deletar fornecedor"
     btnDelete.dataset.id = supplier.id.toString();
 
     tdActions.appendChild(btnEdit);
