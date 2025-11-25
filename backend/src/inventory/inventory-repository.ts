@@ -23,27 +23,52 @@ export const listInventoryItems = async(filters: {
 
      -- Cálculo de preço médio de compra ponderado.
 
-     COALESCE(SUM(CASE
-        WHEN m.tipo IN('entrada') AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0 THEN m.quantidade * m.preco_unitario_liquido
+     COALESCE(
+      SUM(
+        CASE
+          WHEN m.tipo = 'entrada'
+          AND m.origem = 'compra'
+          AND m.preco_unitario_liquido IS NOT NULL
+          AND m.preco_unitario_liquido > 0
+        THEN m.quantidade * m.preco_unitario_liquido
         ELSE 0 
-     END) / NULLIF(SUM(CASE
-        WHEN m.tipo IN ('entrada') AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0 THEN m.quantidade
-        ELSE 0
+     END
+     )
+      / NULLIF(
+      SUM(CASE
+        WHEN m.tipo = 'entrada'
+        AND m.origem = 'compra'
+        AND m.preco_unitario_liquido IS NOT NULL
+        AND m.preco_unitario_liquido > 0
+      THEN m.quantidade
+      ELSE 0
      END), 0), 0) AS preco_medio_compra,
 
 
      -- Preço médio de venda ponderado.
+
     COALESCE(
-    SUM(CASE
-      WHEN m.tipo = 'saida' AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0
-      THEN m.quantidade * m.preco_unitario_liquido
+      SUM(
+        CASE
+          WHEN m.tipo = 'saida'
+          AND m.origem = 'venda'
+          AND m.preco_unitario_liquido IS NOT NULL
+          AND m.preco_unitario_liquido > 0
+        THEN m.quantidade * m.preco_unitario_liquido
       ELSE 0
-      END) / NULLIF(SUM(CASE
-        WHEN m.tipo = 'saida' AND m.preco_unitario_liquido IS NOT NULL AND m.preco_unitario_liquido > 0
-        THEN m.quantidade
-        ELSE 0
-      END), 0),
-      0) AS preco_medio_venda
+      END
+      ) 
+      / NULLIF(
+      SUM(CASE
+        WHEN m.tipo = 'saida'
+        AND m.origem = 'venda'
+        AND m.preco_unitario_liquido IS NOT NULL
+        AND m.preco_unitario_liquido > 0
+      THEN m.quantidade
+      ELSE 0
+    END),
+  0),
+0) AS preco_medio_venda
 
 FROM produtos p
 LEFT JOIN estoque_saldo es ON p.id = es.produto_id

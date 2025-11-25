@@ -3,7 +3,6 @@ interface productModel {
   codigo: string;
   nome: string;
   descricao: string;
-  preco: number;
   estoque: number;
   categoria: string;
   status: string;

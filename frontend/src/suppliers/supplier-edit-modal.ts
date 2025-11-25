@@ -4,6 +4,23 @@ import { formatCnpj, formatPhoneNumber, formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
 
+document.querySelectorAll(".tab").forEach(tab => {
+  const el = tab as HTMLElement; // <-- agora o TS sabe que tem dataset
+
+  el.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+    el.classList.add("active");
+
+    const tabId = el.dataset.tab;
+    if (!tabId) return;
+
+    const content = document.getElementById(tabId);
+    if (content) content.classList.add("active");
+  });
+});
+
 const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
@@ -64,6 +81,8 @@ export async function openEditModal(id: number) {
   currentEditId = id;
 
   const supplier = await getSupplierByIdAPI(id);
+
+  document.getElementById("edit-supplier-id")!.textContent = String(supplier.id);
 
   (form.elements.namedItem("id") as HTMLInputElement).value = supplier.id.toString();
   (form.elements.namedItem("razao") as HTMLInputElement).value = supplier.razao_social;

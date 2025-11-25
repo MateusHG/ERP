@@ -181,10 +181,11 @@ body {
     }
 
     table {
-      width: 100%;
+      width: 99%;
+      margin-left: 8px;
       border-collapse: collapse;
-      background-color: white;
-      border-radius: 8px;
+      background-color: 8px white;
+      border-radius: 0px;
       overflow: hidden;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
     }
@@ -198,12 +199,14 @@ body {
       padding: 12px;
       text-align: center;
       font-size: 14px;
+      border-right: 1px solid #e0e0e0; /* linha vertical suave */
     }
 
     td:nth-child(4), /* Coluna do CNPJ */
     td:nth-child(5)  /* Coluna do Telefone */ {
       min-width: 130px;
     }
+
 
     tbody tr {
       border-bottom: 1px solid #eee;
@@ -387,6 +390,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 50px;
+  margin-bottom: 18px;
 }
 
 .form-group label {
@@ -456,3 +460,171 @@ input[readonly] {
   flex-direction: column;
 }
 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* Título com ícone */
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* espaço entre ícone e texto */
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Ícone */
+.modal-title-icon {
+  width: 50px;        /* ajuste o tamanho que preferir */
+  height: 35px;
+  object-fit: contain;
+  display: block;
+  stroke: #333;
+}
+/* Badge de status */
+.badge-status {
+  font-size: 13px;
+  color: #fff;
+  background: #2d88ff;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+/* Título de seção */
+.section-title {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Linha divisória */
+.section-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 0 0 15px 0;
+}
+
+/* Container das abas */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #e3e3e3;
+  padding-bottom: 6px;
+}
+
+/* Botões de aba */
+.tab {
+  padding: 7px 14px;
+  cursor: pointer;
+  border: none;
+  background: #f7f7f7;
+  font-size: 14px;
+  border-radius: 6px 6px 0 0;
+  transition: background 0.2s, color 0.2s;
+  color: #444;
+}
+
+.tab:hover {
+  background: #e9e9e9;
+}
+
+/* Aba ativa */
+.tab.active {
+  background: #2d88ff;
+  color: white;
+  font-weight: 600;
+}
+
+/* Conteúdo das abas */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+/* Aba visível */
+.tab-content.active {
+  display: block;
+}
+
+/* Animação de suavização ao trocar de aba */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+#suppliers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-family: Arial, sans-serif;
+}
+
+/* Cabeçalho */
+#suppliers-table thead {
+  background-color: #58a9ff;
+  color: white;
+}
+
+#suppliers-table th {
+  padding: 12px 10px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+#suppliers-table th:last-child {
+  border-right: none;
+}
+
+/* Corpo */
+#suppliers-table td {
+  padding: 12px 10px;
+  font-size: 14px;
+  border-bottom: 1px solid #eaeaea;
+  border-right: 1px solid #f0f0f0;
+}
+
+#suppliers-table td:last-child {
+  border-right: none;
+}
+
+/* Linhas alternadas */
+#suppliers-table tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/* Hover */
+#suppliers-table tbody tr:hover {
+  background-color: #f3f2f2;
+}
+
+/* Deixa verticalmente alinhado no centro */
+#suppliers-table td,
+#suppliers-table th {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Wrapper com rolagem opcional */
+.table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

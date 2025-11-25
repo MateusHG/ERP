@@ -20,7 +20,6 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("codigo") as HTMLInputElement).value = product.codigo;
   (form.elements.namedItem("nome") as HTMLInputElement).value = product.nome;
   (form.elements.namedItem("descricao") as HTMLInputElement).value = product.descricao;
-  (form.elements.namedItem("preco") as HTMLInputElement).value = product.preco.toString();
   (form.elements.namedItem("categoria") as HTMLInputElement).value = product.categoria;
   (form.elements.namedItem("status") as HTMLInputElement).value = product.status;
   (form.elements.namedItem("estoque_min") as HTMLInputElement).value = product.estoque_minimo.toString();
@@ -55,7 +54,6 @@ form.addEventListener("submit", async (event) => {
     codigo: formData.get("codigo")?.toString().trim() || "",
     nome: formData.get("nome")?.toString().trim() || "",
     descricao: formData.get("descricao")?.toString().trim() || "",
-    preco: parseFloat(formData.get("preco") as string) || 0,
     estoque_minimo: parseInt(formData.get("estoque_min") as string) || 0,
     estoque_maximo: parseInt(formData.get("estoque_max") as string) || 0,
     status: formData.get("status")?.toString().trim() || "Ativo",

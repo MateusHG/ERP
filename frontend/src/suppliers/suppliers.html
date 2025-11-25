@@ -67,127 +67,168 @@
 </header>
 
   <main>
-      <!-- Modal: Novo Fornecedor -->
-      <div id="new-supplier-modal" class="modal hidden">
-        <div class="modal-content">
-          <h3>Novo Fornecedor</h3>
-          <form id="new-supplier-form">
-        <div class="form-fields">
-          <div class="form-group">
-            <label for="edit-codigo">Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
+  <!-- Modal: Novo Fornecedor -->
+  <div id="new-supplier-modal" class="modal hidden">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h3 class="modal-title">
+        <img src="/erpicons/suppliers.svg" alt="Fornecedor" class="modal-title-icon">Novo Fornecedor</h3>
+</div>
+
+      <!-- NAV DAS ABAS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="tab-gerais">Dados Gerais</button>
+        <button class="tab" data-tab="tab-contato">Contato</button>
+        <button class="tab" data-tab="tab-endereco">Endereço</button>
+      </div>
+
+      <form id="new-supplier-form">
+        
+        <!-- =====================================================
+              ABA: DADOS GERAIS
+        ====================================================== -->
+        <div id="tab-gerais" class="tab-content active">
+          <div class="form-fields">
+
+            <div class="form-group">
+              <label>Razão Social:</label>
+              <input type="text" name="razao" id="edit-razao" required maxlength="100" />
+            </div>
+
+            <div class="form-group">
+              <label>Nome Fantasia:</label>
+              <input type="text" name="fantasia" id="edit-fantasia" required maxlength="100" />
+            </div>
+
+            <div class="form-group">
+              <label>CNPJ:</label>
+              <input type="text" name="cnpj" id="edit-cnpj" required />
+            </div>
+
+            <div class="form-group">
+              <label>Inscrição Estadual:</label>
+              <input type="number" name="iestadual" id="edit-ie" min="0" />
+            </div>
+
+            <div class="form-group">
+              <label>Status:</label>
+              <select name="status" id="edit-status" required>
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+            </div>
+
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="edit-nome">Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
+        <!-- =====================================================
+              ABA: CONTATO
+        ====================================================== -->
+        <div id="tab-contato" class="tab-content">
+          <div class="form-fields">
+
+            <div class="form-group">
+              <label>Telefone:</label>
+              <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
+            </div>
+
+            <div class="form-group">
+              <label>Celular:</label>
+              <input type="text" name="celular" id="edit-celular" maxlength="15" />
+            </div>
+
+            <div class="form-group">
+              <label>Email:</label>
+              <input type="text" name="email" id="edit-email" maxlength="100" />
+            </div>
+
           </div>
+        </div>
 
-          <div class="form-group">
-            <label for="edit-descricao">CNPJ:</label>
-            <input type="text" name="cnpj" id="edit-cnpj" required />
+        <!-- =====================================================
+              ABA: ENDEREÇO
+        ====================================================== -->
+        <div id="tab-endereco" class="tab-content">
+          <div class="form-fields">
+
+            <div class="form-group">
+              <label>CEP:</label>
+              <input type="number" name="cep" id="edit-cep" />
+            </div>
+
+            <div class="form-group">
+              <label>UF:</label>
+              <select name="uf" id="edit-uf" required>
+                <option value="">Selecione</option>
+                <option value="AC">AC</option>
+                <option value="AL">AL</option>
+                <option value="AP">AP</option>
+                <option value="AM">AM</option>
+                <option value="BA">BA</option>
+                <option value="CE">CE</option>
+                <option value="DF">DF</option>
+                <option value="ES">ES</option>
+                <option value="GO">GO</option>
+                <option value="MA">MA</option>
+                <option value="MT">MT</option>
+                <option value="MS">MS</option>
+                <option value="MG">MG</option>
+                <option value="PA">PA</option>
+                <option value="PB">PB</option>
+                <option value="PR">PR</option>
+                <option value="PE">PE</option>
+                <option value="PI">PI</option>
+                <option value="RJ">RJ</option>
+                <option value="RN">RN</option>
+                <option value="RS">RS</option>
+                <option value="RO">RO</option>
+                <option value="RR">RR</option>
+                <option value="SC">SC</option>
+                <option value="SP">SP</option>
+                <option value="SE">SE</option>
+                <option value="TO">TO</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Rua:</label>
+              <input type="text" name="rua" id="edit-rua" required />
+            </div>
+
+            <div class="form-group">
+              <label>Nº:</label>
+              <input type="number" name="numero" id="edit-numero" required />
+            </div>
+
+            <div class="form-group">
+              <label>Complemento:</label>
+              <input type="text" name="complemento" id="edit-complemento" />
+            </div>
+
+            <div class="form-group">
+              <label>Bairro:</label>
+              <input type="text" name="bairro" id="edit-bairro" required />
+            </div>
+
+            <div class="form-group">
+              <label>Cidade:</label>
+              <input type="text" name="cidade" id="edit-cidade" required />
+            </div>
+
           </div>
-
-          <div class="form-group">
-            <label for="edit-ie">Inscrição Estadual:</label>
-            <input type="number" name="iestadual" id="edit-ie" min="0" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-                <label for="edit-cep">CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-uf">UF:</label>
-                <select name="uf" id="edit-uf" required>
-                  <option value="">Selecione uma UF</option>
-                  <option value="AC">Acre (AC)</option>
-                  <option value="AL">Alagoas (AL)</option>
-                  <option value="AP">Amapá (AP)</option>
-                  <option value="AM">Amazonas (AM)</option>
-                  <option value="BA">Bahia (BA)</option>
-                  <option value="CE">Ceará (CE)</option>
-                  <option value="DF">Distrito Federal (DF)</option>
-                  <option value="ES">Espírito Santo (ES)</option>
-                  <option value="GO">Goiás (GO)</option>
-                  <option value="MA">Maranhão (MA)</option>
-                  <option value="MT">Mato Grosso (MT)</option>
-                  <option value="MS">Mato Grosso do Sul (MS)</option>
-                  <option value="MG">Minas Gerais (MG)</option>
-                  <option value="PA">Pará (PA)</option>
-                  <option value="PB">Paraíba (PB)</option>
-                  <option value="PR">Paraná (PR)</option>
-                  <option value="PE">Pernambuco (PE)</option>
-                  <option value="PI">Piauí (PI)</option>
-                  <option value="RJ">Rio de Janeiro (RJ)</option>
-                  <option value="RN">Rio Grande do Norte (RN)</option>
-                  <option value="RS">Rio Grande do Sul (RS)</option>
-                  <option value="RO">Rondônia (RO)</option>
-                  <option value="RR">Roraima (RR)</option>
-                  <option value="SC">Santa Catarina (SC)</option>
-                  <option value="SP">São Paulo (SP)</option>
-                  <option value="SE">Sergipe (SE)</option>
-                  <option value="TO">Tocantins (TO)</option>
-                </select>
-              </div>
-          
-              <div class="form-group">
-                <label for="edit-rua">Rua:</label>
-                <input type="text" name="rua" id="edit-rua" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-numero">Nº:</label>
-                <input type="number" name="numero" id="edit-numero" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-complemento">Complemento:</label>
-                <input type="text" name="complemento" id="edit-complemento" />
-              </div>
-            
-              <div class="form-group">
-                <label for="edit-bairro">Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-cidade">Cidade:</label>
-                <input type="text" name="cidade" id="edit-cidade" required />
-              </div>
         </div>
 
         <div class="modal-buttons">
           <button type="submit" id="submit-new-supplier">Salvar</button>
           <button type="button" id="cancel-new-supplier">Cancelar</button>
         </div>
+
       </form>
+
     </div>
   </div>
+</main>
 
     <table id="suppliers-table">
       <thead>
@@ -230,141 +271,187 @@
   </div>
 
   <!-- Modal: Editar Fornecedor -->
-  <div id="edit-modal" class="modal hidden">
-    <div class="modal-content">
-      <h3>Editar Fornecedor</h3>
-      <form id="edit-form">
-        <div class="form-fields">
-          <div class="form-group">
-            <label for="edit-id">ID:</label>
-            <input type="number" name="id" id="edit-id" readonly />
-          </div>
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-content">
 
-          <div class="form-group">
-            <label for="edit-codigo">Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-nome">Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-descricao">CNPJ:</label>
-            <input type="text" name="cnpj" id="edit-cnpj" required />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-ie">Inscrição Estadual:</label>
-            <input type="number" name="iestadual" id="edit-ie" min="0" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" minlength="1" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-                <label for="edit-cep">CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-uf">UF:</label>
-                <select name="uf" id="edit-uf" required>
-                  <option value="">Selecione uma UF</option>
-                  <option value="AC">Acre (AC)</option>
-                  <option value="AL">Alagoas (AL)</option>
-                  <option value="AP">Amapá (AP)</option>
-                  <option value="AM">Amazonas (AM)</option>
-                  <option value="BA">Bahia (BA)</option>
-                  <option value="CE">Ceará (CE)</option>
-                  <option value="DF">Distrito Federal (DF)</option>
-                  <option value="ES">Espírito Santo (ES)</option>
-                  <option value="GO">Goiás (GO)</option>
-                  <option value="MA">Maranhão (MA)</option>
-                  <option value="MT">Mato Grosso (MT)</option>
-                  <option value="MS">Mato Grosso do Sul (MS)</option>
-                  <option value="MG">Minas Gerais (MG)</option>
-                  <option value="PA">Pará (PA)</option>
-                  <option value="PB">Paraíba (PB)</option>
-                  <option value="PR">Paraná (PR)</option>
-                  <option value="PE">Pernambuco (PE)</option>
-                  <option value="PI">Piauí (PI)</option>
-                  <option value="RJ">Rio de Janeiro (RJ)</option>
-                  <option value="RN">Rio Grande do Norte (RN)</option>
-                  <option value="RS">Rio Grande do Sul (RS)</option>
-                  <option value="RO">Rondônia (RO)</option>
-                  <option value="RR">Roraima (RR)</option>
-                  <option value="SC">Santa Catarina (SC)</option>
-                  <option value="SP">São Paulo (SP)</option>
-                  <option value="SE">Sergipe (SE)</option>
-                  <option value="TO">Tocantins (TO)</option>
-                </select>
-              </div>
-          
-              <div class="form-group">
-                <label for="edit-rua">Rua:</label>
-                <input type="text" name="rua" id="edit-rua" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-numero">Nº:</label>
-                <input type="number" name="numero" id="edit-numero" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-complemento">Complemento:</label>
-                <input type="text" name="complemento" id="edit-complemento" />
-              </div>
-            
-              <div class="form-group">
-                <label for="edit-bairro">Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
-              </div>
-
-              <div class="form-group">
-                <label for="edit-cidade">Cidade:</label>
-                <input type="text" name="cidade" id="edit-cidade" required />
-              </div>
-
-          <div class="form-group">
-            <label for="edit-data-cadastro">Data de Cadastro:</label>
-            <input type="text" name="data_cadastro" id="edit-data-cadastro" readonly />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-data-atualizacao">Data Última Atualização:</label>
-            <input type="text" name="data_atualizacao" id="edit-data-atualizacao" readonly />
-          </div>
-        </div>
-
-        <div class="modal-buttons">
-          <button type="submit" id="submit-edit">Salvar</button>
-          <button type="button" id="cancel-edit">Cancelar</button>
-        </div>
-      </form>
+    <div class="modal-header">
+      <h3>Editar Fornecedor Nº: <span id="edit-supplier-id" class="supplier-id-display"></span></h3>
+      <span class="badge-status" id="edit-status-badge">Ativo</span>
     </div>
+
+    <form id="edit-form">
+
+      <!-- Abas -->
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="edit-tab-geral">Geral</button>
+        <button type="button" class="tab" data-tab="edit-tab-endereco">Endereço</button>
+        <button type="button" class="tab" data-tab="edit-tab-contato">Contato</button>
+        <button type="button" class="tab" data-tab="edit-tab-sistema">Sistema</button>
+      </div>
+
+      <!-- CONTEÚDO DA ABA: GERAL -->
+      <div class="tab-content active" id="edit-tab-geral">
+
+        <div class="section-title">Informações Gerais</div>
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="edit-id">ID:</label>
+          <input type="number" id="edit-id" name="id" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-razao">Razão Social:</label>
+          <input type="text" id="edit-razao" name="razao" required minlength="1" maxlength="100">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-fantasia">Nome Fantasia:</label>
+          <input type="text" id="edit-fantasia" name="fantasia" required minlength="1" maxlength="100">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-cnpj">CNPJ:</label>
+          <input type="text" id="edit-cnpj" name="cnpj" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-ie">Inscrição Estadual:</label>
+          <input type="number" id="edit-ie" name="iestadual" min="0">
+        </div>
+
+      </div>
+
+      <!-- CONTEÚDO DA ABA: ENDEREÇO -->
+      <div class="tab-content" id="edit-tab-endereco">
+
+        <div class="section-title">Endereço</div>
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="edit-cep">CEP:</label>
+          <input type="number" id="edit-cep" name="cep">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-uf">UF:</label>
+          <select id="edit-uf" name="uf" required>
+            <option value="">Selecione uma UF</option>
+            <option value="AC">Acre (AC)</option>
+            <option value="AL">Alagoas (AL)</option>
+            <option value="AP">Amapá (AP)</option>
+            <option value="AM">Amazonas (AM)</option>
+            <option value="BA">Bahia (BA)</option>
+            <option value="CE">Ceará (CE)</option>
+            <option value="DF">Distrito Federal (DF)</option>
+            <option value="ES">Espírito Santo (ES)</option>
+            <option value="GO">Goiás (GO)</option>
+            <option value="MA">Maranhão (MA)</option>
+            <option value="MT">Mato Grosso (MT)</option>
+            <option value="MS">Mato Grosso do Sul (MS)</option>
+            <option value="MG">Minas Gerais (MG)</option>
+            <option value="PA">Pará (PA)</option>
+            <option value="PB">Paraíba (PB)</option>
+            <option value="PR">Paraná (PR)</option>
+            <option value="PE">Pernambuco (PE)</option>
+            <option value="PI">Piauí (PI)</option>
+            <option value="RJ">Rio de Janeiro (RJ)</option>
+            <option value="RN">Rio Grande do Norte (RN)</option>
+            <option value="RS">Rio Grande do Sul (RS)</option>
+            <option value="RO">Rondônia (RO)</option>
+            <option value="RR">Roraima (RR)</option>
+            <option value="SC">Santa Catarina (SC)</option>
+            <option value="SP">São Paulo (SP)</option>
+            <option value="SE">Sergipe (SE)</option>
+            <option value="TO">Tocantins (TO)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-rua">Rua:</label>
+          <input type="text" id="edit-rua" name="rua" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-numero">Nº:</label>
+          <input type="number" id="edit-numero" name="numero" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-complemento">Complemento:</label>
+          <input type="text" id="edit-complemento" name="complemento">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-bairro">Bairro:</label>
+          <input type="text" id="edit-bairro" name="bairro" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-cidade">Cidade:</label>
+          <input type="text" id="edit-cidade" name="cidade" required>
+        </div>
+
+      </div>
+
+      <!-- CONTEÚDO DA ABA: CONTATO -->
+      <div class="tab-content" id="edit-tab-contato">
+
+        <div class="section-title">Contato</div>
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="edit-telefone">Telefone:</label>
+          <input type="text" id="edit-telefone" name="telefone" maxlength="15">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-celular">Celular:</label>
+          <input type="text" id="edit-celular" name="celular" maxlength="15">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-email">E-mail:</label>
+          <input type="text" id="edit-email" name="email" maxlength="100">
+        </div>
+
+      </div>
+
+      <!-- CONTEÚDO DA ABA: SISTEMA -->
+      <div class="tab-content" id="edit-tab-sistema">
+
+        <div class="section-title">Informações do Sistema</div>
+        <div class="section-divider"></div>
+
+        <div class="form-group">
+          <label for="edit-status">Status:</label>
+          <select id="edit-status" name="status" required>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-data-cadastro">Data de Cadastro:</label>
+          <input type="text" id="edit-data-cadastro" name="data_cadastro" readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-data-atualizacao">Data Última Atualização:</label>
+          <input type="text" id="edit-data-atualizacao" name="data_atualizacao" readonly>
+        </div>
+
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="modal-buttons">
+        <button type="submit" id="submit-edit">Salvar</button>
+        <button type="button" id="cancel-edit">Cancelar</button>
+      </div>
+
+    </form>
   </div>
+</div>
 
   <script type="module" src="./script.ts"></script>
 </body>

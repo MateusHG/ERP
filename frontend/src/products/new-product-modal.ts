@@ -40,7 +40,6 @@ export function openNewProductModal() {
       codigo: (form.elements.namedItem("codigo") as HTMLInputElement).value,
       nome: (form.elements.namedItem("nome") as HTMLInputElement).value,
       descricao: (form.elements.namedItem("descricao") as HTMLInputElement).value,
-      preco: parseFloat((form.elements.namedItem("preco") as HTMLInputElement).value),
       categoria: (form.elements.namedItem("categoria") as HTMLInputElement).value,
       status: (form.elements.namedItem("status") as HTMLSelectElement).value,
       estoque_minimo: parseInt((form.elements.namedItem("estoque_min") as HTMLInputElement).value),
