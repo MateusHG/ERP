@@ -182,31 +182,6 @@ body {
       min-width: 200px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
-    }
-
-    thead {
-      background-color: #58a9ff;
-      color: white;
-    }
-
-    th, td {
-     /* justify-content: space-between; */
-      padding: 12px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #eee;
-    }
-
     .actions {
       text-align: center;
       white-space: nowrap;
@@ -456,4 +431,191 @@ input[readonly] {
   color: white;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+/* Título com ícone */
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* espaço entre ícone e texto */
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Ícone */
+.modal-title-icon {
+  width: 50px;        /* ajuste o tamanho que preferir */
+  height: 35px;
+  object-fit: contain;
+  display: block;
+  stroke: #333;
+}
+/* Badge de status */
+.badge-status {
+  margin-left: 14px;
+  font-size: 13px;
+  color: #fff;
+  background: #2d88ff;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+/* Título de seção */
+.section-title {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Linha divisória */
+.section-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 0 0 15px 0;
+}
+
+/* Container das abas */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #e3e3e3;
+  padding-bottom: 6px;
+}
+
+/* Botões de aba */
+.tab {
+  padding: 7px 14px;
+  cursor: pointer;
+  border: none;
+  background: #f7f7f7;
+  font-size: 14px;
+  border-radius: 6px 6px 0 0;
+  transition: background 0.2s, color 0.2s;
+  color: #444;
+}
+
+.tab:hover {
+  background: #e9e9e9;
+}
+
+/* Aba ativa */
+.tab.active {
+  background: #2d88ff;
+  color: white;
+  font-weight: 600;
+}
+
+/* Conteúdo das abas */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+/* Aba visível */
+.tab-content.active {
+  display: block;
+}
+
+/* Animação de suavização ao trocar de aba */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+#products-table {
+  width: 98vw;
+  margin-left: -12px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,1.0);
+  font-family: Arial, sans-serif;
+}
+
+/* Cabeçalho */
+#products-table thead {
+  background: rgba(88, 169, 255, 0.95);
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+#products-table th {
+  padding: 14px 16px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: bold;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+#products-table th:last-child {
+  border-right: none;
+}
+
+/* Corpo */
+#products-table td {
+  padding: 18px 18px;
+  font-size: 14px;
+  border-bottom: 1px solid #eaeaea;
+  border-right: 1px solid #f0f0f0;
+}
+
+#products-table td:last-child {
+  border-right: none;
+}
+
+/* Linhas alternadas */
+#products-table tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/* Hover */
+#products-table tbody tr:hover {
+  background-color: #f3f2f2;
+}
+
+/* Deixa verticalmente alinhado no centro */
+#products-table td,
+#products-table th {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Wrapper com rolagem opcional */
+.table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.btn-edit, .btn-delete {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.icon-btn {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  fill: currentColor; /* se SVG usar stroke/fill = currentColor */
 }

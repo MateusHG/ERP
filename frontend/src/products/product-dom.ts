@@ -1,5 +1,4 @@
 import productModel from "./product-model";
-import { formatData } from "../utils/formatters";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -12,7 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 //Renderiza produtos na tela.
 export function renderProductsList(products: productModel[]): void {
-  const tbody = document.getElementById("produtos-tbody") as HTMLTableSectionElement | null;
+  const tbody = document.getElementById("products-tbody") as HTMLTableSectionElement | null;
   if (!tbody) return;
 
   tbody.innerHTML = "" // limpa o conteúdo anterior
@@ -31,24 +30,24 @@ export function renderProductsList(products: productModel[]): void {
     tr.appendChild(textCell(product.nome));
     tr.appendChild(textCell(product.descricao));
     tr.appendChild(textCell(product.categoria));
-    tr.appendChild(textCell(product.status));
     tr.appendChild(textCell(product.estoque_minimo));
     tr.appendChild(textCell(product.estoque_maximo));
-    tr.appendChild(textCell(formatData(product.data_cadastro)));
-    tr.appendChild(textCell(formatData(product.data_atualizacao)));
+    tr.appendChild(textCell(product.status));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
 
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-edit";
-    btnEdit.textContent = "✏️";
     btnEdit.dataset.id = product.id.toString(); // Guarda o id do produto vindo do backend no botão de editar.
+    btnEdit.innerHTML = `<img src="/erpicons/edit-file.svg" alt="Editar Produto" class="icon-btn" />`;
+    btnEdit.title = "Clique para editar este produto"
 
     const btnDelete = document.createElement("button");
     btnDelete.className = "btn-delete";
-    btnDelete.textContent = "❌";
     btnDelete.dataset.id = product.id.toString();
+    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Deletar Produto" class="icon-btn" />`;
+    btnDelete.title = "Clique para deletar este produto"
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

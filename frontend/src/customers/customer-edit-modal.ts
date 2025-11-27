@@ -3,8 +3,11 @@ import { getCustomerByIdAPI, loadCustomersAPI, updateCustomerAPI } from "./custo
 import { formatCnpj, formatPhoneNumber, formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
+import { initTabs } from "../utils/ui-tabs";
 
-const modal = document.getElementById("edit-modal")!;
+const customerEditModal = document.getElementById("edit-modal")!;
+initTabs(customerEditModal)
+
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
 
@@ -65,6 +68,8 @@ export async function openEditModal(id: number) {
 
   const customer = await getCustomerByIdAPI(id);
 
+  document.getElementById("edit-customer-id")!.textContent = String(customer.id);
+
   (form.elements.namedItem("id") as HTMLInputElement).value = customer.id.toString() || "";
   (form.elements.namedItem("razao") as HTMLInputElement).value = customer.razao_social;
   (form.elements.namedItem("fantasia") as HTMLInputElement).value = customer.nome_fantasia || "";
@@ -85,7 +90,7 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(customer.data_atualizacao);
 
   
-  modal.classList.remove("hidden");
+  customerEditModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 }
 
@@ -94,7 +99,7 @@ cancelBtn?.addEventListener("click", async () => {
     const confirmed = await showConfirm("Você tem alterações não salvas. Deseja realmente sair?");
     if (!confirmed) return;
 }
-    modal.classList.add("hidden");
+    customerEditModal.classList.add("hidden");
     currentEditId = null;
 });
 
@@ -128,7 +133,7 @@ form.addEventListener("submit", async (event) => {
     const response = await updateCustomerAPI(currentEditId, updatedCustomerData);
     showMessage(response.message);
 
-    modal.classList.add("hidden");
+    customerEditModal.classList.add("hidden");
     
     renderCustomersList(await loadCustomersAPI());
   

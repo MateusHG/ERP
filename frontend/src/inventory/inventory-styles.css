@@ -532,69 +532,138 @@ input[readonly] {
   background-color: #17a589;
 }
 
-.movements-row td {
-  background-color: #f8f9fa;
-  padding: 15px;
-  height: 25px;
+/* ----- CONTAINER DA SUBTABELA ----- */
+.movements-container {
+  background: #f9fafb; /* cinza claríssimo */
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* ----- TÍTULO ----- */
+.movements-container h4 {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* ----- TABELA ----- */
 .movements-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 6px;
+  background: white; /* fixa o fundo */
 }
 
-.movements-table th, .movements-table td {
-  border: 1px solid #dee2e6;
-  padding: 4px 6px;
-  text-align: left;
+/* ----- CABEÇALHO DA SUBTABELA ----- */
+.movements-table thead th {
+  background: #e5e7eb !important; /* cinza elegante */
+  color: #1f2937;
+  padding: 8px;
+  font-weight: 600;
+  border-bottom: 1px solid #d1d5db;
 }
 
-.movements-container h4 {
-  margin-bottom: 6px;
-  color: #20c997;
+/* ----- ZEBRA ROWS ----- */
+.movements-table tbody tr:nth-child(even) {
+  background: #f3f4f6; /* cinza suave */
 }
 
-#items-table th, #items-table td {
-  border: 1px solid #ccc;
-  padding: 6px 8px;
-  text-align: left;
+.movements-table tbody tr:nth-child(odd) {
+  background: #ffffff;
 }
 
-/* Produto ID - largura fixa pequena */
-#items-table th:nth-child(1),
-#items-table td:nth-child(1) {
-  width: 75px;
+/* ----- CÉLULAS ----- */
+.movements-table td {
+  padding: 8px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ----- EVITA HERDAR HOVER DA TABELA PRINCIPAL ----- */
+.movements-row td,
+.movements-table *,
+.movements-container * {
+  background-color: unset !important;
+}
+
+/* TR da subtabela NÃO deve sofrer hover da tabela principal */
+.movements-table tbody tr:hover {
+  background: #e5e7eb !important;
+}
+
+#inventory-table {
+  width: 98vw;
+  margin-left: -10px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 1.0);
+  font-family: Arial, sans-serif;
+}
+
+/* Cabeçalho */
+#inventory-table thead {
+  background: rgba(88, 169, 255, 0.95);
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+#inventory-table th {
+  padding: 14px 16px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: bold;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+#inventory-table th:last-child {
+  border-right: none;
+}
+
+/* Corpo */
+#inventory-table td {
+  padding: 18px 18px;
+  font-size: 14px;
+  border-bottom: 1px solid #eaeaea;
+  border-right: 1px solid #f0f0f0;
+}
+
+#inventory-table td:last-child {
+  border-right: none;
+}
+
+/* Linhas alternadas */
+#inventory-table tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/* Hover */
+#inventory-table tbody tr:hover {
+  background-color: #f3f2f2;
+}
+
+/* Deixa verticalmente alinhado no centro */
+#inventory-table td,
+#inventory-table th {
+  vertical-align: middle;
   text-align: center;
 }
 
-/* Código - pode ser compacto também */
-#items-table th:nth-child(2),
-#items-table td:nth-child(2) {
-  width: 100px;
-  text-align: left;
+/* Wrapper com rolagem opcional */
+.table-wrapper {
+  max-height: 480px;
+  overflow-y: auto;
 }
 
-#items-table th:nth-child(7),
-#items-table td:nth-child(7)
- {
-  width: 100px;
-  text-align: center;
-}
-
-#items-table th:nth-child(8),
-#items-table td:nth-child(8)
- {
-  width: 100px;
-  text-align: center;
-}
-
-/* Coluna Ações - impede quebra de botões */
-#items-table th:nth-child(9),
-#items-table td:nth-child(9) {
-  width: 140px;
-  text-align: center;
-  white-space: nowrap; /* não deixa os botões quebrarem de linha */
+.table-wrapper thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 #items-table input {

@@ -3,8 +3,11 @@ import { loadCustomersAPI, postCustomerAPI } from "./customers-service";
 import { formatCnpj, formatPhoneNumber } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
+import { initTabs } from "../utils/ui-tabs";
 
 const newCustomerModal = document.getElementById("new-customer-modal")!;
+initTabs(newCustomerModal);
+
 const form = document.getElementById("new-customer-form") as HTMLFormElement;
 const submitBtn = document.getElementById("submit-new-customer")!;
 const cancelBtn = document.getElementById("cancel-new-customer")!;

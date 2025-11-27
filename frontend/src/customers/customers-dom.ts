@@ -32,21 +32,21 @@ export function renderCustomersList(customers: supplierModel[]): void {
     tr.appendChild(textCell(customer.email));
     tr.appendChild(textCell(customer.uf));
     tr.appendChild(textCell(customer.status));
-    tr.appendChild(textCell(formatData(customer.data_cadastro)));
-    tr.appendChild(textCell(formatData(customer.data_atualizacao)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
 
     const btnEdit = document.createElement("button");
-    btnEdit.className = "btn-edit";
-    btnEdit.textContent = "✏️";
     btnEdit.dataset.id = customer.id.toString();
+    btnEdit.innerHTML = `<img src="/erpicons/edit.svg" alt="Editar" class="icon-btn" />`;
+    btnEdit.title = "Clique para editar este cliente"
+    btnEdit.className = "btn-edit";
 
     const btnDelete = document.createElement("button");
-    btnDelete.className = "btn-delete";
-    btnDelete.textContent = "❌";
     btnDelete.dataset.id = customer.id.toString();
+    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar" class="icon-btn" />`;
+    btnDelete.title = "Clique para deletar este cliente"
+    btnDelete.className = "btn-delete";
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

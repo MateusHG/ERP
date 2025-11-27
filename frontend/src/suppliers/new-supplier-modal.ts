@@ -3,32 +3,14 @@ import { loadSuppliersAPI, postSupplierAPI } from "./suppliers-service";
 import { formatCnpj, formatPhoneNumber } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
+import { initTabs } from "../utils/ui-tabs";
 
 const newSupplierModal = document.getElementById("new-supplier-modal")!;
+initTabs(newSupplierModal);
+
 const form = document.getElementById("new-supplier-form") as HTMLFormElement;
 const submitBtn = document.getElementById("submit-new-supplier")!;
 const cancelBtn = document.getElementById("cancel-new-supplier")!;
-
-// Manipula abas do modal
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    const tabId = (tab as HTMLElement).dataset.tab;
-    if (!tabId) return;
-
-    // Remove active de todas as abas e conteúdos
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-
-    // Ativa a aba clicada
-    tab.classList.add("active");
-
-    // Ativa o conteúdo correspondente
-    const content = document.getElementById(tabId);
-    if (content) {
-      content.classList.add("active");
-    }
-  });
-});
 
 let originalFormData: Record<string, string> = {};
 

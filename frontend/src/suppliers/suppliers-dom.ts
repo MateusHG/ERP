@@ -1,6 +1,6 @@
 import supplierModel from "./supplier-model";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
-import { formatCnpj, formatData } from "../utils/formatters";
+import { formatCnpj } from "../utils/formatters";
 
 //Navegação entre os módulos
 window.addEventListener('DOMContentLoaded', () => {
@@ -32,8 +32,6 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     tr.appendChild(textCell(supplier.email));
     tr.appendChild(textCell(supplier.uf));
     tr.appendChild(textCell(supplier.status));
-    tr.appendChild(textCell(formatData(supplier.data_cadastro)));
-    tr.appendChild(textCell(formatData(supplier.data_atualizacao)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
@@ -41,16 +39,14 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     const btnEdit = document.createElement("button");
     btnEdit.className = "btn-edit";
     btnEdit.dataset.id = supplier.id.toString();
-    btnEdit.innerHTML = `<img src="/erpicons/edit.svg" alt="Editar" class="icon-btn" />`;
-    btnEdit.title = "Clique para editar fornecedor"
-    btnEdit.dataset.id = supplier.id.toString();
+    btnEdit.innerHTML = `<img src="/erpicons/edit.svg" alt="Editar Fornecedor" class="icon-btn" />`;
+    btnEdit.title = "Clique para editar este fornecedor"
 
     const btnDelete = document.createElement("button");
     btnDelete.className = "btn-delete";
     btnDelete.dataset.id = supplier.id.toString();
-    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar fornecedor"
-    btnDelete.dataset.id = supplier.id.toString();
+    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Deletar Fornecedor" class="icon-btn" />`;
+    btnDelete.title = "Clique para deletar este fornecedor"
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

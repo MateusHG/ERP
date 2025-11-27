@@ -1,3 +1,5 @@
+import { origemMovLabels } from "../inventory/inventory-model";
+
 //Formatação de data
 export function formatData(dataStr: string): string {
   const data = new Date(dataStr);
@@ -274,4 +276,25 @@ export function formatCnpj(value: string): string {
     .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
     .replace(/\.(\d{3})(\d)/, ".$1/$2")
     .replace(/(\d{4})(\d)/, "$1-$2");
+};
+
+
+// Formatters para movimentações do inventory(estoque)
+export function capitalize(str: string) {
+  if (!str) return str;
+  return str[0].toUpperCase() + str.slice(1).replace(/_/g, " ");
+};
+
+export function safeLabel(map: Record<string, string>, key: unknown) {
+  if (!key && key !== 0) return "-";
+  const k = String(key);
+  return map[k] ?? capitalize(k);
+};
+
+export function formatOrigemWithRef(origem: any, referencia_id: any) {
+  const base = safeLabel(origemMovLabels, origem);
+  if (referencia_id || referencia_id === 0) {
+    return `${base} Nº #${referencia_id}`;
+  }
+  return base;
 };

@@ -3,25 +3,11 @@ import { getSupplierByIdAPI, loadSuppliersAPI, updateSupplierAPI } from "./suppl
 import { formatCnpj, formatPhoneNumber, formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
+import { initTabs } from "../utils/ui-tabs";
 
-document.querySelectorAll(".tab").forEach(tab => {
-  const el = tab as HTMLElement; // <-- agora o TS sabe que tem dataset
+const supplierEditModal = document.getElementById("edit-modal")!;
+initTabs(supplierEditModal);
 
-  el.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-
-    el.classList.add("active");
-
-    const tabId = el.dataset.tab;
-    if (!tabId) return;
-
-    const content = document.getElementById(tabId);
-    if (content) content.classList.add("active");
-  });
-});
-
-const modal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
 
@@ -104,7 +90,7 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(supplier.data_atualizacao);
 
   
-  modal.classList.remove("hidden");
+  supplierEditModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 }
 
@@ -113,7 +99,7 @@ cancelBtn?.addEventListener("click", async () => {
     const confirmed = await showConfirm("Você tem alterações não salvas. Deseja realmente sair?");
     if (!confirmed) return;
 }
-    modal.classList.add("hidden");
+    supplierEditModal.classList.add("hidden");
     currentEditId = null;
 });
 
@@ -147,7 +133,7 @@ form.addEventListener("submit", async (event) => {
     const response = await updateSupplierAPI(currentEditId, updatedSupplierData);
     showMessage(response.message);
 
-    modal.classList.add("hidden");
+    supplierEditModal.classList.add("hidden");
     
     renderSuppliersList(await loadSuppliersAPI());
   

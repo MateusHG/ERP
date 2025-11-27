@@ -67,8 +67,14 @@
       <!-- Modal: Novo Produto -->
       <div id="new-product-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Novo Produto</h3>
+
+          <div class="modal-header">
+            <h3 class="modal-title">
+              <img src="/erpicons/products.svg" alt="Novo Produto" class="modal-title-icon">Novo Produto</h3>
+          </div>
+          
           <form id="new-product-form">
+
             <div class="form-fields">
               <div class="form-group">
                 <label for="new-codigo">Código:</label>
@@ -123,7 +129,7 @@
       </div> <!-- Fecha new-product-modal -->
     </div>
 
-    <table id="tabela-produtos">
+    <table id="products-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -131,15 +137,13 @@
           <th>Nome</th>
           <th>Descrição</th>
           <th>Categoria</th>
-          <th>Status</th>
           <th>Estoque Mín</th>
           <th>Estoque Máx</th>
-          <th>Data Cadastro</th>
-          <th>Data Atualização</th>
+          <th>Status</th>
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="produtos-tbody">
+      <tbody id="products-tbody">
         <!-- Você pode continuar com os outros produtos aqui -->
       </tbody>
     </table>
@@ -167,8 +171,13 @@
   <!-- Modal: Editar Produto -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Produto</h3>
+
+      <div class="modal-header">
+        <h3>Editar Produto Nº: <span id="edit-product-id" class="product-id-display"></span><span class="badge-status" id="edit-status-badge">Ativo</span></h3>
+      </div>
+      
       <form id="edit-form">
+        
         <div class="form-fields">
           <div class="form-group">
             <label for="edit-id">ID:</label>

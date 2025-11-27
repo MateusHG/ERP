@@ -16,6 +16,8 @@ export async function openEditModal(id: number) {
 
   const product = await getProductByIdAPI(id);
 
+  document.getElementById("edit-product-id")!.textContent = String(product.id);
+
   (form.elements.namedItem("id") as HTMLInputElement).value = product.id.toString();
   (form.elements.namedItem("codigo") as HTMLInputElement).value = product.codigo;
   (form.elements.namedItem("nome") as HTMLInputElement).value = product.nome;

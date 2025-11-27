@@ -70,9 +70,26 @@
       <!-- Modal: Novo Cliente -->
       <div id="new-customer-modal" class="modal hidden">
         <div class="modal-content">
-          <h3>Novo Cliente</h3>
+
+          <div class="modal-header">
+            <h3 class="modal-title">
+              <img src="/erpicons/clients.svg" alt="Clientes" class="modal-title-icon">Novo Cliente</h3>
+          </div>
+
+          <!-- Navegação das abas -->
+           <div class="tabs">
+            <button class="tab active" data-tab="tab-gerais">Dados Gerais</button>
+            <button class="tab" data-tab="tab-contato">Contato</button>
+            <button class="tab" data-tab="tab-endereco">Endereço</button>
+           </div>
+
           <form id="new-customer-form">
+
+            <!--  Aba: DADOS GERAIS -->
+            <div id="tab-gerais" class="tab-content active">
+
         <div class="form-fields">
+
           <div class="form-group">
             <label for="edit-codigo">Razão Social:</label>
             <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
@@ -94,35 +111,53 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" maxlength="15" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
-          </div>
-
-          <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
               <option value="Ativo">Ativo</option>
               <option value="Inativo">Inativo</option>
             </select>
           </div>
+          
+        </div>
+      </div>
+
+          <!-- =====================================================
+              ABA: CONTATO
+           ====================================================== -->
+          <div id="tab-contato" class="tab-content">
+            <div class="form-fields">
 
           <div class="form-group">
-                <label for="edit-cep">CEP:</label>
+            <label>Telefone:</label>
+            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
+          </div>
+
+          <div class="form-group">
+            <label>Celular:</label>
+            <input type="text" name="celular" id="edit-celular" maxlength="15" />
+          </div>
+
+          <div class="form-group">
+            <label>E-mail:</label>
+            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
+          </div>
+
+        </div>
+      </div>
+
+         <!-- =====================================================
+              ABA: ENDEREÇO
+        ====================================================== -->
+        <div id="tab-endereco" class="tab-content">
+          <div class="form-fields">
+
+          <div class="form-group">
+                <label>CEP:</label>
                 <input type="number" name="cep" id="edit-cep" />
               </div>
 
               <div class="form-group">
-                <label for="edit-uf">UF:</label>
+                <label>UF:</label>
                 <select name="uf" id="edit-uf" required>
                   <option value="">Selecione uma UF</option>
                   <option value="AC">Acre (AC)</option>
@@ -156,38 +191,43 @@
               </div>
           
               <div class="form-group">
-                <label for="edit-rua">Rua:</label>
+                <label>Rua:</label>
                 <input type="text" name="rua" id="edit-rua" required />
               </div>
 
               <div class="form-group">
-                <label for="edit-numero">Nº:</label>
+                <label>Nº:</label>
                 <input type="number" name="numero" id="edit-numero" required />
               </div>
 
               <div class="form-group">
-                <label for="edit-complemento">Complemento:</label>
+                <label>Complemento:</label>
                 <input type="text" name="complemento" id="edit-complemento" />
               </div>
             
               <div class="form-group">
-                <label for="edit-bairro">Bairro:</label>
+                <label>Bairro:</label>
                 <input type="text" name="bairro" id="edit-bairro" required />
               </div>
 
               <div class="form-group">
-                <label for="edit-cidade">Cidade:</label>
+                <label>Cidade:</label>
                 <input type="text" name="cidade" id="edit-cidade" required />
               </div>
+
+          </div>
         </div>
 
         <div class="modal-buttons">
           <button type="submit" id="submit-new-customer">Salvar</button>
           <button type="button" id="cancel-new-customer">Cancelar</button>
         </div>
+
       </form>
+
     </div>
   </div>
+</main>
 
     <table id="customers-table">
       <thead>
@@ -200,8 +240,6 @@
           <th>E-mail</th>
           <th>Estado</th>
           <th>Status</th>
-          <th>Data Cadastro</th>
-          <th>Data Atualização</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -232,58 +270,61 @@
   <!-- Modal: Editar Cliente -->
   <div id="edit-modal" class="modal hidden">
     <div class="modal-content">
-      <h3>Editar Cliente</h3>
+
+      <div class="modal-header">
+        <h3>Editar Cliente Nº: <span id="edit-customer-id" class="customer-id-display"></span><span class="badge-status" id="edit-status-badge">Ativo</span></h3>
+      </div>
+      
       <form id="edit-form">
-        <div class="form-fields">
+
+        <!--  Abas -->
+          <div class="tabs">
+            <button type="button" class="tab active" data-tab="edit-tab-geral">Geral</button>
+            <button type="button" class="tab" data-tab="edit-tab-endereco">Endereço</button>
+            <button type="button" class="tab" data-tab="edit-tab-contato">Contato</button>
+            <button type="button" class="tab" data-tab="edit-tab-sistema">Sistema</button>
+          </div>
+
+
+          <!-- ABA: DADOS GERAIS -->
+           <div class="tab-content active" id="edit-tab-geral">
+            <div class="section-title">Informações Gerais</div>
+            <div class="section-divider"></div>
+
           <div class="form-group">
-            <label for="edit-id">ID:</label>
+            <label>ID:</label>
             <input type="number" name="id" id="edit-id" readonly />
           </div>
 
           <div class="form-group">
-            <label for="edit-codigo">Razão Social:</label>
+            <label>Razão Social:</label>
             <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
           </div>
 
           <div class="form-group">
-            <label for="edit-nome">Nome Fantasia:</label>
+            <label>Nome Fantasia:</label>
             <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
           </div>
 
           <div class="form-group">
-            <label for="edit-descricao">CNPJ:</label>
+            <label>CNPJ:</label>
             <input type="text" name="cnpj" id="edit-cnpj" required />
           </div>
 
           <div class="form-group">
-            <label for="edit-ie">Inscrição Estadual:</label>
+            <label>Inscrição Estadual:</label>
             <input type="number" name="iestadual" id="edit-ie" min="0" />
           </div>
 
-          <div class="form-group">
-            <label for="edit-telefone">Telefone:</label>
-            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
-          </div>
+        </div>
 
-          <div class="form-group">
-            <label for="edit-celular">Celular:</label>
-            <input type="text" name="celular" id="edit-celular" minlength="1" maxlength="15" />
-          </div>
+        <!-- Aba ENDEREÇO -->
+          <div class="tab-content" id="edit-tab-endereco">
 
-          <div class="form-group">
-            <label for="edit-email">E-mail:</label>
-            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
-          </div>
+            <div class="section-title">Endereço</div>
+            <div class="section-divider"></div>
 
-          <div class="form-group">
-            <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
-          </div>
-
-          <div class="form-group">
+            <div class="form-group">
                 <label for="edit-cep">CEP:</label>
                 <input type="number" name="cep" id="edit-cep" />
               </div>
@@ -347,7 +388,47 @@
                 <input type="text" name="cidade" id="edit-cidade" required />
               </div>
 
+          </div>
+
+        <!-- Aba: Contato  -->
+        <div class="tab-content" id="edit-tab-contato">
+
+          <div class="section-title">Contato</div>
+          <div class="section-divider"></div>
+
           <div class="form-group">
+            <label>Telefone:</label>
+            <input type="text" name="telefone" id="edit-telefone" maxlength="15" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-celular">Celular:</label>
+            <input type="text" name="celular" id="edit-celular" minlength="1" maxlength="15" />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-email">E-mail:</label>
+            <input type="text" name="email" id="edit-email" minlength="1" maxlength="100" />
+          </div>
+
+        </div>
+
+
+          <!-- Aba: Sistema -->
+          <div class="tab-content" id="edit-tab-sistema">
+
+            <div class="section-title">Informações do Sistema</div>
+            <div class="section-divider"></div>
+
+            <div class="form-group">
+            <label for="edit-status">Status:</label>
+            <select name="status" id="edit-status" required >
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
+
+            <div class="form-group">
             <label for="edit-data-cadastro">Data de Cadastro:</label>
             <input type="text" name="data_cadastro" id="edit-data-cadastro" readonly />
           </div>
@@ -356,13 +437,17 @@
             <label for="edit-data-atualizacao">Data Última Atualização:</label>
             <input type="text" name="data_atualizacao" id="edit-data-atualizacao" readonly />
           </div>
+          
         </div>
+
 
         <div class="modal-buttons">
           <button type="submit" id="submit-edit">Salvar</button>
           <button type="button" id="cancel-edit">Cancelar</button>
         </div>
+
       </form>
+
     </div>
   </div>
 

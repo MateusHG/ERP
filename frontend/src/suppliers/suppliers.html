@@ -49,7 +49,7 @@
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
       <input type="text" id="filtro-nome-fantasia" placeholder="Buscar por Nome Fantasia...">
       <input type="text" id="filtro-razao-social" placeholder="Buscar por Razão Social...">
-      <input type="text" id="filtro-cnpj" placeholder="Buscar por CNPJ...">
+      <input type="text" id="filtro-cnpj" placeholder="Buscar por CNPJ..." maxlength="18">
       <input type="text" id="filtro-email" placeholder="Buscar por E-mail...">
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
@@ -89,6 +89,7 @@
               ABA: DADOS GERAIS
         ====================================================== -->
         <div id="tab-gerais" class="tab-content active">
+
           <div class="form-fields">
 
             <div class="form-group">
@@ -241,8 +242,6 @@
           <th>E-mail</th>
           <th>Estado</th>
           <th>Status</th>
-          <th>Data Cadastro</th>
-          <th>Data Atualização</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -275,8 +274,7 @@
   <div class="modal-content">
 
     <div class="modal-header">
-      <h3>Editar Fornecedor Nº: <span id="edit-supplier-id" class="supplier-id-display"></span></h3>
-      <span class="badge-status" id="edit-status-badge">Ativo</span>
+      <h3>Editar Fornecedor Nº: <span id="edit-supplier-id" class="supplier-id-display"></span><span class="badge-status" id="edit-status-badge">Ativo</span></h3>
     </div>
 
     <form id="edit-form">
@@ -291,7 +289,6 @@
 
       <!-- CONTEÚDO DA ABA: GERAL -->
       <div class="tab-content active" id="edit-tab-geral">
-
         <div class="section-title">Informações Gerais</div>
         <div class="section-divider"></div>
 

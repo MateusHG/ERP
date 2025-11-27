@@ -1,7 +1,8 @@
-import { formatCurrency, formatData, formatDataAndTime } from "../utils/formatters";
+import { formatCurrency, formatDataAndTime } from "../utils/formatters";
 import { getFilterValues, renderInventoryList } from "./inventory-dom";
 import { listInventoryWithFilterAPI, loadInventoryMovements } from "./inventory-service";
 import { openNewInventoryAdjustmentModal } from "./inventory-new-adjustment-modal";
+import { origemMovLabels, tipoMovLabels } from "./inventory-model";
 
 //Chama o modal de novo ajuste de estoque.
 export function handleNewAdjustmentClick(target: HTMLElement) {
@@ -56,11 +57,19 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
   if (!tbodyMov) return;
 
   tbodyMov.innerHTML = movimentacoes.length
-  ? movimentacoes.map((m: any) => `
-   <tr>
+  ? movimentacoes.map((m: any) => {
+
+    const tipoLabel = tipoMovLabels[m.tipo] || m.tipo || "-";
+
+    const origemLabel = origemMovLabels[m.origem]
+        ? `${origemMovLabels[m.origem]} Nº: ${m.referencia_id}`
+        : m.origem || "-";
+
+    return `
+        <tr>
           <td>${m.data_hora ? formatDataAndTime(m.data_hora) : "-"}</td>
-          <td>${m.tipo || "-"}</td>
-          <td>${m.origem ?? "-"}</td>
+          <td>${tipoLabel}</td>
+          <td>${origemLabel}</td>
           <td>${m.saldo_anterior ?? "-"}</td>
           <td>${m.qtd_movimentada ?? "-"}</td>
           <td>${m.saldo_posterior ?? "-"}</td>
@@ -68,7 +77,7 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
           <td>${m.valor_total_liquido ? formatCurrency(m.valor_total_liquido) : "-"}</td>
           <td>${m.usuario || "-"}</td>
         </tr>
-      `).join("")
+      `}).join("")
     : `<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação encontrada.</td></tr>`;
 };
 

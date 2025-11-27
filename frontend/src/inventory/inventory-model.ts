@@ -19,3 +19,16 @@ export interface inventoryMovementsModel {
   valor_total_liquido: string,
   user: string
 };
+
+export const tipoMovLabels: Record<string, string> = {
+  entrada: "Entrada",
+  saida: "Saída",
+};
+
+export const origemMovLabels: Record<string, string> = {
+  compra: "Compra",
+  venda: "Venda",
+  estorno_compra: "Estorno da Compra",
+  estorno_venda: "Estorno da Venda",
+};
+
