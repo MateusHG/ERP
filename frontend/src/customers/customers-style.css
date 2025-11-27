@@ -589,7 +589,7 @@ input[readonly] {
 
 /* Corpo */
 #customers-table td {
-  padding: 18px 18px;
+  padding: 12px 14px;
   font-size: 14px;
   border-bottom: 1px solid #eaeaea;
   border-right: 1px solid #f0f0f0;
@@ -636,8 +636,8 @@ input[readonly] {
 }
 
 .icon-btn {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   vertical-align: middle;
   fill: currentColor; /* se SVG usar stroke/fill = currentColor */
 }

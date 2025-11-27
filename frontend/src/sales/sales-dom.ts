@@ -38,14 +38,16 @@ export function renderSalesList(sales: saleModel[]): void {
     tdActions.className = "actions";
 
     const btnEdit = document.createElement("button");
-    btnEdit.className = "btn-edit";
-    btnEdit.textContent = "✏️";
     btnEdit.dataset.id = sale.id.toString();
+    btnEdit.className = "btn-edit";
+    btnEdit.innerHTML = `<img src="/erpicons/edit-file.svg" alt="Editar Produto" class="icon-btn" />`;
+    btnEdit.title = "Clique para editar esta venda"
 
     const btnDelete = document.createElement("button");
-    btnDelete.className = "btn-delete";
-    btnDelete.textContent = "❌";
     btnDelete.dataset.id = sale.id.toString();
+    btnDelete.className = "btn-delete";
+    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
+    btnDelete.title = "Clique para deletar esta venda"
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

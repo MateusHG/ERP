@@ -312,23 +312,6 @@ body {
   display: none;
 }
 
-.modal-content {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 95%;
-  max-height: 80%;
-  overflow-y: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
-}
-
-.modal-buttons {
-  margin-top: 16px;
-  display: flex;
-  justify-content: space-between;
-}
-
 #submit-edit {
   margin-top: 16px;
   padding: 8px 16px;
@@ -508,6 +491,66 @@ input[readonly] {
   display: none;
 }
 
+#purchase-table {
+  width: 98vw;
+  margin-left: -12px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  font-family: Arial, sans-serif;
+}
+
+/* Cabeçalho */
+#purchase-table thead {
+  background: rgba(88, 169, 255, 0.95);
+  backdrop-filter: blur(6px);
+  color: white;
+}
+
+#purchase-table th {
+  padding: 14px 16px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  font-size: 15px;
+  font-weight: bold;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+#purchase-table th:last-child {
+  border-right: none;
+}
+
+/* Corpo */
+#purchase-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #eaeaea;
+  border-right: 1px solid #f0f0f0;
+}
+
+#purchase-table td:last-child {
+  border-right: none;
+}
+
+/* Linhas alternadas */
+#purchase-table tbody tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+/* Hover */
+#purchase-table tbody tr:hover {
+  background-color: #f3f2f2;
+}
+
+/* Deixa verticalmente alinhado no centro */
+#purchase-table td,
+#purchase-table th {
+  vertical-align: middle;
+  text-align: center;
+}
+
 #fornecedor-search {
   z-index: 1; /* Garante que está acima de outros elementos */
 }
@@ -636,4 +679,86 @@ input[readonly] {
   padding: 4px 8px;
   text-align: left;
   font-size: 0.85rem;
+}
+
+.modal-content {
+  background: #ffffff;
+  width: 90%;                /* AUMENTA O TAMANHO PARA CABER AS GRIDs */
+  max-width: 1200px;         /* TAMANHO CORPORATIVO IDEAL */
+  max-height: 90vh;          /* evita estourar fora da tela */
+  overflow-y: auto;          /* scroll interno elegante */
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modal-buttons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-section {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 18px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  width: 98%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f7fa;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e0e0e0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 0px;
+  margin-top: -2px;
+  align-items: center;
+  font-weight: 600;
+  color: #333;
+}
+
+.section-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.purchase-items-summary {
+  margin-top: 12px;
+  display: flex;
+  gap: 30px;
+  font-size: 14px;
+}
+
+.items-wrapper {
+  overflow-x: none;
+}
+
+.btn-edit, .btn-delete {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.icon-btn {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  fill: currentColor; /* se SVG usar stroke/fill = currentColor */
 }

@@ -33,6 +33,8 @@ export async function openEditModal(id: number) {
 
   const purchase = await getPurchaseByIdAPI(id);
 
+  document.getElementById("edit-purchase-id")!.textContent = String(purchase.id);
+
     // Preenche campo do fornecedor.
   inputFornecedorSearch.value = purchase.fornecedor_nome || "";
   inputFornecedorId.value = String(purchase.fornecedor_id || "");
