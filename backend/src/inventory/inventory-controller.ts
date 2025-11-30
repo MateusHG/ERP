@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { handleSaleInventoryMovementService, listInventoryService, listMovementsService, registerMovementService } from "./inventory-service";
+import { listInventoryService, listMovementsService, registerInventoryAdjustmentService } from "./inventory-service";
 import * as salesRepository from '../sales/sales-repository';
 import * as purchaseRepository from '../purchases/purchase-repository';
 import { StockInsufficientError } from './inventory-model';
@@ -27,22 +27,27 @@ export const listMovementsController = async (req: Request, res: Response) => {
 };
 
 
-export const registerMovementController = async (req: Request, res: Response) => {
+export const registerInventoryAdjustmentController = async (req: Request, res: Response) => {
   try{
-    const userId = (req as any).user?.id;
-    if (!userId) {
-      res.status(401).json({ error: "Usuário não autenticado." });
-    }
+    const userId = req.user!.id;
 
-    //Inclui o ID do usuário no corpo da movimentação.
-    const movementData = { ...req.body, usuario_id: userId };
+    const { ajuste, items } = req.body;
 
-    const httpResponse = await registerMovementService(movementData);
+    const httpResponse = await registerInventoryAdjustmentService(ajuste, items, userId);
+    
     res.status(httpResponse.statusCode).json(httpResponse.body);
   
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
-    res.status(500).json({ error: "Erro interno no servidor" });
+
+    if (err instanceof StockInsufficientError) {
+      res.status(400).json({
+        message: err.message,
+        inconsistencies: err.inconsistencies,
+      });
+    }
+
+    res.status(500).json({ error: "Erro interno no servidor ao registrar ajuste de estoque." });
   }
 };
 
@@ -50,17 +55,18 @@ export const registerMovementController = async (req: Request, res: Response) =>
 export const handlePurchaseInventoryMovementController = async (req: Request, res: Response) => {
   try {
     const purchaseId = Number(req.params.id);
+    const userId = req.user!.id;
 
-    const oldPurchase = await purchaseRepository.getPurchaseByIdQuery(purchaseId);
+    const oldPurchase = await purchaseRepository.getPurchaseByIdQuery(undefined, purchaseId);
     if (!oldPurchase) {
       res.status(404).json({error: 'Compra não encontrada.'});
     }
 
     const newPurchaseData = req.body;
 
-    const updatedPurchase = await purchaseRepository.updatePurchaseById(purchaseId, newPurchaseData, undefined);
+    const updatedPurchase = await purchaseRepository.updatePurchaseById(purchaseId, newPurchaseData, undefined, userId);
     
-    const httpResponse = await purchaseRepository.updatePurchaseById(oldPurchase, updatedPurchase, undefined);
+    const httpResponse = await purchaseRepository.updatePurchaseById(oldPurchase, updatedPurchase, undefined, userId);
 
     res.status(httpResponse.statusCode).json(httpResponse.body);
 
@@ -81,17 +87,20 @@ export const handlePurchaseInventoryMovementController = async (req: Request, re
 
 export const handleSaleInventoryMovementController = async (req: Request, res: Response) => {
   try {
+    const userId = req.user!.id;
+    
     const saleId = Number(req.params.id);
-    const oldSale = await salesRepository.getSaleByIdQuery(saleId);
+
+    const oldSale = await salesRepository.getSaleByIdQuery(undefined, saleId);
     if (!oldSale) {
       res.status(404).json({error: 'Venda não encontrada.'});
     }
     
     const newSaleData = req.body;
 
-    const updatedSale = await salesRepository.updateSaleById(saleId, newSaleData, undefined);
+    const updatedSale = await salesRepository.updateSaleById(saleId, newSaleData, undefined, userId);
 
-    const httpResponse = await salesRepository.updateSaleById(oldSale, updatedSale, undefined);
+    const httpResponse = await salesRepository.updateSaleById(oldSale, updatedSale, undefined, userId);
 
     res.status(httpResponse.statusCode).json(httpResponse.body);
 

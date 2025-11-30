@@ -10,7 +10,27 @@ export interface inventoryListModel {
   preco_medio_venda: string,
   status: string,
   saldo: string
-}
+};
+
+export interface AdjustmentModel {
+  id?: Number;                  //// criado pelo banco
+  tipo: "entrada" | "saida";    // tipo_movimentacao_enum
+  valor_total?: number;         // // default 0
+  observacao?: string | null;    // pode ser null
+  data_cadastro?: string;       // timestamp
+  created_by: number;           // FK users
+};
+
+export interface AdjustmentItemModel {
+  id?: number;                      // criado pelo banco
+  ajuste_id: number;                // FK estoque_ajustes
+  produto_id: number;               // FK produtos
+  quantidade: number; 
+  preco_unitario: number;
+  valor_total?: number;             // gerado pelo banco STORED
+  data_cadastro?: string             // timestamp
+  created_by: number;
+};
 
 export interface InventoryMovementModel {
   id?: number;
@@ -19,7 +39,7 @@ export interface InventoryMovementModel {
   quantidade: number;
   preco_unitario_liquido?: number;
   valor_total?: number;
-  origem: "compra" | "venda" | "estorno_compra" | "estorno_venda";
+  origem: "compra" | "venda" | "estorno_compra" | "estorno_venda" | "ajuste";
   referencia_id: number;
   usuario_id: number;
   usuario_nome?: string,

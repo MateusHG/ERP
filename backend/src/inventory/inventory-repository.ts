@@ -1,4 +1,4 @@
-import { inventoryListModel, InventoryMovementModel, InventoryMovementResult } from "./inventory-model";
+import { AdjustmentItemModel, AdjustmentModel, inventoryListModel, InventoryMovementModel, InventoryMovementResult } from "./inventory-model";
 import db  from "../config/db";
 
 export const listInventoryItems = async(filters: { 
@@ -136,13 +136,32 @@ query += `
 // ***************************************************************************************** //
 // ***************************************************************************************** //
 
-// Consulta saldo dos produtos
-export async function getBalance(produto_id: number) {
+// Consulta saldo dos produtos com LOCK
+export async function getProductBalanceForUpdate(produto_id: number, client: any) {
   const result = await db.query(
-    `SELECT * FROM estoque_saldo WHERE produto_id = $1`,
+    `
+    SELECT 
+      es.quantidade,
+      p.nome as produto,
+      p.codigo
+    FROM estoque_saldo es
+    JOIN produtos p ON p.id = es.produto_id
+    WHERE es.produto_id = $1
+    FOR UPDATE
+    `,
     [produto_id]
   );
-  return result.rows[0] || 0;
+
+  // Caso o produto ainda não esteja na tabela estoque_saldo
+  if (result.rowCount === 0) {
+    return {
+      quantidade: 0,
+      produto: null,
+      codigo: null
+    };
+  }
+
+  return result.rows[0];
 };
 
 // ***************************************************************************************** //
@@ -208,32 +227,90 @@ export async function listMovements(produto_id: number) {
   return result.rows;
 };
 
-// ***************************************************************************************** //
-// ***************************************************************************************** //
 
-// Registra a movimentação de AJUSTE no estoque .
-//------------------------------------
-export async function registerMovement(mov: InventoryMovementModel) {
-  const client = await db.connect();
+
+// ***************************************************************************************** //
+// AJUSTES manuais de estoque.
+// ***************************************************************************************** //
+export async function createAdjustmentHeader(adjustment: AdjustmentModel, client: any) {
+  const result = await client.query(
+    `INSERT INTO estoque_ajustes
+    (tipo, valor_total, observacao, created_by)
+    VALUES ($1, $2, $3, $4)
+    RETURNING *`,
+    [
+      adjustment.tipo,
+      adjustment.valor_total ?? 0,
+      adjustment.observacao ?? null,
+      adjustment.created_by
+    ]
+  );
+
+  return result.rows[0];
+};
+
+export async function createAdjustmentItem(item: AdjustmentItemModel, client: any) {
+  const res = await client.query(
+    `INSERT INTO estoque_ajustes_itens
+    (ajuste_id, produto_id, quantidade, preco_unitario, created_by)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *`,
+    [
+      item.ajuste_id,
+      item.produto_id,
+      item.quantidade,
+      item.preco_unitario,
+      item.created_by
+    ]
+  );
+
+  return res.rows[0];
+};
+
+// Atualiza o total do cabeçalho do ajuste
+export async function updateAdjustmentTotal(adjustmentId: number, total: number, client: any) {
+  await client.query(
+    `UPDATE estoque_ajustes SET valor_total = $2 WHERE id = $1 `,
+    [adjustmentId, total]
+  );
+};
+
+// Registra o histórico e atualiza o saldo.
+export async function registerAdjustmentMovement(mov: InventoryMovementModel, client: any): Promise<InventoryMovementResult> {
+  const quantidade = Math.floor(Number(mov.quantidade));
+  const fator = mov.tipo === 'saida' ? -1 : 1;
+
   try {
-    await client.query("BEGIN");
-
-    const quantidade = Math.floor(Number(mov.quantidade));
-
-    // Bloqueia o registro para evitar concorrência
-    const saldoRes = await client.query(
-      `SELECT quantidade FROM estoque_saldo WHERE produto_id = $1 FOR UPDATE`,
+     // Bloqueia o registro para evitar concorrência
+    const produtoRes = await client.query(
+      `SELECT 
+      es.quantidade AS estoque_atual,
+      p.nome AS produto,
+      p.codigo
+      FROM estoque_saldo es
+      JOIN produtos p ON p.id = es.produto_id
+      WHERE es.produto_id = $1
+      FOR UPDATE`,
       [mov.produto_id]
     );
 
-    const saldoAtual = saldoRes.rows[0]?.quantidade || 0;
-    const fator = mov.tipo === "saida" ? -1 : 1;
-    const novoSaldo = saldoAtual + quantidade * fator;
+    const estoque_atual = produtoRes.rows[0]?.estoque_atual || 0;
+    const produto_nome = produtoRes.rows[0]?.produto || null;
+    const codigo = produtoRes.rows[0]?.codigo || null;
 
-    if (novoSaldo < 0) {
-      throw new Error(`Saldo insuficiente para registrar a saída. Saldo atual: ${saldoAtual}, Quantidade movimentada: ${quantidade}`);
+    const estoque_ficaria = estoque_atual + quantidade * fator;
+
+    if (estoque_ficaria < 0) {
+      return {
+        estoque_insuficiente: true,
+        produto_id: mov.produto_id,
+        produto: produto_nome,
+        codigo,
+        estoque_atual,
+        tentativa_saida: quantidade,
+        estoque_ficaria
+      };
     }
-
 
     // Insert no log de movimentações
     const result = await client.query(
@@ -252,31 +329,26 @@ export async function registerMovement(mov: InventoryMovementModel) {
       ]
     );
 
-    // Atualizar saldo na tabela estoque_saldo
+     // Atualizar saldo na tabela estoque_saldo
     await client.query(
       `INSERT INTO estoque_saldo (produto_id, quantidade)
        VALUES ($1, $2)
        ON CONFLICT (produto_id)
        DO UPDATE SET quantidade = $2`,
-      [mov.produto_id, novoSaldo] 
+      [mov.produto_id, estoque_ficaria] 
     );
 
-    await client.query("COMMIT");
-    return result.rows[0];
-
+    return { estoque_insuficiente: false};
   } catch (error: any) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
+    console.error(error) 
+    throw error
+  } 
 };
 
 
 // *********************************************************************** //
-// *********************************************************************** //
-
-// Movimentações de COMPRA.
+// Movimentações de COMPRA. //
+// *********************************************************************** 
 export async function registerPurchaseMovement(mov: InventoryMovementModel, client: any): Promise<InventoryMovementResult> {
 
   try {
@@ -422,4 +494,13 @@ export async function registerSaleMovement(mov: InventoryMovementModel, client: 
     console.error(error)
     throw error;
   }
+};
+
+export async function verifyProduct(productId: number, client: any) {
+  const result = await client.query(
+    `SELECT id, nome, codigo FROM produtos WHERE id = $1`,
+    [productId]
+  );
+
+  return result.rows[0] || null;
 };

@@ -1,9 +1,11 @@
+import db from "../config/db";
 import * as inventoryRepository from "../inventory/inventory-repository";
 import { purchaseItemModel, purchaseModel } from "../purchases/purchase-model";
 import { salesItemModel, salesModel } from "../sales/sales-model";
 import { badRequest, internalServerError, ok } from "../utils/http-helper";
-import { InventoryMovementModel, StockInsufficientError, stockInsufficientErrorModel } from "./inventory-model";
+import { AdjustmentItemModel, AdjustmentModel, InventoryMovementResult, StockInsufficientError, stockInsufficientErrorModel } from "./inventory-model";
 
+// Lista todos os produtos do estoque.
 export const listInventoryService = async(filters: { id?: number, codigo?: string, nome?: string, categoria?: string, status?: string, saldo?: string}) => {
   try {
     const inventoryList = await inventoryRepository.listInventoryItems(filters);
@@ -15,28 +17,7 @@ export const listInventoryService = async(filters: { id?: number, codigo?: strin
   }
 };
 
-// Movimento de AJUSTE DE ESTOQUE.
-export const registerMovementService = async (mov: InventoryMovementModel) => {
-  try {
-
-    const quantidade = Math.floor(Number(mov.quantidade));
-    if (isNaN(quantidade) || quantidade <= 0) {
-      return badRequest(`Quantidade inválida: ${mov.quantidade}`);
-    }
-  
-    const movement = await inventoryRepository.registerMovement({...mov, quantidade});
-    return ok(movement);
-  
-  } catch (err: any) {
-    if (err.message.includes('Saldo insuficiente')) {
-      return badRequest(err.message);
-    }
-    console.error(err);
-    return internalServerError('Erro ao registrar movimentação.')
-  }
-};
-
-
+// Lista movimentações de um produto.
 export const listMovementsService = async (produto_id: number) => {
   try {
     const movements = await inventoryRepository.listMovements(produto_id);
@@ -49,8 +30,126 @@ export const listMovementsService = async (produto_id: number) => {
 };
 
 
+// =========================================================
+// Movimento de AJUSTE DE ESTOQUE.
+// =========================================================
+export const registerInventoryAdjustmentService = async (
+  adjustment: AdjustmentModel,
+  items: AdjustmentItemModel[],
+  userId: number
+) => {
 
+  const client = await db.connect();
+  const inconsistencies: stockInsufficientErrorModel[] = [];
+  let totalAjuste =  0;
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. Cria o cabeçalho do ajuste
+    const adjustmentRes = await inventoryRepository.createAdjustmentHeader(
+      {
+        tipo: adjustment.tipo,
+        observacao: adjustment.observacao ?? null,
+        valor_total: 0,
+        created_by: userId
+      },
+      client
+    );
+
+    const ajusteId = adjustmentRes.id;
+
+
+    // 2. Loop nos itens do ajuste
+    for (const item of items) {
+
+      // Verifica se o produto está cadastrado no sistema
+      const productExists = await inventoryRepository.verifyProduct(item.produto_id, client);
+      if (!productExists) {
+        await client.query("ROLLBACK");
+        return badRequest(`Produto informado (ID ${item.produto_id}) não existe no sistema.`);
+      }
+
+       // Quantidade deve ser maior que 0
+      const qtd = Number(item.quantidade);
+      if (isNaN(qtd) || qtd <= 0) {
+        await client.query("ROLLBACK");
+        return badRequest(`Quantidade do produto ${item.produto_id} deve ser maior que zero.`);
+      }
+      
+      const preco = item.preco_unitario ?? null;
+
+      // Soma para valor_total do ajuste(cabeçalho)
+      totalAjuste += qtd * preco;
+
+      const movementResult = await inventoryRepository.registerAdjustmentMovement(
+        {
+          produto_id: item.produto_id,
+          quantidade: qtd,
+          tipo: adjustment.tipo,
+          origem: "ajuste",
+          referencia_id: ajusteId,
+          usuario_id: userId,
+          preco_unitario_liquido: preco
+        },
+        client
+      );
+
+      if (movementResult.estoque_insuficiente) {
+        inconsistencies.push({
+          produto_id: movementResult.produto_id!,
+          produto: movementResult.produto!,
+          codigo: movementResult.codigo!,
+          estoque_atual: movementResult.estoque_atual!,
+          tentativa_saida: movementResult.tentativa_saida!,
+          estoque_ficaria: movementResult.estoque_ficaria!
+        });
+      } else {
+        // Se ok, cria o item
+        await inventoryRepository.createAdjustmentItem(
+          {
+            ajuste_id: ajusteId,
+            produto_id: item.produto_id,
+            quantidade: qtd,
+            preco_unitario: preco,
+            created_by: userId
+          },
+          client
+        );
+      }
+    }
+
+    // 3. Após processar TODOS os itens, valida inconsistências
+    if (inconsistencies.length > 0) {
+      await client.query("ROLLBACK");
+      throw new StockInsufficientError(
+        "Existem itens com saldo insuficiente para o ajuste de saída.",
+        inconsistencies
+      );
+    }
+
+    // 4.Atualiza o total do cabeçalho
+    await inventoryRepository.updateAdjustmentTotal(ajusteId, totalAjuste, client);
+    
+    // 5. Se tudo OK, commit e retorno
+    await client.query("COMMIT");
+    return ok("Ajuste de estoque realizado com sucesso.");
+
+  } catch (error: any) {
+    await client.query("ROLLBACK");
+
+    if (error instanceof StockInsufficientError) throw error;
+
+    return internalServerError("Erro ao registrar ajuste de estoque.");
+  } finally {
+    client.release();
+  }
+};
+
+
+// ===========================================================
 // Serviço para movimentar estoque á partir da compra.
+// ===========================================================
 export async function handlePurchaseInventoryMovementService(
   oldPurchase: purchaseModel,
   newPurchase: purchaseModel,
