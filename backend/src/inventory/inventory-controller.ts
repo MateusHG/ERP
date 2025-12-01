@@ -46,8 +46,6 @@ export const registerInventoryAdjustmentController = async (req: Request, res: R
         inconsistencies: err.inconsistencies,
       });
     }
-
-    res.status(500).json({ error: "Erro interno no servidor ao registrar ajuste de estoque." });
   }
 };
 
@@ -80,8 +78,6 @@ export const handlePurchaseInventoryMovementController = async (req: Request, re
         inconsistencies: err.inconsistencies,
       });
     }
-
-    res.status(500).json({error: 'Erro interno do servidor ao processar movimentação de estoque à partir da compra.'});
   }
 };
 
@@ -114,8 +110,6 @@ export const handleSaleInventoryMovementController = async (req: Request, res: R
         inconsistencies: err.inconsistencies,
       });
     }
-    
-    res.status(500).json({error: 'Erro interno do servidor ao processar movimentação de estoque à partir da venda.'})
   }
-}
+};
 

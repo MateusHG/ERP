@@ -46,6 +46,10 @@ export const registerInventoryAdjustmentService = async (
   try {
     await client.query("BEGIN");
 
+    if (adjustment.tipo !== "entrada" && adjustment.tipo !== "saida") {
+    return badRequest("Tipo de operação inválida, a mesma deve ser: 'entrada' ou 'saida'.");
+  }
+
     // 1. Cria o cabeçalho do ajuste
     const adjustmentRes = await inventoryRepository.createAdjustmentHeader(
       {
