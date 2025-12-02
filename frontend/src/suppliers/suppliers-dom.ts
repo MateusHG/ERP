@@ -1,6 +1,6 @@
 import supplierModel from "./supplier-model";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
-import { formatCnpj } from "../utils/formatters";
+import { capitalize, formatCnpj } from "../utils/formatters";
 
 //Navegação entre os módulos
 window.addEventListener('DOMContentLoaded', () => {
@@ -31,7 +31,7 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     tr.appendChild(textCell(supplier.telefone));
     tr.appendChild(textCell(supplier.email));
     tr.appendChild(textCell(supplier.uf));
-    tr.appendChild(textCell(supplier.status));
+    tr.appendChild(textCell(capitalize(supplier.status)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";

@@ -8,7 +8,7 @@ export interface purchaseModel {
   desconto_financeiro?: number;  // pagamento à vista, antecipado
   valor_bruto?: number;           // soma dos itens sem desconto
   valor_total?: number;           // valor final após descontos aplicados
-  status: 'aberto' | 'aguardando' | 'aprovado' | 'recebido' | 'cancelado';
+  status: 'aberto' | 'aguardando' | 'aprovado' | 'recebido' | 'finalizado' | 'cancelado';
   data_cadastro: Date;
   data_atualizacao: Date;
 };

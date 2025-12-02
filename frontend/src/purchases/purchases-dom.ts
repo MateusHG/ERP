@@ -44,17 +44,30 @@ export function renderPurchasesList(purchases: purchaseModel[]): void {
     btnEdit.className = "btn-edit";
     btnEdit.innerHTML = `<img src="/erpicons/edit-file.svg" alt="Editar Produto" class="icon-btn" />`;
     btnEdit.title = "Clique para editar esta compra";
-
-    const btnDelete = document.createElement("button");
-    btnDelete.dataset.id = purchase.id.toString();
-    btnDelete.className = "btn-delete";
-    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar esta compra"
-
     tdActions.appendChild(btnEdit);
-    tdActions.appendChild(btnDelete);
-    tr.appendChild(tdActions);
 
+    const status = purchase.status;
+    const isLocked = status === "finalizado" || status === "recebido";
+
+    // Se não estiver finalizado, mostra o botão de deletar normalmente.
+    if (!isLocked) {
+      const btnDelete = document.createElement("button");
+      btnDelete.dataset.id = purchase.id.toString();
+      btnDelete.className = "btn-delete";
+      btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
+      btnDelete.title = "Clique para deletar esta compra";
+      tdActions.appendChild(btnDelete);
+    } else {
+      // Caso esteja finalizada, bloqueia o botão de delete.
+      const btnLocked = document.createElement("button");
+      btnLocked.className = "btn-delete disabled-delete";
+      btnLocked.disabled = true;
+      btnLocked.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
+      btnLocked.title = "Compra recebida/finalizada - exclusão bloqueada";
+      tdActions.appendChild(btnLocked);
+    } 
+
+    tr.appendChild(tdActions);
     tbody.appendChild(tr);
   });
 };

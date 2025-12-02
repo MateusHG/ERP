@@ -8,6 +8,21 @@ import { initTabs } from "../utils/ui-tabs";
 const supplierEditModal = document.getElementById("edit-modal")!;
 initTabs(supplierEditModal);
 
+function updateSupplierStatusBadge(status: string) {
+  const badge = document.getElementById("edit-status-badge") as HTMLSpanElement;
+  if (!badge) return;
+
+  badge.classList.remove("badge-active", "badge-inactive");
+
+  if (status === "ativo") {
+    badge.textContent = "Ativo";
+    badge.classList.add("badge-active");
+  } else {
+    badge.textContent = "Inativo";
+    badge.classList.add("badge-inactive");
+  }
+};
+
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
 
@@ -68,6 +83,8 @@ export async function openEditModal(id: number) {
 
   const supplier = await getSupplierByIdAPI(id);
 
+  updateSupplierStatusBadge(supplier.status);
+
   document.getElementById("edit-supplier-id")!.textContent = String(supplier.id);
 
   (form.elements.namedItem("id") as HTMLInputElement).value = supplier.id.toString();
@@ -88,10 +105,10 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("cidade") as HTMLInputElement).value = supplier.cidade;
   (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(supplier.data_cadastro);
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(supplier.data_atualizacao);
-
   
   supplierEditModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
+  
 }
 
 cancelBtn?.addEventListener("click", async () => {

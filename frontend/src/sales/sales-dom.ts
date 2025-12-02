@@ -41,18 +41,29 @@ export function renderSalesList(sales: saleModel[]): void {
     btnEdit.dataset.id = sale.id.toString();
     btnEdit.className = "btn-edit";
     btnEdit.innerHTML = `<img src="/erpicons/edit-file.svg" alt="Editar Produto" class="icon-btn" />`;
-    btnEdit.title = "Clique para editar esta venda"
-
-    const btnDelete = document.createElement("button");
-    btnDelete.dataset.id = sale.id.toString();
-    btnDelete.className = "btn-delete";
-    btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar esta venda"
-
+    btnEdit.title = "Clique para editar esta venda";
     tdActions.appendChild(btnEdit);
-    tdActions.appendChild(btnDelete);
-    tr.appendChild(tdActions);
 
+    const status = sale.status;
+    const isLocked = status === "finalizado" || status === "entregue";
+
+    if (!isLocked) {
+      const btnDelete = document.createElement("button");
+      btnDelete.dataset.id = sale.id.toString();
+      btnDelete.className = "btn-delete";
+      btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
+      btnDelete.title = "Clique para deletar esta venda";
+      tdActions.appendChild(btnDelete);
+    } else {
+      const btnLocked = document.createElement("button");
+      btnLocked.className = "btn-delete disabled-delete";
+      btnLocked.disabled = true;
+      btnLocked.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar Produto" class="icon-btn" />`;
+      btnLocked.title = "Venda entregue/finalizada - exclusão bloqueada.";
+      tdActions.appendChild(btnLocked);
+    } 
+    
+    tr.appendChild(tdActions);
     tbody.appendChild(tr);
   });
 };

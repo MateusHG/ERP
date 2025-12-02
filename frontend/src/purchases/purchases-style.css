@@ -199,6 +199,16 @@ body {
       cursor: pointer;
     }
 
+    .disabled-delete {
+      opacity: 0.35 !important;
+      cursor: not-allowed !important;
+      filter: grayscale(1);
+    }
+
+.disabled-delete img {
+  pointer-events: none;
+}
+
 /* Box de confirmação para deletar o produto */
 
 #confirm-box {
