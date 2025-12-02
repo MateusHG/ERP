@@ -6,7 +6,7 @@ import { fetchProductSuggestions } from "./purchases-service";
 
 // Atualiza o estado de visualização ou edição de uma linha.
 export function setViewMode(tr: HTMLTableRowElement, isView: boolean) {
-  const inputs = tr.querySelectorAll("input"); // corrigido para "input" minúsculo
+  const inputs = tr.querySelectorAll("input");
   inputs.forEach((input) => {
     const inp = input as HTMLInputElement;
     inp.readOnly = isView;

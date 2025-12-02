@@ -1,8 +1,8 @@
+import { makeCurrencyCellInput } from "../utils/formatters";
 import { attachItemAutoComplete } from "../utils/autocomplete";
-import { formatCurrency, makeCurrencyCellInput } from "../utils/formatters";
-import { setupItemRowEvents } from "./purchase-items-controller";
+import { setupItemRowEvents } from "./inventory-adjustment-item-controller";
 
-// Manipulação de DOM para os itens da compra.
+// DOM dos itens de Ajuste de Estoque
 
 const makeCellInput = (name: string, type = "text", initial = "", placeholder = "") => {
   const td = document.createElement("td");
@@ -13,6 +13,7 @@ const makeCellInput = (name: string, type = "text", initial = "", placeholder = 
   input.placeholder = placeholder;
   input.autocomplete = "off";
   input.style.minWidth = "60px";
+  input.style.textAlign = "center";
   td.appendChild(input);
   return { td, input };
 };
@@ -30,10 +31,11 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   const { td: tdCode, input: inputCode } = makeCellInput(
     "item-code", "text", item?.produto_codigo || "", "Digite o código..."
   );
+
   tr.appendChild(tdCode);
 
   const { td: tdName, input: inputName } = makeCellInput(
-    "item-name", "text", item?.produto_nome || "", "Digite o nome.."
+    "item-name", "text", item?.produto_nome || "", "Digite o nome..."
   );
   tr.appendChild(tdName);
 
@@ -47,38 +49,17 @@ export function createEditableRow(item?: any, isSaved: boolean = false): HTMLTab
   attachItemAutoComplete(inputCode, fillRow);
   attachItemAutoComplete(inputName, fillRow);
 
-  const { td: tdQuantity, input: inputQuantity } = makeCellInput(
+  const { td: tdQuantity, input: inputQuantity } =  makeCellInput(
     "item-quantity", "number", item?.quantidade.toString() || "1"
   );
   inputQuantity.min = "1";
   tr.appendChild(tdQuantity);
 
-  const { td: tdUnitPrice, input: inputUnitPrice } = makeCurrencyCellInput(
-  "item-unit-price",
-   item?.preco_unitario != null ? item.preco_unitario : 0
-);
+  const { td: tdUnitPrice, input: inputUnitPrice } =  makeCurrencyCellInput(
+    "item-unit-price",
+    item?.preco_unitario_liquido ?? 0
+  );
   tr.appendChild(tdUnitPrice);
-
-// Desconto por unidade
-const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
-  "item-discount-volume",
-   item?.desconto_unitario != null ?  item.desconto_unitario : 0
-);
-  tr.appendChild(tdDiscount);
-
-  // Total desconto
-  const tdTotalDiscount = document.createElement("td");
-  tdTotalDiscount.classList.add("item-total-discount");
-  const discountValue = item?.desconto_unitario && item?.quantidade
-    ? Number(item.desconto_unitario) * Number(item.quantidade)
-    : 0;
-  tdTotalDiscount.textContent = formatCurrency(discountValue); // garante R$
-  tr.appendChild(tdTotalDiscount);
-
-  const tdTotal = document.createElement("td");
-  tdTotal.textContent = item ? formatCurrency(Number(item.valor_total || 0)) : formatCurrency(0);
-  tdTotal.classList.add("item-line-total");
-  tr.appendChild(tdTotal);
 
   // Ações
   const tdActions = document.createElement("td");
@@ -98,7 +79,6 @@ const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
   btnEdit.addEventListener("click", () => {
     tr.dataset.status = "editando";
     btnEdit.disabled = true;
-    btnEdit.disabled = false;
   });
 
   const btnRemove = document.createElement("button");
@@ -109,26 +89,22 @@ const { td: tdDiscount, input: inputDiscount } = makeCurrencyCellInput(
   tdActions.appendChild(btnSave);
   tdActions.appendChild(btnEdit);
   tdActions.appendChild(btnRemove);
+
   tr.appendChild(tdActions);
 
   return tr;
-}
+};
 
-export function addItemRowTo(
-  container: HTMLElement,
-  item?: any,
-  prefix: "new" | "edit" = "new",
-  isSaved: boolean = false
-): HTMLTableRowElement {
+export function addItemRowTo(container: HTMLElement, item?: any, isSaved: boolean = false): HTMLTableRowElement {
   if (!container) {
     console.error("Container não encontrado para adicionar o item.");
-    throw new Error("Container não encontrado");
+    throw new Error("Container não encontrado.");
   }
 
   const tr = createEditableRow(item, isSaved);
   container.appendChild(tr);
 
-  setupItemRowEvents(tr, container, prefix, isSaved);
+  setupItemRowEvents(tr, container, isSaved);
 
   return tr;
 };

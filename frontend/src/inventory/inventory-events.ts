@@ -1,8 +1,9 @@
 import { formatCurrency, formatDataAndTime } from "../utils/formatters";
 import { getFilterValues, renderInventoryList } from "./inventory-dom";
 import { listInventoryWithFilterAPI, loadInventoryMovements } from "./inventory-service";
-import { openNewInventoryAdjustmentModal } from "./inventory-new-adjustment-modal";
+import { openNewInventoryAdjustmentModal } from "./inventory-adjustment-modal";
 import { origemMovLabels, tipoMovLabels } from "./inventory-model";
+import { addItemRowTo } from "./inventory-adjustment-item-dom";
 
 //Chama o modal de novo ajuste de estoque.
 export function handleNewAdjustmentClick(target: HTMLElement) {
@@ -62,7 +63,7 @@ export async function toggleMovementsRow(productRow: HTMLTableRowElement, produt
     const tipoLabel = tipoMovLabels[m.tipo] || m.tipo || "-";
 
     const origemLabel = origemMovLabels[m.origem]
-        ? `${origemMovLabels[m.origem]} Nº: ${m.referencia_id}`
+        ? `${origemMovLabels[m.origem]}${m.referencia_id}`
         : m.origem || "-";
 
     return `
@@ -85,4 +86,11 @@ export async function handleFilterChange() {
   const filters = getFilterValues();
   const items = await listInventoryWithFilterAPI(filters);
   renderInventoryList(items);
+};
+
+export async function handleNewAdjustmentItemClick(button: HTMLElement) {
+  const modal = button.closest(".modal")!;
+  const tbody = modal.querySelector("tbody")!;
+
+  addItemRowTo(tbody, undefined, false);
 };

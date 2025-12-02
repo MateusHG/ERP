@@ -26,9 +26,10 @@ export const tipoMovLabels: Record<string, string> = {
 };
 
 export const origemMovLabels: Record<string, string> = {
-  compra: "Compra",
-  venda: "Venda",
-  estorno_compra: "Estorno da Compra",
-  estorno_venda: "Estorno da Venda",
+  compra: "Compra ID: ",
+  venda: "Venda ID: ",
+  estorno_compra: "Estorno da Compra ID: ",
+  estorno_venda: "Estorno da Venda ID: ",
+  ajuste: "Ajuste Manual #"
 };
 

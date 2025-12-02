@@ -15,10 +15,12 @@ export interface inventoryListModel {
 export interface AdjustmentModel {
   id?: Number;                  //// criado pelo banco
   tipo: "entrada" | "saida";    // tipo_movimentacao_enum
-  valor_total?: number;         // // default 0
+  motivo: string;
   observacao?: string | null;    // pode ser null
-  data_cadastro?: string;       // timestamp
+  valor_total?: number;         // // default 0
+  data_ajuste: string;       
   created_by: number;           // FK users
+  data_cadastro?: string;       // timestamp
 };
 
 export interface AdjustmentItemModel {

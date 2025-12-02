@@ -235,13 +235,15 @@ export async function listMovements(produto_id: number) {
 export async function createAdjustmentHeader(adjustment: AdjustmentModel, client: any) {
   const result = await client.query(
     `INSERT INTO estoque_ajustes
-    (tipo, valor_total, observacao, created_by)
-    VALUES ($1, $2, $3, $4)
+    (tipo, motivo, valor_total, observacao, data_ajuste, created_by)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *`,
     [
       adjustment.tipo,
+      adjustment.motivo,
       adjustment.valor_total ?? 0,
       adjustment.observacao ?? null,
+      adjustment.data_ajuste,
       adjustment.created_by
     ]
   );

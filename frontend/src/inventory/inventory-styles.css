@@ -262,7 +262,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
+  z-index: 3000;
 }
 
 #message-box.hidden {
@@ -277,6 +277,8 @@ body {
   text-align: center;
   max-width: 300px;
   font-family: sans-serif;
+  position: relative;
+  z-index: 3001;
 }
 
 #message-text {
@@ -292,24 +294,6 @@ body {
   color: white;
   border-radius: 6px;
   cursor: pointer;
-}
-
-/* Box para edição de informações do produto. */
-#edit-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-#edit-modal.hidden {
-  display: none;
 }
 
 .modal-content {
@@ -439,23 +423,162 @@ input[readonly] {
   cursor: not-allowed;
 }
 
-/* Box para cadastro de novo fornecedor. */
+/* ============================
+   MODAL: NOVO AJUSTE DE ESTOQUE
+=============================== */
+
 #new-inventory-adjustment-modal {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 999;
 }
 
 #new-inventory-adjustment-modal.hidden {
   display: none;
 }
+
+#new-inventory-adjustment-modal .modal-content {
+  background: #fff;
+  width: 60%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  padding: 24px 28px;
+  box-shadow: 0px 6px 18px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Títulos */
+#new-inventory-adjustment-modal .section-title {
+  text-align: left;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 26px;
+}
+
+#new-inventory-adjustment-modal .section-subtitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 22px 0 10px 0;
+  margin-bottom: 20px;
+}
+
+/* Formulário */
+#new-inventory-adjustment-modal form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Força layout vertical igual aos outros modais */
+#new-inventory-adjustment-modal .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#new-inventory-adjustment-modal .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#new-inventory-adjustment-modal .form-group label {
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Inputs */
+#new-inventory-adjustment-modal input,
+#new-inventory-adjustment-modal select,
+#new-inventory-adjustment-modal textarea {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 14px;
+}
+
+#new-inventory-adjustment-modal input:focus,
+#new-inventory-adjustment-modal select:focus,
+#new-inventory-adjustment-modal textarea:focus {
+  border-color: #2d88ff;
+  outline: none;
+  background: #fff;
+}
+
+.add-item-btn {
+  margin-left: 8px;
+  background: #ffffff;
+  color: #2e80eb;
+  border: 2px solid #2e80eb;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-item-btn:hover {
+  background: #2e80eb;
+  color: white;
+  border-color: #2e80eb;
+}
+
+/* Resumo */
+#new-inventory-adjustment-modal .adjustment-summary {
+  margin: 18px 0;
+  font-size: 14px;
+}
+
+/* Botões finais */
+#new-inventory-adjustment-modal .modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+#new-inventory-adjustment-modal .modal-buttons button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#submit-new-inventory-adjustment {
+  background: #2d88ff;
+  color: #fff;
+}
+
+#cancel-new-inventory-adjustment {
+  background: #ddd;
+}
+
+/* Scroll bonito no modal */
+#new-inventory-adjustment-modal .modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+#new-inventory-adjustment-modal .modal-content::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+#new-inventory-adjustment-modal .modal-content::-webkit-scrollbar-thumb:hover {
+  background: #b7b7b7;
+}
+
 
 #submit-new-inventory-adjustment {
   margin-top: 16px;
@@ -508,14 +631,57 @@ input[readonly] {
   display: none;
 }
 
-#fornecedor-search {
-  z-index: 1; /* Garante que está acima de outros elementos */
+#items-table {
+  table-layout: auto;
 }
 
-#items-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* Importante: distribui colunas conforme largura definida */
+#items-table th, #items-table td {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+/* Produto ID - largura fixa pequena */
+#items-table th:nth-child(1),
+#items-table td:nth-child(1) {
+  min-width: 20px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Código - pode ser compacto também */
+#items-table th:nth-child(2),
+#items-table td:nth-child(2) {
+  width: 100px;
+  text-align: center;
+}
+
+#items-table th:nth-child(3),
+#items-table td:nth-child(3) {
+  width: 150px;
+  text-align: center;
+}
+
+#items-table th:nth-child(4),
+#items-table td:nth-child(4) {
+  min-width: 70px;
+  width: 70px;
+  text-align: center;
+}
+
+#items-table th:nth-child(5),
+#items-table td:nth-child(5) {
+  min-width: 70px;
+  width: 70px;
+  text-align: center;
+}
+
+#items-table th:nth-child(6),
+#items-table td:nth-child(6) {
+  min-width: 100px;
+  width: 100px;
+  text-align: center;
 }
 
 .btn-view-movements {
@@ -671,7 +837,7 @@ input[readonly] {
   box-sizing: border-box;
 }
 
-.sale-items-summary {
+.inventory-items-summary {
   margin-top: 12px;
   display: flex;
   gap: 16px;
@@ -748,3 +914,4 @@ input[readonly] {
   cursor: help;
   vertical-align: middle;
 }
+

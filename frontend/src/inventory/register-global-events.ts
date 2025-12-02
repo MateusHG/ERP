@@ -1,4 +1,4 @@
-import { handleFilterChange, handleNewAdjustmentClick, toggleMovementsRow } from "./inventory-events";
+import { handleFilterChange, handleNewAdjustmentClick, handleNewAdjustmentItemClick, toggleMovementsRow } from "./inventory-events";
 
 export async function registerGlobalEvents() {
   document.addEventListener("click", async (event) => {
@@ -8,6 +8,9 @@ export async function registerGlobalEvents() {
 
     if (target.classList.contains("btn-new-inventory")) {
       await handleNewAdjustmentClick(target);
+
+    } else if (target.classList.contains("add-item-btn")) {
+      await handleNewAdjustmentItemClick(target);
 
     } else if (target.classList.contains("btn-view-movements")) {
       const produtoId = Number(target.dataset.produtoId);

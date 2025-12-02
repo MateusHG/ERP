@@ -30,3 +30,24 @@ export async function loadInventoryMovements(produtoId: number) {
 
   return await result.json();
 };
+
+export async function postInventoryAdjustmentAPI(newAdjustmentData: any) {
+  const response = await authorizedFetch(`https://localhost:3000/api/estoque/ajuste`, {
+    method: "POST",
+    body: JSON.stringify(newAdjustmentData)
+  });
+
+  return response.json();
+};
+
+export async function fetchProductSuggestions(filters: {id?: string, codigo?: string, nome?: string}) {
+  const params = new URLSearchParams();
+
+  if (filters.id) params.append("id", filters.id);
+  if (filters.codigo) params.append("codigo", filters.codigo);
+  if (filters.nome) params.append("nome", filters.nome);
+
+  const result = await authorizedFetch(`https://localhost:3000/api/produtos?${params.toString()}`);
+  if (!result.ok) return [];
+  return await result.json();
+};

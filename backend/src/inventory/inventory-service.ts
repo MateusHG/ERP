@@ -38,7 +38,31 @@ export const registerInventoryAdjustmentService = async (
   items: AdjustmentItemModel[],
   userId: number
 ) => {
+  // -------------------------
+  // VALIDAÇÕES OBRIGATÓRIAS
+  // -------------------------
 
+  if (adjustment.tipo !== "entrada" && adjustment.tipo !== "saida") {
+    return badRequest("Tipo de operação inválida, a mesma deve ser: 'entrada' ou 'saida'.");
+  }
+
+  if (!adjustment.motivo || adjustment.motivo.trim() ===  "") {
+    return badRequest("O campo 'motivo' é obrigatório");
+  }
+
+  if (!adjustment.data_ajuste ||adjustment.data_ajuste.trim() === "") {
+    return badRequest("O campo 'data_ajuste' é obrigatório.");
+  }
+
+  // Validação de data
+  const dateCheck = new Date(adjustment.data_ajuste);
+  if (isNaN(dateCheck.getTime())) {
+    return badRequest("O campo 'data_ajuste contém uma data inválida.");
+  }
+
+  // -----------------------------
+  // PROCESSAMENTO DO AJUSTE
+  // -----------------------------
   const client = await db.connect();
   const inconsistencies: stockInsufficientErrorModel[] = [];
   let totalAjuste =  0;
@@ -46,16 +70,14 @@ export const registerInventoryAdjustmentService = async (
   try {
     await client.query("BEGIN");
 
-    if (adjustment.tipo !== "entrada" && adjustment.tipo !== "saida") {
-    return badRequest("Tipo de operação inválida, a mesma deve ser: 'entrada' ou 'saida'.");
-  }
-
     // 1. Cria o cabeçalho do ajuste
     const adjustmentRes = await inventoryRepository.createAdjustmentHeader(
       {
         tipo: adjustment.tipo,
-        observacao: adjustment.observacao ?? null,
+        motivo: adjustment.motivo,
         valor_total: 0,
+        observacao: adjustment.observacao ?? null,
+        data_ajuste: adjustment.data_ajuste,
         created_by: userId
       },
       client

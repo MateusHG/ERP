@@ -31,12 +31,13 @@ export const registerInventoryAdjustmentController = async (req: Request, res: R
   try{
     const userId = req.user!.id;
 
-    const { ajuste, items } = req.body;
+    const adjustment = req.body.ajuste ?? req.body;
 
-    const httpResponse = await registerInventoryAdjustmentService(ajuste, items, userId);
+    const items = req.body.items ?? req.body;
+
+    const httpResponse = await registerInventoryAdjustmentService(adjustment, items, userId);
     
     res.status(httpResponse.statusCode).json(httpResponse.body);
-  
   } catch (err: any) {
     console.error(err);
 

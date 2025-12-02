@@ -10,7 +10,7 @@ inventoryRouter.get("/listar", listInventoryController);
 
 inventoryRouter.get("/movimentacoes/:id", listMovementsController);
 
-inventoryRouter.post("/movimentar/ajuste", registerInventoryAdjustmentController);
+inventoryRouter.post("/ajuste", registerInventoryAdjustmentController);
 
 inventoryRouter.patch("/compras/:id/movimentar", handlePurchaseInventoryMovementController);
 inventoryRouter.patch("/vendas/:id/movimentar", handleSaleInventoryMovementController);
