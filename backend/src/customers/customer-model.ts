@@ -20,4 +20,5 @@ export interface customerModel {
   status: 'ativo' | 'inativo';
   data_cadastro: Date;
   data_atualizacao: Date;
+  has_sales: boolean;
 }

@@ -1,10 +1,11 @@
 import db from "../config/db";
 import { customerModel } from "../customers/customer-model";
+import { supplierModel } from "../suppliers/supplier-model";
 
 export const searchAllCustomers = async (
   filters: { id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string }
 ): Promise<customerModel[]> => {
-  let query = `SELECT * FROM clientes`;
+  let query = `SELECT c.*, EXISTS (SELECT 1 FROM vendas v WHERE  v.cliente_id = c.id) AS has_sales FROM clientes c`;
   const conditions: string[] = [];
   const values: any[] = [];
 
@@ -49,7 +50,7 @@ export const searchAllCustomers = async (
 };
 
 export const searchCustomerById = async (id: number): Promise<customerModel | null> => {
-  const result = await db.query(`SELECT * FROM clientes where id = $1`, [id]);
+  const result = await db.query(`SELECT c.*, EXISTS (SELECT 1 FROM vendas v WHERE v.cliente_id = c.id) AS has_sales FROM clientes c where c.id = $1`, [id]);
   return result.rows[0];
 };
 
@@ -125,12 +126,8 @@ export const verifyEmail = async (email: string, ignoredId?:number) => {
   return result.rowCount > 0;
 };
 
-export const verifyCpf = async (cpf: string): Promise<customerModel |  null> => {
-  const result = await db.query(
-    `SELECT * FROM clientes where cpf = $1 limit 1`,
-    [cpf]
-  );
-
+export const verifyNomeFantasia = async (nome_fantasia: string): Promise<supplierModel | null> => {
+  const result = await db.query(`SELECT * FROM clientes WHERE nome_fantasia = $1 LIMIT 1`, [nome_fantasia]);
   return result.rows[0] || null;
 };
 
@@ -150,4 +147,9 @@ export const updateCustomer = async (id: number, fieldsToUpdate: Partial<custome
 export const deleteCustomerById = async (id: number): Promise<boolean> => {
   const result = await db.query(`DELETE FROM clientes where id = $1`, [id]);
   return result.rowCount> 0;
+};
+
+export const verifyCustomerSales = async (id: number): Promise<boolean> => {
+  const result = await db.query(`SELECT * FROM vendas WHERE cliente_id = $1 LIMIT 1`, [id]);
+  return result.rowCount > 0;
 };

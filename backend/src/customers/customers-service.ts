@@ -37,36 +37,24 @@ export const getCustomerByIdService = async (id: number) => {
 
 export const createCustomerService = async (customer: Omit<customerModel, 'id' | 'data_cadastro' | 'data_atualizacao'>) => {
   try {
-    if ( !customer.razao_social || !customer.email || !customer.status ) {
-    return badRequest('Campos obrigatórios estão ausentes: razão social, email, CPF/CNPJ ou status.');
+    if ( !customer.razao_social || !customer.nome_fantasia || !customer.cnpj || !customer.cep || !customer.status ) {
+    return badRequest('Campos obrigatórios estão ausentes: Razão Social, Nome Fantasia, CNPJ, CEP ou Status.');
   }
 
-    const hasCpf = !!customer.cpf;
-    const hasCnpj = !!customer.cnpj;
-
-    //Validação para permitir apenas CPF ou CNPJ, nunca ambos
-    if ((hasCpf && hasCnpj) || (!hasCpf && !hasCnpj)) {
-      return badRequest('Informe apenas CPF ou apenas CNPJ.');
+    const nomeAlreadyExists = await customerRepository.verifyNomeFantasia(customer.nome_fantasia); 
+    if (nomeAlreadyExists) {
+      return badRequest("Nome fantasia já existe em outro cadastro.");
     }
-
-    //Validações para não duplicar CPF ou CNPJ.
-    if (hasCnpj) {
-    const cnpjAlreadyExists = await customerRepository.verifyCnpj(customer.cnpj);
-    if (cnpjAlreadyExists) {
-      return badRequest('CNPJ já existe em outro cadastro.')
-    }
-  }
-
-    if (hasCpf) {
-    const cpfAlreadyExists = await customerRepository.verifyCpf(customer.cpf);
-    if (cpfAlreadyExists) {
-      return badRequest('CPF já existe em outro cadastro.')
-    }
-  }  
+  
     //Verifica se já existe a razão social e email.
     const razaoAlreadyExists = await customerRepository.verifyRazao(customer.razao_social);
     if (razaoAlreadyExists) {
       return badRequest('Razão social já existe em outro cadastro.')
+    }
+
+    const cnpjAlreadyExists = await customerRepository.verifyCnpj(customer.cnpj);
+    if (cnpjAlreadyExists) {
+      return badRequest("CNPJ já existe em outro cadastro.");
     }
 
     const emailAlreadyExists = await customerRepository.verifyEmail(customer.email);
@@ -89,41 +77,21 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
       return badRequest('Nenhum campo enviado para atualização.')
     }
 
-    const existingCustomer = await customerRepository.searchCustomerById(id);
-    if(!existingCustomer) {
+    const customer = await customerRepository.searchCustomerById(id);
+    if(!customer) {
       return notFound('Cliente não encontrado.')
     }
 
-    const hasCpf = data.cpf !== undefined;
-    const hasCnpj = data.cnpj !== undefined;
+    // Se já houve vendas com o cliente que está sendo alterado, bloqueia dados sensíveis
+    if (customer.has_sales) {
+      const lockedFields = ["razao_social", "cnpj", "inscricao_estadual"];
 
-    if (hasCpf && data.cpf && existingCustomer.cnpj) {
-    data.cnpj = undefined; // sobrescreve o CNPJ no update
-  } 
-
-    if (hasCnpj && data.cnpj && existingCustomer.cpf) {
-    data.cpf = undefined; // sobrescreve o CPF no update
-  }
-
-    //Apenas se FOR ENVIADO CPF/CNPJ, aplica a regra para escolher apenas um dos dois.
-    if ((hasCpf || hasCnpj) && (hasCpf && hasCnpj || !hasCpf && !hasCnpj)) {
-      return badRequest('Informe apenas CPF ou apenas CNPJ.');
-    }
-
-    //Valida duplicidade se for enviado ** CPF **
-    if (hasCpf && data.cpf) {
-      const cpfAlreadyExists = await customerRepository.verifyCpf(data.cpf);
-      if (cpfAlreadyExists) {
-        return badRequest('CPF já existe em outro cadastro.')
-    }
-  }
-    //Valida duplicidade se for enviado ** CNPJ **
-    if (hasCnpj && data.cnpj) {
-      const cnpjAlreadyExists = await customerRepository.verifyCnpj(data.cnpj, id);
-      if (cnpjAlreadyExists) {
-        return badRequest('CNPJ já existe em outro cadastro.');
+      for (const field of lockedFields) {
+        if (field in data) {
+          return badRequest(`O campo '${field}' não pode ser alterado pois o cliente já possui movimentações de venda.`)
+        }
       }
-  }
+    }
 
     //Verifica se já existe a razão social e email.
     if (data.razao_social) {
@@ -133,6 +101,13 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
     }
   }
 
+    if (data.nome_fantasia) {
+      const nomeAlreadyExists = await customerRepository.verifyNomeFantasia(data.nome_fantasia);
+      if (nomeAlreadyExists && nomeAlreadyExists.id !== id) {
+        return badRequest("Já existe um cadastro com este nome fantasia.");
+      }
+    }
+
     if (data.email) {
     const emailAlreadyExists = await customerRepository.verifyEmail(data.email, id);
     if (emailAlreadyExists) {
@@ -141,7 +116,11 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
   }
 
     const updatedCustomer = await customerRepository.updateCustomer(id, data);
-    //Se tudo der certo retorna ok com os dados do cliente.
+
+    if (!updatedCustomer) {
+      return notFound("Cliente não encontrado");
+    }
+
     return ok( {message: "Cadastro atualizado com sucesso." });
 
   } catch (err) {
@@ -152,11 +131,22 @@ export const updateCustomerByIdService = async (id:number, data: Partial<custome
 
 export const deleteCustomerByIdService = async (id: number) => {
   try {
-  const deleted = await customerRepository.deleteCustomerById(id);
+    if (isNaN(id)) {
+      return badRequest("ID Inválido.");
+    }
 
-  if (!deleted) {
-    return notFound('ID Não encontrado.')
-  }
+    const customer = await customerRepository.searchCustomerById(id);
+    if (!customer) {
+      return badRequest("Cliente não encontrado.");
+    }
+
+    const hasSales = await customerRepository.verifyCustomerSales(id);
+    if (hasSales) {
+      return badRequest("Este cliente já possui vendas cadastradas no sistema, não é possível excluir.")
+    }
+
+    await customerRepository.deleteCustomerById(id);
+
     return ok({ message: 'Cliente deletado com sucesso.' });
 
 }   catch (err) {

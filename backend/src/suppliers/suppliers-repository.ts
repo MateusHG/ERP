@@ -80,7 +80,7 @@ export const insertSupplier = async (supplier: Omit<supplierModel, 'id' | 'data_
 };
 
 export const verifyNomeFantasia = async (nome_fantasia: string): Promise<supplierModel | null> => {
-  const result = await db.query(`SELECT * FROM fornecedores where nome_fantasia = $1 limit 1`,
+  const result = await db.query(`SELECT * FROM fornecedores WHERE nome_fantasia = $1 LIMIT 1`,
     [nome_fantasia]
   );
 
@@ -88,7 +88,7 @@ export const verifyNomeFantasia = async (nome_fantasia: string): Promise<supplie
 };
 
 export const verifyRazao = async (razao: string): Promise<supplierModel | null> => {
-  const result = await db.query(`SELECT * FROM fornecedores where razao_social = $1 limit 1`,
+  const result = await db.query(`SELECT * FROM fornecedores WHERE razao_social = $1 LIMIT 1`,
     [razao]
   );
   
@@ -96,7 +96,7 @@ export const verifyRazao = async (razao: string): Promise<supplierModel | null> 
 };
 
 export const verifyCnpj = async (cnpj: string): Promise<supplierModel | null> => {
-  const result = await db.query(`SELECT * FROM fornecedores where cnpj = $1 limit 1`,
+  const result = await db.query(`SELECT * FROM fornecedores WHERE cnpj = $1 LIMIT 1`,
     [cnpj]
   );
 
@@ -104,7 +104,7 @@ export const verifyCnpj = async (cnpj: string): Promise<supplierModel | null> =>
 };
 
 export const verifyEmail = async (email: string): Promise<supplierModel | null> => {
-  const result = await db.query(`SELECT * FROM fornecedores WHERE email = $1 limit 1`,
+  const result = await db.query(`SELECT * FROM fornecedores WHERE email = $1 LIMIT 1`,
     [email]
   );
 

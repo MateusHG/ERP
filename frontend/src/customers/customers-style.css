@@ -480,14 +480,46 @@ input[readonly] {
   display: block;
   stroke: #333;
 }
-/* Badge de status */
+
+.modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Base do badge */
 .badge-status {
-  margin-left: 14px;
-  font-size: 13px;
-  color: #fff;
-  background: #2d88ff;
-  padding: 3px 10px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: inline-block;
+  line-height: 1;
+  border: 1px solid transparent;
+  /* Efeito visual suave */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ===========================
+   BADGE: ATIVO
+   Estilo TOTVS / Omie
+   =========================== */
+.badge-active {
+  background: #e0f7e9;      /* suave */
+  color: #1b8f3f;           /* verde forte */
+  border-color: #78d39a;    /* borda verde suave */
+}
+
+/* ===========================
+   BADGE: INATIVO
+   Estilo Bling / Omie
+   =========================== */
+.badge-inactive {
+  background: #fdecea;      /* vermelho claro */
+  color: #d93025;           /* vermelho forte */
+  border-color: #f6a5a3;    /* borda suave */
 }
 
 /* Título de seção */
@@ -633,6 +665,12 @@ input[readonly] {
   border: none;
   padding: 4px;
   cursor: pointer;
+}
+
+.disabled-delete {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(1);
 }
 
 .icon-btn {

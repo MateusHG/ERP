@@ -71,6 +71,7 @@ form.addEventListener("submit", async (event) => {
   if (!currentEditId) return;
 
   const formData = new FormData(form);
+  
   // Filtra apenas os campos que NÃO estão locked(readOnly ou disabled)
   const updatedSupplierData: Record<string, string> = {};
 

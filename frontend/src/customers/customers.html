@@ -54,8 +54,8 @@
       <select id="filtro-status">
         <option value="" disabled selected>Buscar por status...</option>
         <option value="">Todos</option>
-        <option value="Ativo">Ativo</option>
-        <option value="Inativo">Inativo</option>
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
       </select>
     </div>
     </div>
@@ -92,12 +92,12 @@
 
           <div class="form-group">
             <label for="edit-codigo">Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
+            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" required/>
           </div>
 
           <div class="form-group">
             <label for="edit-nome">Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
+            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" required/>
           </div>
 
           <div class="form-group">
@@ -113,8 +113,8 @@
           <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
             </select>
           </div>
           
@@ -153,7 +153,7 @@
 
           <div class="form-group">
                 <label>CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
+                <input type="number" name="cep" id="edit-cep" required/>
               </div>
 
               <div class="form-group">
@@ -207,7 +207,7 @@
             
               <div class="form-group">
                 <label>Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
+                <input type="text" name="bairro" id="edit-bairro"/>
               </div>
 
               <div class="form-group">
@@ -272,7 +272,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h3>Editar Cliente Nº: <span id="edit-customer-id" class="customer-id-display"></span><span class="badge-status" id="edit-status-badge">Ativo</span></h3>
+        <h3>Editar Cliente Nº:<span id="edit-customer-id" class="customer-id-display"></span><span class="badge-status" id="edit-status-badge"></span></h3>
       </div>
       
       <form id="edit-form">
@@ -298,12 +298,12 @@
 
           <div class="form-group">
             <label>Razão Social:</label>
-            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" />
+            <input type="text" name="razao" id="edit-razao" required minlength="1" maxlength="100" required/>
           </div>
 
           <div class="form-group">
             <label>Nome Fantasia:</label>
-            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" />
+            <input type="text" name="fantasia" id="edit-fantasia" required minlength="1" maxlength="100" required/>
           </div>
 
           <div class="form-group">
@@ -326,7 +326,7 @@
 
             <div class="form-group">
                 <label for="edit-cep">CEP:</label>
-                <input type="number" name="cep" id="edit-cep" />
+                <input type="number" name="cep" id="edit-cep" required/>
               </div>
 
               <div class="form-group">
@@ -380,7 +380,7 @@
             
               <div class="form-group">
                 <label for="edit-bairro">Bairro:</label>
-                <input type="text" name="bairro" id="edit-bairro" required />
+                <input type="text" name="bairro" id="edit-bairro"/>
               </div>
 
               <div class="form-group">
@@ -423,8 +423,8 @@
             <div class="form-group">
             <label for="edit-status">Status:</label>
             <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
             </select>
           </div>
 

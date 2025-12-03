@@ -146,7 +146,7 @@ export const deleteSupplierByIdService = async (id: number) => {
 
     const hasPurchases = await supplierRepository.verifySupplierPurchases(id);
     if (hasPurchases) {
-      return badRequest("Fornecedor já possui compras cadastradas no sistema, não é possível excluir.")
+      return badRequest("Este fornecedor já possui compras cadastradas no sistema, não é possível excluir.")
     }
 
     await supplierRepository.deleteSupplierById(id);

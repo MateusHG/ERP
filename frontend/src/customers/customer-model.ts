@@ -20,6 +20,7 @@ export interface customerModel {
   status: 'ativo' | 'inativo';
   data_cadastro: string;
   data_atualizacao: string;
+  has_sales: boolean;
 }
 
 export default customerModel;

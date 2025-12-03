@@ -20,12 +20,12 @@ export const getGeneralDashboard = async (data_inicial: string, data_final: stri
       (SELECT COUNT(*) FROM fornecedores WHERE status = 'ativo') AS fornecedores_ativos,
       (SELECT COUNT(*) FROM fornecedores WHERE status = 'inativo') AS fornecedores_inativos,
       (SELECT COUNT(*) AS fornecedores_novos_mes FROM fornecedores WHERE data_cadastro >= DATE_TRUNC('month', CURRENT_DATE) AND data_cadastro < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')
-      AND status = 'Ativo'),
+      AND status = 'ativo'),
 
       (SELECT COUNT(*) FROM clientes WHERE status = 'ativo') AS clientes_ativos,
       (SELECT COUNT(*) FROM clientes WHERE status = 'inativo') AS clientes_inativos,
       (SELECT COUNT(*) AS clientes_novos_mes FROM clientes WHERE data_cadastro >= DATE_TRUNC('month', CURRENT_DATE) AND data_cadastro < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')
-      AND status = 'Ativo')
+      AND status = 'ativo')
   `;
 
     const values = [data_inicial, data_final];

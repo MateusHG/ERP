@@ -7,7 +7,6 @@ export function lockSupplierFormFields(form: HTMLFormElement, helperMessage: str
 
       if (!field) return;
 
-      // Permite alteração apenas do status
       if (field.name === "status") return;
 
       if (field instanceof HTMLInputElement) {
@@ -28,7 +27,7 @@ export function lockSupplierFormFields(form: HTMLFormElement, helperMessage: str
         return;
       }
     });
-  }
+  };
     
 export function unlockSupplierFormFields(form: HTMLFormElement) {
   const sensitiveNames = ["razao", "cnpj", "iestadual"];
@@ -61,4 +60,4 @@ export function unlockSupplierFormFields(form: HTMLFormElement) {
       return;
     }
   });
-}
+};

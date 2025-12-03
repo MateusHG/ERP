@@ -1,6 +1,6 @@
-// Atualiza o badge de status no modal de edição de fornecedor
+// Atualiza o badge de status do modal de edição 
 
-export function updateSupplierStatusBadge(status: string) {
+export function updateCustomerStatusBadge(status: string) {
   const badge = document.getElementById("edit-status-badge") as HTMLSpanElement;
   if (!badge) return;
 

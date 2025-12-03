@@ -1,9 +1,12 @@
 import { renderCustomersList } from "./customers-dom";
 import { getCustomerByIdAPI, loadCustomersAPI, updateCustomerAPI } from "./customers-service";
-import { formatCnpj, formatPhoneNumber, formatData } from "../utils/formatters";
+import { formatData } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
 import { initTabs } from "../utils/ui-tabs";
+import { attachInputFormatters } from "../utils/input-formatters";
+import { updateCustomerStatusBadge } from "./customer-ui";
+import { lockCustomerFormFields, unlockCustomerFormFields } from "./customer-form-locks";
 
 const customerEditModal = document.getElementById("edit-modal")!;
 initTabs(customerEditModal)
@@ -14,60 +17,12 @@ const cancelBtn = document.getElementById("cancel-edit");
 let currentEditId: number | null = null;
 let originalFormData: Record<string, string> = {};
 
-//Listener para formatação de CNPJ.
-const cnpjInput = form.elements.namedItem("cnpj") as HTMLInputElement | null;
-
-if (cnpjInput) {
-  cnpjInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatCnpj(target.value);
-    
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference;
-  });
-};
-
-//Listener para formatação de número de telefone
-const phoneNumberInput = form.elements.namedItem("telefone") as HTMLInputElement | null;
-const cellNumberInput = form.elements.namedItem("celular") as HTMLInputElement | null;
-
-if (phoneNumberInput) {
-  phoneNumberInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatPhoneNumber(target.value);
-
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference; 
-  });
-}
-
-if (cellNumberInput) {
-  cellNumberInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatPhoneNumber(target.value);
-
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference;
-  });
-};
+// --------------------------------------------------------------------------------------------------
 
 export async function openEditModal(id: number) {
+  
   currentEditId = id;
-
   const customer = await getCustomerByIdAPI(id);
-
   document.getElementById("edit-customer-id")!.textContent = String(customer.id);
 
   (form.elements.namedItem("id") as HTMLInputElement).value = customer.id.toString() || "";
@@ -89,6 +44,14 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(customer.data_cadastro);
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(customer.data_atualizacao);
 
+  updateCustomerStatusBadge(customer.status);
+  attachInputFormatters(form);
+
+  if (customer.has_sales) {
+    lockCustomerFormFields(form, "Este cliente já possui movimentações de venda e não pode ter dados sensíveis alterados.");
+  } else {
+    unlockCustomerFormFields(form);
+  }
   
   customerEditModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
@@ -109,25 +72,22 @@ form.addEventListener("submit", async (event) => {
 
   const formData = new FormData(form);
 
-  const updatedCustomerData = {
-    razao_social: formData.get("razao")?.toString().trim() || "",
-    nome_fantasia: formData.get("fantasia")?.toString().trim() || "",
-    cnpj: formData.get("cnpj")?.toString().trim() || "",
-    inscricao_estadual: formData.get("iestadual")?.toString().trim() || "",
-    telefone: formData.get("telefone")?.toString().trim() || "",
-    celular: formData.get("celular")?.toString().trim() || "",
-    email: formData.get("email")?.toString().trim() || "",
-    status: formData.get("status")?.toString().trim() || "Ativo",
-    cep: formData.get("cep")?.toString().trim() || "",
-    uf: formData.get("uf")?.toString().trim() || "",
-    rua: formData.get("rua")?.toString().trim() || "",
-    numero: formData.get("numero")?.toString().trim() || "",
-    complemento: formData.get("complemento")?.toString().trim() || "",
-    bairro: formData.get("bairro")?.toString().trim() || "",
-    cidade: formData.get("cidade")?.toString().trim() || "",
-    data_cadastro: formData.get("data_cadastro")?.toString().trim() || "",
-    data_atualizacao: formData.get("data_atualizacao")?.toString().trim() || "",
-  };
+  // Filtra apenas os campos que não estão bloqueados(readOnly ou disabled)
+  const updatedCustomerData: Record<string, string> = {};
+
+  Array.from(form.elements).forEach((el) => {
+    if (!(el instanceof HTMLInputElement) || (el instanceof HTMLSelectElement && el.disabled)) return;
+    const name = el.name;
+    if (!name) return;
+
+    //Ignora os campos bloqueados
+    if ((el instanceof HTMLInputElement && el.readOnly) || (el instanceof HTMLSelectElement && el.disabled)) return;
+
+    updatedCustomerData[name] = formData.get(name)?.toString().trim() || "";
+
+    const statusField = formData.get("status")?.toString().trim() || "Ativo";
+    updatedCustomerData["status"] = statusField;
+  })
 
   try {
     const response = await updateCustomerAPI(currentEditId, updatedCustomerData);

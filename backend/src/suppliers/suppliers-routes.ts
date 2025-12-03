@@ -14,6 +14,6 @@ suppliersRouter.post("/", postSupplier);
 
 suppliersRouter.patch("/:id", patchSupplierById);
 
-suppliersRouter.delete("/:id" ,deleteSupplierById);
+suppliersRouter.delete("/:id" , deleteSupplierById);
 
 export default suppliersRouter;

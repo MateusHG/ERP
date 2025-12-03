@@ -1,6 +1,6 @@
 import supplierModel from "./customer-model";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
-import { formatCnpj, formatData } from "../utils/formatters";
+import { capitalize, formatCnpj } from "../utils/formatters";
 
 //Navegação entre os módulos
 window.addEventListener('DOMContentLoaded', () => {
@@ -31,7 +31,7 @@ export function renderCustomersList(customers: supplierModel[]): void {
     tr.appendChild(textCell(customer.telefone));
     tr.appendChild(textCell(customer.email));
     tr.appendChild(textCell(customer.uf));
-    tr.appendChild(textCell(customer.status));
+    tr.appendChild(textCell(capitalize(customer.status)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
@@ -45,8 +45,17 @@ export function renderCustomersList(customers: supplierModel[]): void {
     const btnDelete = document.createElement("button");
     btnDelete.dataset.id = customer.id.toString();
     btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Editar" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar este cliente"
-    btnDelete.className = "btn-delete";
+
+    if (customer.has_sales) {
+      // Bloqueado se cliente já tem vendas cadastradas
+      btnDelete.className = "btn-delete disabled-delete";
+      btnDelete.disabled = true;
+      btnDelete.title = "Este cliente já possui vendas cadastradas e não pode ser excluído.";
+      
+    } else {
+      btnDelete.className = "btn-delete";
+      btnDelete.title = "Clique para deletar este cliente";
+    }
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);
