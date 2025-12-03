@@ -42,11 +42,21 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
     btnEdit.innerHTML = `<img src="/erpicons/edit.svg" alt="Editar Fornecedor" class="icon-btn" />`;
     btnEdit.title = "Clique para editar este fornecedor"
 
+
     const btnDelete = document.createElement("button");
-    btnDelete.className = "btn-delete";
     btnDelete.dataset.id = supplier.id.toString();
     btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Deletar Fornecedor" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar este fornecedor"
+
+    if (supplier.has_purchases) {
+      //Bloqueado se já movimentou compras
+      btnDelete.className = "btn-delete disabled-delete";
+      btnDelete.disabled = true;
+      btnDelete.title = "Este fornecedor possui compras cadastradas e não pode ser excluído."
+    } else {
+      // Liberado
+      btnDelete.className = "btn-delete";
+      btnDelete.title = "Clique para deletar este fornecedor"
+    }
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

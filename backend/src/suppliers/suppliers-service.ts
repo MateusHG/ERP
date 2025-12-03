@@ -36,8 +36,8 @@ export const getSupplierByIdService = async (id: number) => {
 
 export const createSupplierService = async (supplier: Omit<supplierModel, 'id' | 'data_cadastro' | 'data_atualizacao'>) => {
   try {
-    if (!supplier.razao_social || !supplier.nome_fantasia || !supplier.cnpj || !supplier.email || !supplier.status) {
-      return badRequest('Campos obrigatórios estão ausentes: razão social, nome fantasia, cnpj, email ou status');
+    if (!supplier.razao_social || !supplier.nome_fantasia || !supplier.cnpj || !supplier.status) {
+      return badRequest('Campos obrigatórios estão ausentes: Razão Social, Nome Fantasia, CNPJ ou Status');
     }
 
     const nomeAlreadyExists = await supplierRepository.verifyNomeFantasia(supplier.nome_fantasia);
@@ -73,6 +73,22 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
   try {
     if (Object.keys(data).length === 0) {
       return badRequest('Nenhum campo enviado para atualização.');
+    }
+
+    const supplier = await supplierRepository.searchSupplierById(id);
+    if (!supplier) {
+      return notFound("Fornecedor não encontrado.");
+    }
+
+    // Se já houve compras com o fornecedor que está sendo alterado, bloqueia dados sensíveis
+    if (supplier.has_purchases) {
+      const lockedFields = ["razao_social", "cnpj", "inscricao_estadual"];
+
+      for (const field of lockedFields) {
+        if (field in data) {
+          return badRequest(`O campo '${field}' não pode ser alterado pois o fornecedor já possui movimentações de compra.`)
+        }
+      }
     }
 
     if (data.nome_fantasia) {
@@ -119,12 +135,23 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
 
 export const deleteSupplierByIdService = async (id: number) => {
   try {
-  const deleted = await supplierRepository.deleteSupplierById(id);
+    if (isNaN(id)) {
+      return badRequest("ID Inválido.");
+    }
 
-  if (!deleted) {
-    return notFound('ID Não encontrado.')
-}
-  return ok({ message: 'Fornecedor deletado com sucesso.'});
+    const supplier = await supplierRepository.searchSupplierById(id);
+    if (!supplier) {
+      return badRequest("Fornecedor não encontrado.");
+    }
+
+    const hasPurchases = await supplierRepository.verifySupplierPurchases(id);
+    if (hasPurchases) {
+      return badRequest("Fornecedor já possui compras cadastradas no sistema, não é possível excluir.")
+    }
+
+    await supplierRepository.deleteSupplierById(id);
+
+    return ok({ message: 'Fornecedor deletado com sucesso.'});
 
 }  catch (err) {
    console.error(err);

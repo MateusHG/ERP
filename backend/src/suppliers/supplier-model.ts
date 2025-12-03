@@ -19,4 +19,5 @@ export interface supplierModel {
   status: 'ativo' | 'inativo';
   data_cadastro: Date;
   data_atualizacao: Date;
+  has_purchases: boolean; // Retorna um boolean para o front-end saber se o fornecedor já possui compras movimentadas, e poder bloquear exclusão do cadastro ou edição de dados sensíveis.
 }

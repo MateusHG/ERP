@@ -1,71 +1,23 @@
 import { renderSuppliersList } from "./suppliers-dom";
 import { loadSuppliersAPI, postSupplierAPI } from "./suppliers-service";
-import { formatCnpj, formatPhoneNumber } from "../utils/formatters";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
 import { showConfirm, showMessage } from "../utils/messages";
 import { initTabs } from "../utils/ui-tabs";
+import { attachInputFormatters } from "../utils/input-formatters";
 
 const newSupplierModal = document.getElementById("new-supplier-modal")!;
 initTabs(newSupplierModal);
 
 const form = document.getElementById("new-supplier-form") as HTMLFormElement;
-const submitBtn = document.getElementById("submit-new-supplier")!;
 const cancelBtn = document.getElementById("cancel-new-supplier")!;
 
 let originalFormData: Record<string, string> = {};
 
-//Listener para formatação de CNPJ.
-const cnpjInput = form.elements.namedItem("cnpj") as HTMLInputElement | null;
+// --------------------------------------------------------------------------------------------------
 
-if (cnpjInput) {
-  cnpjInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatCnpj(target.value);
-    
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference;
-  });
-};
-
-//Listener para formatação de número de telefone
-const phoneNumberInput = form.elements.namedItem("telefone") as HTMLInputElement | null;
-const cellNumberInput = form.elements.namedItem("celular") as HTMLInputElement | null;
-
-if (phoneNumberInput) {
-  phoneNumberInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatPhoneNumber(target.value);
-
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference; 
-  });
-}
-
-if (cellNumberInput) {
-  cellNumberInput.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-    const oldLength = target.value.length;
-
-    target.value = formatPhoneNumber(target.value);
-
-    const newLength = target.value.length;
-    const difference = newLength - oldLength;
-    target.selectionStart = target.selectionEnd = cursorPosition + difference;
-  });
-};
-
-// Abre o modal com os campos vazios;
-export function openNewSupplierModal() {
-  form.reset(); // Reseta os campos do formulário.
+export async function openNewSupplierModal() {
+  form.reset();
+  attachInputFormatters(form);
   newSupplierModal.classList.remove("hidden");
   originalFormData = getFormDataSnapshot(form);
 }

@@ -17,13 +17,13 @@ export const getGeneralDashboard = async (data_inicial: string, data_final: stri
       (SELECT COUNT(*) AS produtos_estoque_medio FROM produtos p INNER JOIN estoque_saldo es ON p.id = es.produto_id WHERE es.quantidade BETWEEN p.estoque_minimo AND p.estoque_maximo),
       (SELECT COUNT(*) AS produtos_estoque_alto FROM produtos p INNER JOIN estoque_saldo es ON p.id = es.produto_id WHERE es.quantidade > p.estoque_maximo),
 
-      (SELECT COUNT(*) FROM fornecedores WHERE status = 'Ativo') AS fornecedores_ativos,
-      (SELECT COUNT(*) FROM fornecedores WHERE status = 'Inativo') AS fornecedores_inativos,
+      (SELECT COUNT(*) FROM fornecedores WHERE status = 'ativo') AS fornecedores_ativos,
+      (SELECT COUNT(*) FROM fornecedores WHERE status = 'inativo') AS fornecedores_inativos,
       (SELECT COUNT(*) AS fornecedores_novos_mes FROM fornecedores WHERE data_cadastro >= DATE_TRUNC('month', CURRENT_DATE) AND data_cadastro < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')
       AND status = 'Ativo'),
 
-      (SELECT COUNT(*) FROM clientes WHERE status = 'Ativo') AS clientes_ativos,
-      (SELECT COUNT(*) FROM clientes WHERE status = 'Inativo') AS clientes_inativos,
+      (SELECT COUNT(*) FROM clientes WHERE status = 'ativo') AS clientes_ativos,
+      (SELECT COUNT(*) FROM clientes WHERE status = 'inativo') AS clientes_inativos,
       (SELECT COUNT(*) AS clientes_novos_mes FROM clientes WHERE data_cadastro >= DATE_TRUNC('month', CURRENT_DATE) AND data_cadastro < DATE_TRUNC('month', CURRENT_DATE + INTERVAL '1 month')
       AND status = 'Ativo')
   `;

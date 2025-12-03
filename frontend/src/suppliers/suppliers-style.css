@@ -387,7 +387,8 @@ body {
 
 
 /* Deixa "apagado" os campos que não são editáveis na edição do produto (id, data de cadastro e atualização). */
-input[readonly] {
+input[readonly],
+input.field-locked {
   background-color: #f5f5f5;
   color: #555;
   cursor: not-allowed;
@@ -646,6 +647,12 @@ input[readonly] {
   border: none;
   padding: 4px;
   cursor: pointer;
+}
+
+.disabled-delete {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(1);
 }
 
 .icon-btn {

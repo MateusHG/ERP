@@ -4,7 +4,7 @@ import { supplierModel } from "../suppliers/supplier-model";
 export const searchAllSuppliers = async (
   filters: { id?: number, nome_fantasia?: string, razao_social?: string, cnpj?: string, email?: string, status?: string, limit?: number, orderBy?: string }):
    Promise<supplierModel[]> => {
-  let query = `SELECT * FROM fornecedores`;
+  let query = `SELECT f.*, EXISTS(SELECT 1 FROM compras c WHERE c.fornecedor_id = f.id) AS has_purchases FROM fornecedores f`;
   const conditions: string[] = [];
   const values: any[] = [];
 
@@ -62,8 +62,8 @@ export const searchAllSuppliers = async (
 
 
 export const searchSupplierById = async (id: number): Promise<supplierModel | null > => {
-  const result = await db.query(`SELECT * FROM fornecedores where id = $1`, [id]);
-  return result.rows[0];
+  const result = await db.query(`SELECT f.*, EXISTS (SELECT 1 FROM compras c WHERE c.fornecedor_id = f.id) AS has_purchases FROM fornecedores f WHERE f.id = $1`, [id]);
+  return result.rows[0] || null;
 };
 
 export const insertSupplier = async (supplier: Omit<supplierModel, 'id' | 'data_cadastro'| 'data_atualizacao'>): Promise<supplierModel> => {
@@ -104,7 +104,7 @@ export const verifyCnpj = async (cnpj: string): Promise<supplierModel | null> =>
 };
 
 export const verifyEmail = async (email: string): Promise<supplierModel | null> => {
-  const result = await db.query(`SELECT * FROM fornecedores where email = $1 limit 1`,
+  const result = await db.query(`SELECT * FROM fornecedores WHERE email = $1 limit 1`,
     [email]
   );
 
@@ -125,6 +125,11 @@ export const updateSupplier = async (id: number, fieldsToUpdate: Partial<supplie
 };
 
 export const deleteSupplierById = async (id:number): Promise<boolean> => {
-  const result = await db.query(`DELETE FROM fornecedores where id = $1`, [id]);
+  const result = await db.query(`DELETE FROM fornecedores WHERE id = $1`, [id]);
   return result.rowCount> 0;
+};
+
+export const verifySupplierPurchases = async (id: number): Promise<boolean> => {
+  const result = await db.query(`SELECT * FROM compras WHERE fornecedor_id = $1 LIMIT 1`, [id]);
+  return result.rowCount > 0;
 };

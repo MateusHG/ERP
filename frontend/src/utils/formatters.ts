@@ -118,7 +118,6 @@ function applyCurrencyMask(input: HTMLInputElement) {
 
 
 // Inicializa os inputs para aplicar máscara no evento 'input'
-// Inicializa os inputs para aplicar máscara no evento 'input'
 export function setupCurrencyInputs(): void {
   const currencyInputs = document.querySelectorAll<HTMLInputElement>(
     "#desconto-itens, #descontos-totais, #valor-bruto, #valor-total, \
@@ -278,6 +277,19 @@ export function formatCnpj(value: string): string {
     .replace(/(\d{4})(\d)/, "$1-$2");
 };
 
+// Formatação de CEP: 00000-000
+export function formatCep(value: string): string {
+  // Remove tudo que não for número
+  const digits = value.replace(/\D/g, "").slice(0, 8); // CEP tem 8 dígitos
+
+  // Aplica a máscara
+  if (digits.length > 5) {
+    return digits.replace(/^(\d{5})(\d{1,3})$/, "$1-$2");
+  }
+
+  return digits;
+};
+
 
 // Formatters para movimentações do inventory(estoque)
 export function capitalize(str: string) {
@@ -289,12 +301,4 @@ export function safeLabel(map: Record<string, string>, key: unknown) {
   if (!key && key !== 0) return "-";
   const k = String(key);
   return map[k] ?? capitalize(k);
-};
-
-export function formatOrigemWithRef(origem: any, referencia_id: any) {
-  const base = safeLabel(origemMovLabels, origem);
-  if (referencia_id || referencia_id === 0) {
-    return `${base} Nº #${referencia_id}`;
-  }
-  return base;
 };
