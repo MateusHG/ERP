@@ -36,8 +36,8 @@ export const getSupplierByIdService = async (id: number) => {
 
 export const createSupplierService = async (supplier: Omit<supplierModel, 'id' | 'data_cadastro' | 'data_atualizacao'>) => {
   try {
-    if (!supplier.razao_social || !supplier.nome_fantasia || !supplier.cnpj || !supplier.status) {
-      return badRequest('Campos obrigatórios estão ausentes: Razão Social, Nome Fantasia, CNPJ ou Status');
+    if (!supplier.razao_social || !supplier.nome_fantasia || !supplier.cnpj || !supplier.cep || !supplier.status) {
+      return badRequest('Campos obrigatórios estão ausentes: Razão Social, Nome Fantasia, CNPJ , CEP ou Status');
     }
 
     const nomeAlreadyExists = await supplierRepository.verifyNomeFantasia(supplier.nome_fantasia);
