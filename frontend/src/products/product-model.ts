@@ -10,6 +10,7 @@ interface productModel {
   estoque_maximo: number;
   data_cadastro: string;
   data_atualizacao: string;
+  has_movements: boolean;
 }
 
 export default productModel;

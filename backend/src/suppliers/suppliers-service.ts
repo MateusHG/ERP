@@ -82,7 +82,7 @@ export const updateSupplierByIdService = async (id: number, data: Partial<suppli
 
     // Se já houve compras com o fornecedor que está sendo alterado, bloqueia dados sensíveis
     if (supplier.has_purchases) {
-      const lockedFields = ["razao_social", "cnpj", "inscricao_estadual"];
+      const lockedFields = ["id", "razao_social", "cnpj", "inscricao_estadual"];
 
       for (const field of lockedFields) {
         if (field in data) {

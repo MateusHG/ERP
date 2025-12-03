@@ -51,8 +51,8 @@
       <input type="text" id="filtro-categoria" placeholder="Buscar por categoria...">
       <select id="filtro-status">
         <option value="">Todos</option>
-        <option value="Ativo">Ativo</option>
-        <option value="Inativo">Inativo</option>
+        <option value="ativo">Ativo</option>
+        <option value="inativo">Inativo</option>
       </select>
     </div>
     </div>
@@ -65,69 +65,84 @@
 
   <main>
       <!-- Modal: Novo Produto -->
-      <div id="new-product-modal" class="modal hidden">
-        <div class="modal-content">
+<div id="new-product-modal" class="modal hidden">
+  <div class="modal-content">
 
-          <div class="modal-header">
-            <h3 class="modal-title">
-              <img src="/erpicons/products.svg" alt="Novo Produto" class="modal-title-icon">Novo Produto</h3>
-          </div>
-          
-          <form id="new-product-form">
-
-            <div class="form-fields">
-              <div class="form-group">
-                <label for="new-codigo">Código:</label>
-                <input type="text" name="codigo" id="new-codigo" minlength="1" maxlength="11" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-nome">Nome:</label>
-                <input type="text" name="nome" id="new-nome" minlength="1" maxlength="100" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-descricao">Descrição:</label>
-                <input type="text" name="descricao" id="new-descricao" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-preco">Preço:</label>
-                <input type="text" name="preco" id="new-preco" min="0" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-categoria">Categoria:</label>
-                <input type="text" name="categoria" id="new-categoria" minlength="1" maxlength="50" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-status">Status:</label>
-                <select name="status" id="new-status" required>
-                  <option value="Ativo">Ativo</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="new-estoque-min">Estoque Mínimo:</label>
-                <input type="number" name="estoque_min" id="new-estoque-min" min="0" required />
-              </div>
-
-              <div class="form-group">
-                <label for="new-estoque-max">Estoque Máximo:</label>
-                <input type="number" name="estoque_max" id="new-estoque-max" min="0" required />
-              </div>
-            </div>
-
-            <div class="modal-buttons">
-              <button type="submit" id="submit-new-product">Salvar</button>
-              <button type="button" id="cancel-new-product">Cancelar</button>
-            </div>
-          </form>
-        </div> <!-- Fecha modal-content -->
-      </div> <!-- Fecha new-product-modal -->
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <img src="/erpicons/products.svg" alt="Novo Produto" class="modal-title-icon">
+        Novo Produto
+      </h3>
     </div>
+
+    <!-- NAV DAS ABAS -->
+    <div class="tabs">
+      <button class="tab active" data-tab="tab-gerais">Dados Gerais</button>
+      <button class="tab" data-tab="tab-estoque">Estoque</button>
+    </div>
+
+    <form id="new-product-form">
+
+      <!-- ABA: DADOS GERAIS -->
+      <div id="tab-gerais" class="tab-content active">
+        <div class="form-fields">
+          <div class="form-group">
+            <label for="new-codigo">Código:</label>
+            <input type="text" name="codigo" id="new-codigo" minlength="1" maxlength="11" required />
+          </div>
+
+          <div class="form-group">
+            <label for="new-nome">Nome:</label>
+            <input type="text" name="nome" id="new-nome" minlength="1" maxlength="100" required />
+          </div>
+
+          <div class="form-group">
+            <label for="new-categoria">Categoria:</label>
+            <input type="text" name="categoria" id="new-categoria" minlength="1" maxlength="50" required />
+          </div>
+
+          <div class="form-group">
+            <label for="new-status">Status:</label>
+            <select name="status" id="new-status" required>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+
+          <div class="form-group textarea-full">
+            <label for="new-descricao">Descrição:</label>
+            <textarea name="descricao" id="new-descricao" placeholder="Digite uma descrição do produto..." rows="4" required></textarea>
+            <small id="desc-count">0 / 500</small>
+          </div>
+
+        </div> <!-- Fecha form-fields da aba gerais -->
+      </div> <!-- Fecha tab-gerais -->
+
+      <!-- ABA: ESTOQUE -->
+      <div id="tab-estoque" class="tab-content">
+        <div class="form-fields">
+          <div class="form-group">
+            <label for="new-estoque-min">Estoque Mínimo:</label>
+            <input type="number" name="estoque_min" id="new-estoque-min" min="0" required />
+          </div>
+
+          <div class="form-group">
+            <label for="new-estoque-max">Estoque Máximo:</label>
+            <input type="number" name="estoque_max" id="new-estoque-max" min="0" required />
+          </div>
+        </div> <!-- Fecha form-fields da aba estoque -->
+      </div> <!-- Fecha tab-estoque -->
+
+      <!-- BOTÕES DO MODAL -->
+      <div class="modal-buttons">
+        <button type="submit" id="submit-new-product">Salvar</button>
+        <button type="button" id="cancel-new-product">Cancelar</button>
+      </div>
+
+    </form>
+  </div> <!-- Fecha modal-content -->
+</div> <!-- Fecha new-product-modal -->
+
 
     <table id="products-table">
       <thead>
@@ -169,16 +184,30 @@
   </div>
 
   <!-- Modal: Editar Produto -->
-  <div id="edit-modal" class="modal hidden">
-    <div class="modal-content">
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-content">
 
-      <div class="modal-header">
-        <h3>Editar Produto Nº: <span id="edit-product-id" class="product-id-display"></span><span class="badge-status" id="edit-status-badge">Ativo</span></h3>
+    <div class="modal-header">
+      <h3 class="modal-title">
+        Editar Produto Nº: 
+        <span id="edit-product-id" class="product-id-display"></span>
+        <span class="badge-status" id="edit-status-badge"></span>
+      </h3>
+    </div>
+
+    <form id="edit-form">
+
+      <!-- NAV DAS ABAS -->
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="edit-tab-geral">Dados Gerais</button>
+        <button type="button" class="tab" data-tab="edit-tab-estoque">Estoque</button>
+        <button type="button" class="tab" data-tab="edit-tab-sistema">Sistema</button>
       </div>
-      
-      <form id="edit-form">
-        
+
+      <!-- TAB: GERAL -->
+      <div id="edit-tab-geral" class="tab-content active">
         <div class="form-fields">
+
           <div class="form-group">
             <label for="edit-id">ID:</label>
             <input type="number" name="id" id="edit-id" readonly />
@@ -195,22 +224,22 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-descricao">Descrição:</label>
-            <input type="text" name="descricao" id="edit-descricao" required />
-          </div>
-          
-          <div class="form-group">
             <label for="edit-categoria">Categoria:</label>
             <input type="text" name="categoria" id="edit-categoria" required minlength="1" maxlength="50" />
           </div>
 
-          <div class="form-group">
-            <label for="edit-status">Status:</label>
-            <select name="status" id="edit-status" required >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-            </select>
+          <div class="form-group textarea-full">
+            <label for="edit-descricao">Descrição:</label>
+            <textarea name="descricao" id="edit-descricao" placeholder="Digite uma descrição do produto..." rows="4"></textarea>
+            <small id="edit-desc-count">0 / 500</small>
           </div>
+
+        </div>
+      </div>
+
+      <!-- TAB: ESTOQUE -->
+      <div id="edit-tab-estoque" class="tab-content">
+        <div class="form-fields">
 
           <div class="form-group">
             <label for="edit-estoque-min">Estoque Mínimo:</label>
@@ -222,6 +251,21 @@
             <input type="number" name="estoque_max" id="edit-estoque-max" required min="0" />
           </div>
 
+        </div>
+      </div>
+
+      <!-- TAB: SISTEMA -->
+      <div id="edit-tab-sistema" class="tab-content">
+        <div class="form-fields">
+
+          <div class="form-group">
+            <label for="edit-status">Status:</label>
+            <select name="status" id="edit-status" required>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+
           <div class="form-group">
             <label for="edit-data-cadastro">Data de Cadastro:</label>
             <input type="text" name="data_cadastro" id="edit-data-cadastro" readonly />
@@ -231,15 +275,21 @@
             <label for="edit-data-atualizacao">Data Última Atualização:</label>
             <input type="text" name="data_atualizacao" id="edit-data-atualizacao" readonly />
           </div>
-        </div>
 
-        <div class="modal-buttons">
-          <button type="submit" id="submit-edit">Salvar</button>
-          <button type="button" id="cancel-edit">Cancelar</button>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <!-- BOTÕES -->
+      <div class="modal-buttons">
+        <button type="submit" id="submit-edit">Salvar</button>
+        <button type="button" id="cancel-edit">Cancelar</button>
+      </div>
+
+    </form>
+
   </div>
+</div>
+
 
   <script type="module" src="./script.ts"></script>
 </body>

@@ -1,5 +1,6 @@
 import productModel from "./product-model";
 import { initHeaderData, initLogout, initNavigation } from "../utils/navigation";
+import { capitalize } from "../utils/formatters";
 
 window.addEventListener('DOMContentLoaded', () => {
   initNavigation();
@@ -32,7 +33,7 @@ export function renderProductsList(products: productModel[]): void {
     tr.appendChild(textCell(product.categoria));
     tr.appendChild(textCell(product.estoque_minimo));
     tr.appendChild(textCell(product.estoque_maximo));
-    tr.appendChild(textCell(product.status));
+    tr.appendChild(textCell(capitalize(product.status)));
 
     const tdActions = document.createElement("td");
     tdActions.className = "actions";
@@ -44,10 +45,18 @@ export function renderProductsList(products: productModel[]): void {
     btnEdit.title = "Clique para editar este produto"
 
     const btnDelete = document.createElement("button");
-    btnDelete.className = "btn-delete";
     btnDelete.dataset.id = product.id.toString();
     btnDelete.innerHTML = `<img src="/erpicons/delete.svg" alt="Deletar Produto" class="icon-btn" />`;
-    btnDelete.title = "Clique para deletar este produto"
+
+    if (product.has_movements) {
+      //Bloqueado deletar se já movimentou no sistema.
+      btnDelete.className = "btn-delete disabled-delete";
+      btnDelete.disabled = true;
+      btnDelete.title = "Este produto já foi movimentado no sistema e não pode ser excluído.";
+    } else {
+      btnDelete.className = "btn-delete";
+      btnDelete.title = "Clique para deletar este produto.";
+    }
 
     tdActions.appendChild(btnEdit);
     tdActions.appendChild(btnDelete);

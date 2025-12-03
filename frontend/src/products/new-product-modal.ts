@@ -3,14 +3,20 @@ import { renderProductsList } from "./product-dom";
 import { loadProductsAPI, postProductAPI } from "./product-service";
 import { showConfirm, showMessage } from "../utils/messages";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
+import { initTabs } from "../utils/ui-tabs";
+import { initCharCounter } from "../utils/forms";
 
 //Elementos
 const newProductModal = document.getElementById("new-product-modal")!;
 const form = document.getElementById("new-product-form") as HTMLFormElement;
-const submitBtn = document.getElementById("submit-new-product")!;
 const cancelBtn = document.getElementById("cancel-new-product")!;
 
 let originalFormData: Record<string, string> = {};
+
+initTabs(newProductModal);
+initCharCounter('new-descricao', 'desc-count', 500);
+
+// ----------------------------------------------------------------------------------------------- //
 
 // Abre o modal com os campos vazios.
 export function openNewProductModal() {

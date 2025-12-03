@@ -51,11 +51,11 @@ export function renderSuppliersList(suppliers: supplierModel[]): void {
       //Bloqueado se já movimentou compras
       btnDelete.className = "btn-delete disabled-delete";
       btnDelete.disabled = true;
-      btnDelete.title = "Este fornecedor possui compras cadastradas e não pode ser excluído."
+      btnDelete.title = "Este fornecedor possui compras cadastradas e não pode ser excluído.";
     } else {
       // Liberado
       btnDelete.className = "btn-delete";
-      btnDelete.title = "Clique para deletar este fornecedor"
+      btnDelete.title = "Clique para deletar este fornecedor";
     }
 
     tdActions.appendChild(btnEdit);

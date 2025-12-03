@@ -3,11 +3,11 @@ export interface productModel {
   codigo: string;
   nome: string;
   descricao: string;
-  preco: number;
   categoria: string;
   status: string;
   estoque_minimo: number;
   estoque_maximo: number;
   data_cadastro: Date;
   data_atualizacao: Date;
+  has_movements: boolean;
 }

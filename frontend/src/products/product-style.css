@@ -64,12 +64,6 @@ body {
   opacity: 0.9;
 }
 
-.breadcrumb {
-  margin-top: 2px;
-  font-size: 12px;
-  opacity: 0.8;
-}
-
 .header-right {
   display: flex;
   flex-direction: column;
@@ -312,8 +306,8 @@ body {
   background: white;
   padding: 24px;
   border-radius: 12px;
-  width: 30%;
-  max-width: 90%;
+  width: 35%;
+  max-width: 100%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
 }
 
@@ -332,23 +326,24 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: start; /* alinha o topo dos campos */
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  min-height: 50px;
+  width: 100%; /* garante que preencha a coluna */
 }
 
 .form-group label {
   font-weight: 600;
   margin-bottom: 4px;
-  margin-left: 2px;
 }
 
 .form-group input, 
-.form-group select {
-  width: 100%;
+.form-group select,
+.form-group textarea {
+  width: 100%; /* acompanha a largura da coluna */
   padding: 8px;
   font-size: 14px;
   box-sizing: border-box;
@@ -356,6 +351,22 @@ body {
   border-radius: 6px;
 }
 
+.form-group.textarea-full {
+  grid-column: 1 / -1; /* ocupa todas as colunas do grid */
+}
+
+/* Textarea específico */
+.form-group textarea {
+  min-height: 100px; /* altura inicial */
+  resize: vertical;   /* permite redimensionar verticalmente */
+}
+
+.form-group small {
+  text-align: right;
+  color: #555;
+  font-size: 12px;
+  margin-top: 2px;
+}
 
 /* Deixa "apagado" os campos que não são editáveis na edição do produto (id, data de cadastro e atualização). */
 input[readonly] {
@@ -380,11 +391,6 @@ input[readonly] {
 
 #new-product-modal.hidden {
   display: none;
-}
-
-#new-product-form {
-  display: flex;
-  flex-direction: column;
 }
 
 #submit-new-product {
@@ -440,6 +446,41 @@ input[readonly] {
   margin-bottom: 15px;
 }
 
+/* Base do badge */
+.badge-status {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  display: inline-block;
+  line-height: 1;
+  border: 1px solid transparent;
+  /* Efeito visual suave */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ===========================
+   BADGE: ATIVO
+   Estilo TOTVS / Omie
+   =========================== */
+.badge-active {
+  background: #e0f7e9;      /* suave */
+  color: #1b8f3f;           /* verde forte */
+  border-color: #78d39a;    /* borda verde suave */
+}
+
+/* ===========================
+   BADGE: INATIVO
+   Estilo Bling / Omie
+   =========================== */
+.badge-inactive {
+  background: #fdecea;      /* vermelho claro */
+  color: #d93025;           /* vermelho forte */
+  border-color: #f6a5a3;    /* borda suave */
+}
+
 /* Título com ícone */
 .modal-title {
   display: flex;
@@ -457,15 +498,6 @@ input[readonly] {
   object-fit: contain;
   display: block;
   stroke: #333;
-}
-/* Badge de status */
-.badge-status {
-  margin-left: 14px;
-  font-size: 13px;
-  color: #fff;
-  background: #2d88ff;
-  padding: 3px 10px;
-  border-radius: 6px;
 }
 
 /* Título de seção */
@@ -613,9 +645,16 @@ input[readonly] {
   cursor: pointer;
 }
 
+.disabled-delete {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(1);
+}
+
 .icon-btn {
   width: 22px;
   height: 22px;
   vertical-align: middle;
   fill: currentColor; /* se SVG usar stroke/fill = currentColor */
 }
+

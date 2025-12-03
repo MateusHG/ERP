@@ -3,25 +3,33 @@ import { getProductByIdAPI, loadProductsAPI, updateProductAPI } from "./product-
 import { formatData } from "../utils/formatters";
 import { showConfirm, showMessage } from "../utils/messages";
 import { getFormDataSnapshot, isFormChanged } from "../utils/validations";
+import { initTabs } from "../utils/ui-tabs";
+import { initCharCounter } from "../utils/forms";
+import { updateProductStatusBadge } from "./product-ui";
+import { lockProductFormFields, unlockProductFormFields } from "./product-form-locks";
 
-const modal = document.getElementById("edit-modal")!;
+const editProductModal = document.getElementById("edit-modal")!;
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit")!;
 
 let currentEditId: number | null = null;
 let originalFormData: Record<string, string> = {};
 
+// --------------------------------------------------------------------------------------------------
+
 export async function openEditModal(id: number) {
+
   currentEditId = id;
-
   const product = await getProductByIdAPI(id);
-
   document.getElementById("edit-product-id")!.textContent = String(product.id);
 
   (form.elements.namedItem("id") as HTMLInputElement).value = product.id.toString();
   (form.elements.namedItem("codigo") as HTMLInputElement).value = product.codigo;
   (form.elements.namedItem("nome") as HTMLInputElement).value = product.nome;
-  (form.elements.namedItem("descricao") as HTMLInputElement).value = product.descricao;
+
+  const desc = document.getElementById('edit-descricao') as HTMLTextAreaElement;
+  desc.value = product.descricao ?? "";
+
   (form.elements.namedItem("categoria") as HTMLInputElement).value = product.categoria;
   (form.elements.namedItem("status") as HTMLInputElement).value = product.status;
   (form.elements.namedItem("estoque_min") as HTMLInputElement).value = product.estoque_minimo.toString();
@@ -29,8 +37,18 @@ export async function openEditModal(id: number) {
   (form.elements.namedItem("data_cadastro") as HTMLInputElement).value = formatData(product.data_cadastro);
   (form.elements.namedItem("data_atualizacao") as HTMLInputElement).value = formatData(product.data_atualizacao);
   
+  updateProductStatusBadge(product.status);
+  initTabs(editProductModal);
 
-  modal.classList.remove("hidden");
+  editProductModal.classList.remove("hidden");
+  initCharCounter('edit-descricao', 'edit-desc-count', 500);
+  
+  if (product.has_movements) {
+    lockProductFormFields(form, "Este produto já possui movimentações no sistema e não pode ter o código alterado.");
+  } else {
+    unlockProductFormFields(form);
+  }
+
   originalFormData = getFormDataSnapshot(form);
 }
 
@@ -41,7 +59,7 @@ cancelBtn.addEventListener("click", async () => {
     if (!confirmed) return;
 
   }
-  modal.classList.add("hidden");
+  editProductModal.classList.add("hidden");
   currentEditId = null;
 });
 
@@ -66,7 +84,7 @@ form.addEventListener("submit", async (event) => {
     const response = await updateProductAPI(currentEditId, updatedProductData);
     showMessage(response.message);
 
-    modal.classList.add("hidden"); // Fecha o modal de edição.
+    editProductModal.classList.add("hidden"); // Fecha o modal de edição.
 
     renderProductsList(await loadProductsAPI()); //Recarrega os produtos.
     

@@ -9,10 +9,10 @@ import { attachInputFormatters } from "../utils/input-formatters";
 import { updateSupplierStatusBadge } from "./supplier-ui";
 
 const supplierEditModal = document.getElementById("edit-modal")!;
-initTabs(supplierEditModal);
-
 const form = document.getElementById("edit-form") as HTMLFormElement;
 const cancelBtn = document.getElementById("cancel-edit");
+
+initTabs(supplierEditModal);
 
 let currentEditId: number | null = null;
 let originalFormData: Record<string, string> = {};

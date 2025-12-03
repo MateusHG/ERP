@@ -18,13 +18,6 @@ export const getProducts = async (req: Request, res: Response) => {
 //GET pelo ID
 export const getProductsById = async (req: Request, res: Response) => {
   const id = Number(req.params.id);
-
-  //Verifica se o ID enviado é um número, se tentar mandar letra retorna a mensagem de erro.
-  if (isNaN(id)) {
-    res.status(400).json({ erro: 'ID inválido.'});
-    return;
-  }
-
   const httpResponse = await getProductsByIdService(id);
   res.status(httpResponse.statusCode).json(httpResponse.body);
 };

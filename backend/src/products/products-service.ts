@@ -15,13 +15,15 @@ export const getProductsService = async (filters: { id?: number, codigo?: string
 
 export const getProductsByIdService = async (id: number) => {
   try {
-    const found = await productRepository.searchProductsById(id)
-    
-    if (!found)
+    if (isNaN(id)) {
+      return badRequest("ID Inválido");
+    }
+
+    const product = await productRepository.searchProductsById(id);
+    if (!product)
       return notFound('Produto não encontrado');
 
-    const productId = await productRepository.searchProductsById(id);
-    return ok(productId);
+    return ok(product);
     
   } catch (err) {
     console.error(err);
@@ -31,8 +33,8 @@ export const getProductsByIdService = async (id: number) => {
 
 export const createProductService = async (product: Omit<productModel, 'id' | 'data_cadastro' | 'data_atualizacao'>) => {
   try {
-    if (!product.nome || !product.codigo || !product.preco || !product.status) {
-      return badRequest('Campos obrigatórios estão ausentes: nome, código, preço ou status.');
+    if (!product.nome || !product.codigo || !product.status) {
+      return badRequest('Campos obrigatórios estão ausentes: nome, código ou status.');
     }
 
     const codigoAlreadyExists = await productRepository.verifyCodigo(product.codigo);
@@ -45,7 +47,7 @@ export const createProductService = async (product: Omit<productModel, 'id' | 'd
       return badRequest('Já existe um produto com mesmo nome.')
     }
 
-    const insertedProduct = await productRepository.insertProduct(product);
+    await productRepository.insertProduct(product);
     return ok( { message: 'Produto cadastrado com sucesso.'} );
 
   } catch (err) {
@@ -60,16 +62,27 @@ export const updateProductByIdService = async (id: number, data: Partial<product
       return badRequest('Nenhum campo enviado para atualização.');
     }
 
-    // Atribui 0 se undefined ou null (valor padrão)
-    data.estoque_minimo = data.estoque_minimo ?? 0;
-    data.estoque_maximo = data.estoque_maximo ?? 0;
+    const currentProduct = await productRepository.searchProductsById(id);
+    if (!currentProduct) {
+      return notFound("Produto não encontrado");
+    }
 
-    //Garante que valores negativos não sejam enviados.
-    if (
-      (typeof data.estoque_minimo === "number" && data.estoque_minimo < 0) ||
-      (typeof data.estoque_maximo === "number" && data.estoque_maximo < 0)
-    ) {
+    const hasMovements = currentProduct.has_movements === true;
+    if (hasMovements && data.codigo !== undefined && data.codigo !== currentProduct.codigo) {
+      return badRequest("Não é permitido alterar o código de um produto que já possui movimentações.");
+    }
+
+    // Atribui 0 se undefined ou null (valor padrão)
+    data.estoque_minimo = data.estoque_minimo ?? currentProduct.estoque_minimo ?? 0;
+    data.estoque_maximo = data.estoque_maximo ?? currentProduct.estoque_maximo ?? 0;
+
+    // Bloquear negativos
+    if (data.estoque_minimo < 0 || data.estoque_maximo < 0) {
       return badRequest("Valores negativos não são permitidos.");
+    } 
+
+    if (data.estoque_minimo > data.estoque_maximo) {
+      return badRequest("O estoque mínimo não pode ser maior que o estoque máximo.");
     }
 
     if (data.codigo) {
@@ -101,12 +114,24 @@ export const updateProductByIdService = async (id: number, data: Partial<product
 
 export const deleteProductsByIdService = async (id: number) => {
   try {
-  const deleted = await productRepository.deleteProduct(id)
+    if (isNaN(id)) {
+      return badRequest("ID Inválido.");
+    }
+
+    const product = await productRepository.searchProductsById(id);
+    if (!product) {
+      return badRequest("Produto não encontrado.");
+    }
+
+    const hasMovements = await productRepository.verifyProductMovements(id);
+    if (hasMovements) {
+      return badRequest("Este produto já possui movimentações cadastradas no sistema, não é possível excluir.")
+    }
+
+    await productRepository.deleteProduct(id);
   
-  if (!deleted)
-    return notFound('Produto não encontrado');
-  
-  return ok({ message: 'Produto deletado com sucesso.'});
+    return ok({ message: 'Produto deletado com sucesso.'});
+
   } catch (err) {
     console.error(err);
     return internalServerError('Erro ao deletar o produto.');

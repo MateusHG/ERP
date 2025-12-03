@@ -2,7 +2,18 @@ import db from "../config/db";
 import { productModel } from "../products/product-model";
 
 export const searchAllProducts = async (filters: { id?: number, codigo?: string, nome?: string, categoria?: string, status?: string }): Promise<productModel[]> => {
-  let query = `SELECT * FROM produtos`;
+  let query = `
+    SELECT p.*,
+      CASE
+       WHEN EXISTS (SELECT 1 FROM compras_itens ci WHERE ci.produto_id = p.id LIMIT 1) OR
+            EXISTS (SELECT 1 FROM vendas_itens vi WHERE vi.produto_id = p.id LIMIT 1) OR
+            EXISTS (SELECT 1 FROM estoque_ajustes_itens aj WHERE aj.produto_id = p.id LIMIT 1 )
+        THEN TRUE
+        ELSE FALSE
+      END AS has_movements
+    FROM produtos p
+  `;
+
   const conditions: string[] = [];
   const values: any[] = [];
 
@@ -42,18 +53,31 @@ export const searchAllProducts = async (filters: { id?: number, codigo?: string,
 };
 
 export const searchProductsById = async (id: number): Promise<productModel | null> => {
-  const result = await db.query(`SELECT * FROM produtos where id = $1`, [id]);
-  return result.rows[0];
+  const query = `
+    SELECT p.*,
+      CASE
+        WHEN EXISTS (SELECT 1 FROM compras_itens ci WHERE ci.produto_id = p.id LIMIT 1) OR
+             EXISTS (SELECT 1 FROM vendas_itens vi WHERE vi.produto_id = p.id LIMIT 1) OR
+             EXISTS (SELECT 1 FROM estoque_ajustes_itens aj WHERE aj.produto_id = p.id LIMIT 1 )
+        THEN TRUE
+        ELSE FALSE
+      END AS has_movements
+    FROM produtos p
+    WHERE p.id = $1
+    LIMIT 1`;
+
+  const result = await db.query(query, [id]);
+  return result.rows[0] || null;
 };
 
 export const insertProduct = async (product: Omit<productModel, 'id' | 'data_cadastro' | 'data_atualizacao'>): Promise<productModel> => {
-  const {codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo} = product;
+  const {codigo, nome, descricao, categoria, status, estoque_minimo, estoque_maximo} = product;
 
   const result = await db.query(
-  `INSERT INTO produtos (codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8 )
+  `INSERT INTO produtos (codigo, nome, descricao, categoria, status, estoque_minimo, estoque_maximo)
+   VALUES ($1, $2, $3, $4, $5, $6, $7 )
    RETURNING *`,
-  [codigo, nome, descricao, preco, categoria, status, estoque_minimo, estoque_maximo]
+  [codigo, nome, descricao, categoria, status, estoque_minimo, estoque_maximo]
 );
 
 return result.rows[0];
@@ -74,11 +98,14 @@ export const updateProduct = async (id: number, fieldsToUpdate: Partial<productM
   return result.rows[0];
 };
 
-//Consultas para verificar se já tem outro produto com o mesmo nome ou código e não duplicar ao fazer insert ou update.
-//Criado separadamente um para código e um para nome, pois ao fazer os dois juntos a validação estava ocorrendo apenas quando ambos já existiam.
-//Assim se mandasse um código já existente porém com outro nome e vice-versa, permitia o update.
+export const deleteProduct = async (id:number): Promise<boolean> => {
+  const result = await db.query (`DELETE FROM produtos WHERE id = $1`, [id]);
+  return result.rowCount> 0; //retorna true se algo foi deletado
+};
+
+
 export const verifyCodigo = async (codigo: string): Promise<productModel | null> => {
-  const result = await db.query('SELECT * FROM produtos where codigo = $1 limit 1',
+  const result = await db.query('SELECT * FROM produtos WHERE codigo = $1 limit 1',
     [codigo]
   );
   
@@ -86,14 +113,24 @@ export const verifyCodigo = async (codigo: string): Promise<productModel | null>
 };
 
 export const verifyNome = async (nome: string): Promise<productModel | null> => {
-  const result = await db.query('SELECT * FROM produtos where nome = $1 limit 1',
+  const result = await db.query('SELECT * FROM produtos WHERE nome = $1 limit 1',
     [nome]
   );
 
   return result.rows[0] || null;
 };
 
-export const deleteProduct = async (id:number): Promise<boolean> => {
-  const result = await db.query (`DELETE FROM produtos where id = $1`, [id]);
-  return result.rowCount> 0; //retorna true se algo foi deletado
+export const verifyProductMovements = async (id: number): Promise<boolean> => {
+  const query = `
+    SELECT EXISTS (
+      SELECT 1 FROM compras_itens WHERE produto_id = $1
+    ) OR EXISTS (
+      SELECT 1 FROM vendas_itens WHERE produto_id = $1
+    ) OR EXISTS (
+      SELECT 1 FROM estoque_ajustes_itens WHERE produto_id = $1
+    ) AS has_movements
+  `;
+
+  const result = await db.query(query, [id]);
+  return result.rows[0].has_movements;
 };
