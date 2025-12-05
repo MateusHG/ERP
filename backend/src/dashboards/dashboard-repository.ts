@@ -9,7 +9,7 @@ export const getGeneralDashboard = async (data_inicial: string, data_final: stri
       (SELECT COUNT(*) FROM vendas WHERE data_emissao BETWEEN $1 AND $2 AND status = 'aguardando') AS total_vendas_aguardando_aprovacao,
 
       (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status = 'finalizado') AS total_compras_finalizadas,
-      (SELECT SUM(valor_total) FROM compras WHERE data_emissao BETWEEN $1 and $2 AND status = 'finalizado') AS total_compras_valores,
+      (SELECT SUM(valor_total) FROM compras WHERE data_emissao BETWEEN $1 and $2 AND status = 'finalizado') AS total_compras_finalizadas_valores,
       (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status <> 'finalizado') AS total_compras_pendentes,
       (SELECT COUNT(*) FROM compras WHERE data_emissao BETWEEN $1 AND $2 AND status = 'aguardando') AS total_compras_aguardando_aprovacao,
 

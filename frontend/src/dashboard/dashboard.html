@@ -64,52 +64,89 @@
 
   <main class="dashboard-main">
     <section class="cards">
-      <div class="card">
-        <h3>Vendas do Período</h3>
-        <p id="total-sales-count"></p>
-        <p id="total-sales-value"></p>
-        <p id="total-sales-pending"></p>
-        <p id="total-sales-pending-approval"></p>
-      </div>
-      <div class="card">
-        <h3>Compras do Período</h3>
-        <p id="total-purchases-count"></p>
-        <p id="total-purchases-value"></p>
-        <p id="total-purchases-pending"></p>
-        <p id="total-purchases-pending-approval"></p>
-      </div>
-      <div class="card">
-        <h3>Estoque</h3>
-          <div class="inventory-status">
-          <p><span class="badge badge-red">Itens Abaixo do Mínimo:</span> <span id="below-minimum"></span></p>
-          <p><span class="badge badge-green">Itens Dentro da Média:</span> <span id="between-limits"></span></p>
-          <p><span class="badge badge-blue">Itens Acima do Máximo:</span> <span id="above-maximum"></span></p>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Clientes</h3>
-          <div class="customers-status">
-          <p><span class="badge badge-green">Clientes Ativos:</span> <span id="active-customers"></span></p>
-          <p><span class="badge badge-red">Clientes Inativos:</span> <span id="inactive-customers"></span></p>
-          <p><span class="badge badge-blue">Novos no Mês:</span> <span id="new-monthly-customers"></span></p>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Fornecedores</h3>
-        <div class="suppliers-status">
-          <p><span class="badge badge-green">Fornecedores Ativos:</span> <span id="active-suppliers"></span></p>
-          <p><span class="badge badge-red">Fornecedores Inativos:</span> <span id="inactive-suppliers"></span></p>
-          <p><span class="badge badge-blue">Novos no Mês:</span> <span id="new-monthly-suppliers"></span></p>
-        </div>
-      </div>
-    </section>
 
-    <section class="chart">
-      <h3>Faturamento (últimos 6 meses)</h3>
-      <img src="https://quickchart.io/chart?c={type:'line',data:{labels:['Fev','Mar','Abr','Mai','Jun','Jul'],datasets:[{label:'R$',data:[15000,18000,12000,20000,17000,22000]}]}}" alt="Gráfico de Faturamento">
-    </section>
-  </main>
+  <div class="card">
+    <img src="/erpicons/sales.svg" class="card-icon">
+    <h3>Vendas do Período</h3>
 
-  <script type="module" src="./dashboard.ts"></script>
+    <p class="primary-value" id="total-sales-value">R$ --</p>
+    <p id="total-sales-count"></p>
+    <p id="total-sales-pending"></p>
+
+    <div class="card-insight" id="sales-insight">
+      Carregando insight...
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="/erpicons/purchase.svg" class="card-icon">
+    <h3>Compras do Período</h3>
+
+    <p class="primary-value" id="total-purchases-value">R$ --</p>
+    <p id="total-purchases-count"></p>
+    <p id="total-purchases-pending"></p>
+
+    <div class="card-insight" id="purchases-insight">
+      Carregando insight...
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="/erpicons/inventory.svg" class="card-icon">
+    <h3>Estoque</h3>
+
+    <p class="primary-value">
+      <span id="below-minimum"></span> itens críticos
+    </p>
+
+    <div class="card-insight" id="inventory-insight">
+      Avaliando estoque…
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="/erpicons/clients.svg" class="card-icon">
+    <h3>Clientes</h3>
+
+    <p class="primary-value" id="active-customers">--</p>
+    <p id="new-monthly-customers"></p>
+
+    <div class="card-insight" id="customers-insight">
+      Carregando insight…
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="/erpicons/suppliers.svg" class="card-icon">
+    <h3>Fornecedores</h3>
+
+    <p class="primary-value" id="active-suppliers">--</p>
+    <p id="inactive-suppliers"></p>
+
+    <div class="card-insight" id="suppliers-insight">
+      Carregando insight…
+    </div>
+  </div>
+</section>
+
+  <div class="ranking-container">
+    <div class="ranking-box">
+      <h3>Ranking de Clientes</h3>
+      <div class="chart-wrapper">
+        <canvas id="top-customers-chart"></canvas>
+      </div>
+    </div>
+
+    <div class="ranking-box">
+      <h3>Ranking de Fornecedores</h3>
+      <div class="chart-wrapper">
+        <canvas id="top-suppliers-chart"></canvas>
+      </div>
+    </div>
+</div>
+  
+</main>
+
+<script type="module" src="./dashboard.ts"></script>
 </body>
 </html>
