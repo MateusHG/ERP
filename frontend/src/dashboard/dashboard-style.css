@@ -247,13 +247,18 @@ body {
 .chart-wrapper {
   position: relative;
   height: 360px;
+  padding-top: 0;
 }
 
 .hover-bar-highlight {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
   background: rgba(54,162,235,0.15);
   border-radius: 6px;
   transition: opacity .2s ease, top .15s ease, height .15s ease;
   opacity: 0;
+  display: flex;
 }
 
 .card-icon {

@@ -32,3 +32,47 @@ export const getGeneralDashboard = async (data_inicial: string, data_final: stri
     const result = await db.query(query, values);
     return result.rows[0]; // retorna um objeto com todos os counts.
 };
+
+
+
+export async function getTopCustomers(data_inicial: string, data_final: string) {
+  const query = `
+    SELECT
+      c.id,
+      c.nome_fantasia AS cliente,
+      COUNT(v.id) AS quantidade_vendas,
+      COALESCE(SUM(v.valor_total), 0::numeric) AS total_vendido
+    FROM clientes c
+    LEFT JOIN vendas v
+    ON v.cliente_id = c.id
+      AND v.status in ('finalizado', 'entregue')
+      AND v.data_emissao BETWEEN $1 AND $2
+    GROUP BY c.id, c.nome_fantasia
+    ORDER BY total_vendido DESC
+    LIMIT 5;
+  `;
+
+  const result = await db.query(query, [data_inicial, data_final]);
+  return result.rows;
+};
+
+export async function getTopSuppliers(data_inicial:string , data_final: string) {
+  const query = `
+    SELECT 
+      f.id,
+      f.nome_fantasia AS fornecedor,
+      COUNT(c.id) AS quantidade_compras,
+      COALESCE(SUM(c.valor_total), 0::numeric) AS total_comprado
+    FROM fornecedores f
+    LEFT JOIN compras c
+    ON c.fornecedor_id = f.id
+      AND c.status IN ('recebido', 'finalizado')
+      AND c.data_emissao BETWEEN $1 AND $2
+    GROUP BY f.id, f.nome_fantasia
+    ORDER BY total_comprado DESC
+    LIMIT 5;
+  `;
+
+  const result = await db.query(query, [data_inicial, data_final]);
+  return result.rows;
+};
