@@ -8,59 +8,61 @@
 </head>
 <body>
     <header class="dashboard-header">
-  <!-- Esquerda: Logo + Título -->
-  <div class="header-left">
-    <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
-    <div class="title-box">
-      <h1>Open ERP</h1>
-      <p class="subtitle">Bem-vindo de volta!</p>
+
+  <!-- LINHA SUPERIOR -->
+  <div class="header-top">
+    <!-- Esquerda: Logo + título -->
+    <div class="header-left">
+      <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
+      <div class="title-box">
+        <h1>Open ERP</h1>
+        <p class="subtitle">Bem-vindo de volta!</p>
+      </div>
     </div>
-  </div>
 
-  <!-- Centro: Navegação com ícones -->
-  <nav class="menu">
-    <button id="btn-dashboard" class="ativo"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
-    <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
-    <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button id="btn-purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button id="btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
-    <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
-    <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
-    <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
-    <button id="btn-services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
-    <button id="btn-config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
-  </nav>
+    <!-- Centro: Navegação -->
+    <nav class="menu">
+      <button id="btn-dashboard" class="ativo"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
+      <button id="btn-products" ><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+      <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+      <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+      <button id="btn-purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+      <button id="btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+      <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+      <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+      <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+      <button id="btn-services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+      <button id="btn-config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
+    </nav>
 
-  <!-- Direita: Usuário + Data + Logout -->
-  <div class="header-right">
-    <div class="user-info">
-    <div class="datetime" id="datetime"></div>
+    <!-- Direita: Usuário -->
+    <div class="header-right">
+      <div class="datetime" id="datetime"></div>
       <span>Usuário: <strong id="logged-user"></strong></span>
       <button id="logout-btn">Sair</button>
     </div>
   </div>
-</header>
-  
-  <header class="dashboard-header">
-  <div class="left">
-    <div>
-      <h1>Dashboards Iniciais <img src="/erpicons/dashboard.svg" alt="Dashboard-Icone"></h1>
-      <div class="filter-date-period">
-      <label for="initial-date">Período de:</label>
-      <input type="date" id="initial-date" name="initial_date">
 
-      <label for="final-date">até:</label>
-      <input type="date" id="final-date" name="final_date">
+  <!-- LINHA INFERIOR -->
+  <div class="header-bottom">
+    <div class="dashboard-title">
+      <img src="/erpicons/dashboard.svg" alt="Dashboard">
+      <h2>Dashboards Iniciais</h2>
+    </div>
+
+    <div class="filter-date-period">
+      <label>Período de:</label>
+      <input type="date" id="initial-date">
+
+      <label>até:</label>
+      <input type="date" id="final-date">
 
       <button id="filter-btn">Filtrar</button>
     </div>
   </div>
-</div>
-  <div class="right">
-    </div>
-  </div>
+
 </header>
+
 
   <main class="dashboard-main">
     <section class="cards">

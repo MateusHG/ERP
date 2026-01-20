@@ -9,7 +9,7 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 
 
 
-![Tela Principal](docs/images/start-page.png)
+![Tela Principal](docs/images/start-page.gif)
 
 ---
 
