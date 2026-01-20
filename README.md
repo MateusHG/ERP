@@ -116,31 +116,35 @@ frontend
 
 ## 📂 Módulos e Regras de Negócio
 
-### Dashboard
-- Filtro de data inicial e final.
-- Card de Vendas (Vendas Finalizadas + Total R$ e quantidade de vendas pendentes).
-- Card de Compras (Compras Finalizadas + Total R$ e quantidade de compras pendentes).
-- Card de Estoque: (Quantidade de itens abaixo do mínimo, dentro da média, e acima do máximo).
-- Cards de Clientes e Fornecedores (Clientes Ativos, Inativos, e novos cadastrados no mês).
+Esta seção descreve as **principais regras de negócio implementadas no sistema**, com destaque para aquelas que simulam **cenários reais e críticos de um ERP**, especialmente relacionadas a **controle de estoque e consistência de dados**.
 
-### Produtos Comerciais
-- Cadastro/alteração e remoção de produtos.
-- Regras de negócio para não permitir produtos com mesmo nome e código.
-- Filtros dinâmicos de busca por ID, Nome, Categoria e Status(Ativo/Inativo).
-- Registradores automáticos de data de cadastro e de data da última atualização do produto.
+## 🔴 Regras Críticas de Estoque
 
-### Fornecedores
-- Cadastro/alteração e remoção de fornecedores.
-- Regras de negócio para não permitir fornecedores com mesmo nome fantasia, razão social, CNPJ e e-mail.
-- Filtros dinâmicos de busca por ID, Nome Fantasia, Razão Social, CNPJ, E-mail e Status.
-- Máscaras automáticas para campos CNPJ, telefone, celular e CEP.
-- Registradores automáticos de data de cadastro e de data da última atualização do fornecedor.
+### Bloqueio de Estoque Negativo
+O sistema **não permite que o estoque de um produto fique negativo** em nenhuma operação crítica.
 
-### Clientes
-- Cadastro/alteração e remoção de clientes.
-- Regras de negócio para não permitir clientes com mesmo nome fantasia, razão social, CNPJ e e-mail.
-- Filtros dinâmicos de busca por ID, Nome Fantasia, Razão Social, CNPJ, E-mail e Status.
-- Máscaras automáticas para campos CNPJ, telefone, celular e CEP.
-- Registradores automáticos de data de cadastro e de data da última atualização do cliente.
+Essa regra é aplicada nos seguintes cenários:
+- Finalização de vendas
+- Estorno de compras
+- Ajustes manuais de estoque
+
+Antes de qualquer operação que reduza o estoque, o sistema valida se a quantidade disponível é suficiente.  
+
+Caso contrário, a operação é **bloqueada** e uma mensagem clara é retornada ao usuário.
+
+**Objetivo da regra:**
+- Garantir consistência de dados
+- Evitar divergência entre estoque físico e sistema
+- Simular comportamento real de ERPs comerciais
 
 ---
+
+### Finalização de Venda com Validação de Estoque
+No momento da finalização de uma venda, o sistema:
+
+1. Verifica o estoque atual de cada item
+2. Valida se a quantidade solicitada está disponível
+3. Bloqueia a venda caso algum item fique com estoque negativo
+4. Finaliza a venda apenas se todas as validações forem atendidas
+
+Essa validação ocorre **no backend**, garantindo segurança mesmo que o front-end seja burlado.
