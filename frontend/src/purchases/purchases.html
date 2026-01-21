@@ -7,74 +7,91 @@
   <link rel="stylesheet" href="./purchases-style.css">
 </head>
 <header class="purchases-header">
-  <!-- Esquerda: Logo + Título -->
-  <div class="header-left">
-    <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
-    <div class="title-box">
-      <h1>Open ERP</h1>
-      <p class="subtitle">Bem-vindo de volta!</p>
+
+  <!-- LINHA SUPERIOR -->
+  <div class="header-top">
+
+    <!-- Esquerda: Logo + título -->
+    <div class="header-left">
+      <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
+      <div class="title-box">
+        <h1>Open ERP</h1>
+        <p class="subtitle">Bem-vindo de volta!</p>
+      </div>
     </div>
-  </div>
 
-  <!-- Centro: Navegação com ícones -->
-  <nav class="menu">
-    <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
-    <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
-    <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button id="btn-purchases" class="ativo"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button id="btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
-    <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
-    <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
-    <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
-    <button id="btn-services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
-    <button id="btn-config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
-  </nav>
+    <!-- Centro: Navegação -->
+    <nav class="menu">
+      <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
+      <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
+      <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
+      <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
+      <button id="btn-purchases" class="ativo"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
+      <button id="btn-customers"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
+      <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
+      <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
+      <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
+      <button id="btn-services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
+      <button id="btn-config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
+    </nav>
 
-  <!-- Direita: Usuário + Data + Logout -->
-  <div class="header-right">
-    <div class="user-info">
-    <div class="datetime" id="datetime"></div>
+    <!-- Direita: Usuário -->
+    <div class="header-right">
+      <div class="datetime" id="datetime"></div>
       <span>Usuário: <strong id="logged-user"></strong></span>
       <button id="logout-btn">Sair</button>
     </div>
+
   </div>
-</header>
-  
-  <header class="purchases-header">
-  <div class="left">
-    <div>
-      <h1>Compras <img src="/erpicons/purchase.svg" alt="Produtos-Icone"><button id="btn-new-purchase" class="btn-new-purchase">+ Nova Compra</button></h1>
-      <div class="filter-date-period">
-      <label for="initial-date">Período de:</label>
-      <input type="date" id="initial-date" name="initial-date">
 
-      <label for="final-date">até:</label>
-      <input type="date" id="final-date" name="final-date">
+  <!-- LINHA INFERIOR -->
+  <div class="header-bottom">
 
-      <button id="filter-btn">Filtrar Data</button>
+    <div class="purchases-title">
+      <img src="/erpicons/purchase.svg" alt="Compras">
+      <h2>Compras</h2>
 
-      <div class="filtros">
-      <input type="text" id="filtro-id" placeholder="Buscar por ID...">
-      <input type="text" id="filtro-nome-fornecedor" placeholder="Buscar por Fornecedor...">
-      <select id="filtro-status">
-        <option value="" disabled selected>Buscar por status...</option>
-        <option value="">Todos</option>
-        <option value="aberto">Em Aberto</option>
-        <option value="aguardando">Aguardando Aprovação</option>
-        <option value="aprovado">Aprovado</option>
-        <option value="recebido">Recebido</option>
-        <option value="finalizado">Finalizado</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
+      <button id="btn-new-purchase" class="btn-new-purchase">
+        + Nova Compra
+      </button>
     </div>
-    </div>
+
+    <div class="filters-row">
+
+  <div class="filter-date-period">
+
+  <div class="period">
+    <label>Período de:</label>
+    <input type="date" id="initial-date">
+
+    <label>até:</label>
+    <input type="date" id="final-date">
+
+    <button id="filter-btn">Filtrar</button>
   </div>
+
+  <div class="filtros">
+    <input type="text" id="filtro-id" placeholder="Buscar por ID...">
+    <input type="text" id="filtro-nome-fornecedor" placeholder="Buscar por Fornecedor...">
+
+    <select id="filtro-status">
+      <option value="" disabled selected>Status...</option>
+      <option value="">Todos</option>
+      <option value="aberto">Em Aberto</option>
+      <option value="aguardando">Aguardando Aprovação</option>
+      <option value="aprovado">Aprovado</option>
+      <option value="recebido">Recebido</option>
+      <option value="finalizado">Finalizado</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+  </div>
+
 </div>
-  <div class="right">
-    </div>
+
   </div>
+
 </header>
+
 
   <main>
       <!-- Modal: Nova Compra -->

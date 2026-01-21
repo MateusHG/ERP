@@ -34,14 +34,44 @@ body {
     }
 
     .inventory-header {
-      background: linear-gradient(260deg, #2e80eb, #74b9ff);
-      color: white;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
+  background: linear-gradient(260deg, #2e80eb, #74b9ff);
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Linha superior */
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Linha inferior */
+.header-bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.header-bottom h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.6rem;
+}
+
+.inventory-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.4rem;
 }
 
 .left img {
@@ -763,6 +793,7 @@ input[readonly] {
 #inventory-table {
   width: 98vw;
   margin-left: -10px;
+  margin-top: -12px;
   border-collapse: collapse;
   background: #fff;
   border-radius: 2px;

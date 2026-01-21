@@ -7,64 +7,69 @@
   <link rel="stylesheet" href="./customers-style.css">
 </head>
 <header class="customers-header">
-  <!-- Esquerda: Logo + Título -->
-  <div class="header-left">
-    <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
-    <div class="title-box">
-      <h1>Open ERP</h1>
-      <p class="subtitle">Bem-vindo de volta!</p>
+
+  <!-- LINHA SUPERIOR -->
+  <div class="header-top">
+    <!-- Esquerda: Logo + Título -->
+    <div class="header-left">
+      <img src="/erpicons/logo-open-erp.png" alt="Logo ERP" class="logo" />
+      <div class="title-box">
+        <h1>Open ERP</h1>
+        <p class="subtitle">Bem-vindo de volta!</p>
+      </div>
     </div>
-  </div>
 
-  <!-- Centro: Navegação com ícones -->
-  <nav class="menu">
-    <button id="btn-dashboard"><img src="/erpicons/dashboard.svg" alt="Dashboard">Dashboards</button>
-    <button id="btn-products"><img src="/erpicons/products.svg" alt="Produtos">Produtos</button>
-    <button id="btn-inventory"><img src="/erpicons/inventory.svg" alt="Estoque">Estoque</button>
-    <button id="btn-suppliers"><img src="/erpicons/suppliers.svg" alt="Fornecedores">Fornecedores</button>
-    <button id="btn-purchases"><img src="/erpicons/purchase.svg" alt="Compras">Compras</button>
-    <button id="btn-customers" class="ativo"><img src="/erpicons/clients.svg" alt="Clientes">Clientes</button>
-    <button id="btn-sales"><img src="/erpicons/sales.svg" alt="Vendas">Vendas</button>
-    <button id="btn-receipts"><img src="/erpicons/receipts.svg" alt="Fiscal">Fiscal</button>
-    <button id="btn-logistics"><img src="/erpicons/logistics.svg" alt="Transporte">Transporte</button>
-    <button id="btn-services"><img src="/erpicons/services.svg" alt="Serviços">Serviços</button>
-    <button id="btn-config"><img src="/erpicons/config.svg" alt="Configurações">Configurações</button>
-  </nav>
+    <!-- Centro: Navegação -->
+    <nav class="menu">
+      <button id="btn-dashboard"><img src="/erpicons/dashboard.svg">Dashboards</button>
+      <button id="btn-products"><img src="/erpicons/products.svg">Produtos</button>
+      <button id="btn-inventory"><img src="/erpicons/inventory.svg">Estoque</button>
+      <button id="btn-suppliers"><img src="/erpicons/suppliers.svg">Fornecedores</button>
+      <button id="btn-purchases"><img src="/erpicons/purchase.svg">Compras</button>
+      <button id="btn-customers" class="ativo"><img src="/erpicons/clients.svg">Clientes</button>
+      <button id="btn-sales"><img src="/erpicons/sales.svg">Vendas</button>
+      <button id="btn-receipts"><img src="/erpicons/receipts.svg">Fiscal</button>
+      <button id="btn-logistics"><img src="/erpicons/logistics.svg">Transporte</button>
+      <button id="btn-services"><img src="/erpicons/services.svg">Serviços</button>
+      <button id="btn-config"><img src="/erpicons/config.svg">Configurações</button>
+    </nav>
 
-  <!-- Direita: Usuário + Data + Logout -->
-  <div class="header-right">
-    <div class="user-info">
-    <div class="datetime" id="datetime"></div>
+    <!-- Direita: Usuário -->
+    <div class="header-right">
+      <div class="datetime" id="datetime"></div>
       <span>Usuário: <strong id="logged-user"></strong></span>
       <button id="logout-btn">Sair</button>
     </div>
   </div>
-</header>
-  
-  <header class="customers-header">
-  <div class="left">
-    <div>
-      <h1>Clientes <img src="/erpicons/clients.svg" alt="Produtos-Icone"><button id="btn-new-customer" class="btn-new-customer">+ Novo Cliente</button></h1>
-      <div class="filtros">
+
+  <!-- LINHA INFERIOR -->
+  <div class="header-bottom">
+    <div class="customers-title">
+      <img src="/erpicons/clients.svg" alt="Clientes">
+      <h2>
+        Clientes
+        <button id="btn-new-customer" class="btn-new-customer">+ Novo Cliente</button>
+      </h2>
+    </div>
+
+    <div class="filtros">
       <input type="text" id="filtro-id" placeholder="Buscar por ID...">
       <input type="text" id="filtro-nome-fantasia" placeholder="Buscar por Nome Fantasia...">
       <input type="text" id="filtro-razao-social" placeholder="Buscar por Razão Social...">
       <input type="text" id="filtro-cnpj" placeholder="Buscar por CNPJ...">
       <input type="text" id="filtro-email" placeholder="Buscar por E-mail...">
+
       <select id="filtro-status">
-        <option value="" disabled selected>Buscar por status...</option>
+        <option value="" disabled selected>Status...</option>
         <option value="">Todos</option>
         <option value="ativo">Ativo</option>
         <option value="inativo">Inativo</option>
       </select>
     </div>
-    </div>
   </div>
-</div>
-  <div class="right">
-    </div>
-  </div>
+
 </header>
+
 
   <main>
       <!-- Modal: Novo Cliente -->
