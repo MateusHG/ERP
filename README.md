@@ -159,3 +159,4 @@ No momento da finalização de uma venda, o sistema executa o seguinte fluxo:
 4. Após finalização da venda, a edição e exclusão da venda ficam bloqueadas para preservar o histórico
 - O back-end bloqueia a requisição:
 - O front-end bloqueia os campos:
+a
