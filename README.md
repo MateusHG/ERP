@@ -140,11 +140,22 @@ Caso contrário, a operação é **bloqueada** e uma mensagem clara é retornada
 ---
 
 ### Finalização de Venda com Validação de Estoque
-No momento da finalização de uma venda, o sistema:
+No momento da finalização de uma venda, o sistema executa o seguinte fluxo:
 
-1. Verifica o estoque atual de cada item
-2. Valida se a quantidade solicitada está disponível
-3. Bloqueia a venda caso algum item fique com estoque negativo
-4. Finaliza a venda apenas se todas as validações forem atendidas
+1. Front-end coleta os dados da venda e dos produtos e envia ao **back-end**
 
-Essa validação ocorre **no backend**, garantindo segurança mesmo que o front-end seja burlado.
+2. **Back-end valida** se o status foi alterado de aberto para finalizado.
+
+3. Caso seja uma finalização da venda:
+- Consulta o saldo atual dos produtos
+- Calcula o resultado subtraindo a quantidade de saída do saldo atual
+- Caso o saldo seja insuficiente, **back-end bloqueia a operação** e retorna um objeto JSON com as informações dos produtos bloqueados para ser exibida ao usuário no front-end:
+
+![Estoque Negativo Backedn](docs/images/estoque-negativo-backend.PNG)
+![Estoque Negativo Fluxo](docs/images/estoque-negativo-venda.gif)
+
+- Se o estoque atual for o suficiente, finaliza a venda, atualiza o saldo de estoque e grava o histórico da movimentação.
+
+4. Após finalização da venda, a edição e exclusão da venda ficam bloqueadas para preservar o histórico
+- O back-end bloqueia a requisição:
+- O front-end bloqueia os campos:
