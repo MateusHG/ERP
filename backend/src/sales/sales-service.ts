@@ -224,9 +224,13 @@ export const deleteSaleByIdService = async (id: number) => {
       return badRequest('ID Inválido.')
     }
 
-    const saleExists = await salesRepository.verifySaleId(id);
-    if (!saleExists) {
+    const sale = await salesRepository.verifySaleId(id);
+    if (!sale) {
       return notFound('Venda informada não existe.')
+    }
+
+    if (sale.status === 'finalizado' || sale.status === 'entregue') {
+      return badRequest('Não é possível excluir uma venda finalizada ou entregue.');
     }
 
     await salesRepository.deleteSaleById(id);

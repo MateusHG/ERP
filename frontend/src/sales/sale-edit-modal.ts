@@ -292,16 +292,16 @@ form.addEventListener("submit", async (event) => {
     // Abrir → Finalizado/Entregue (movimenta estoque)
     if (wasOpen && isFinalized) {
       const confirmed = await showConfirm(
-        "<b>🛑 Atenção! 🛑</b><br><br>" +
-        "Alterar o status para <b>'Finalizado'</b> ou <b>'Entregue'</b> fará o sistema <b>dar saída no estoque.</b><br><br>" +
+        "<b>Atenção</b><br><br>" +
+        "Esta ação irá <b>movimentar o estoque</b>.<br><br>" +
         "<b>Deseja continuar?</b>"
       );
 
       if (!confirmed) {
         await showMessage(
-          "<b>Operação cancelada ✅</b><br><br>" +
-          "- Estoque não foi alterado."
-        );
+        "<b>Operação cancelada</b><br><br>" +
+        "O estoque não foi alterado."
+      );
         return;
       }
     }
@@ -309,15 +309,15 @@ form.addEventListener("submit", async (event) => {
     // Finalizado/Entregue → Aberto (reverte movimentação)
     if (wasFinalized && isOpen) {
       const confirmed = await showConfirm(
-        "<b>🛑 Atenção! 🛑</b><br><br>" +
-        "<b>Esta venda já movimentou o estoque.</b><br><br>" +
-        "Ao alterar o status, o sistema irá <b>reverter a movimentação</b>.<br><br>" +
-        "<b>Deseja realmente continuar?</b>"
+        "<b>Atenção</b><br><br>" +
+        "Esta venda já movimentou o estoque.<br>" +
+        "Ao alterar o status, a movimentação será <b>revertida</b>.<br><br>" +
+        "<b>Deseja continuar?</b>"
       );
 
       if (!confirmed) {
         await showMessage(
-          "<b>Operação cancelada ✅</b><br><br>" +
+          "<b>Operação cancelada</b><br><br>" +
           "- Estoque não foi alterado."
         );
         return;

@@ -310,6 +310,14 @@ export const verifySaleId = async (id: number): Promise<salesModel | null> => {
   return result.rows[0] || null;
 };
 
+export const getSaleStatusById = async (id: number) => {
+  const result = await db.query(
+    `SELECT status FROM vendas WHERE id = $1`, [id]
+  );
+    
+  return result.rows[0] || null;
+};
+
 // Busca o saldo do produto para validar estoque negativo.
 export const getProductBalance = async (produtoId: number): Promise<number> => {
   const result = await db.query(

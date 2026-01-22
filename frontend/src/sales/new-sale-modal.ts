@@ -90,15 +90,15 @@ form.addEventListener("submit", async (e) => {
   // Em nova venda, só existe a transição: Aberto → Finalizado
   if (isFinalized) {
     const confirmed = await showConfirm(
-      "<b>🛑 Atenção! 🛑</b><br><br>" +
-      "Salvar a venda com status <b>'Finalizado'</b> ou <b>'Entregue'</b> fará o sistema <b>dar saída no estoque.</b><br><br>" +
+      "<b>Atenção</b><br><br>" +
+      "Esta ação irá <b>movimentar o estoque</b>.<br><br>" +
       "<b>Deseja continuar?</b>"
     );
 
     if (!confirmed) {
       await showMessage(
-        "<b>Operação cancelada ✅</b><br><br>" +
-        "- Estoque não foi alterado."
+        "<b>Operação cancelada</b><br><br>" +
+        "Estoque não foi alterado."
       );
       return;
     }

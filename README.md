@@ -151,12 +151,28 @@ No momento da finalização de uma venda, o sistema executa o seguinte fluxo:
 - Calcula o resultado subtraindo a quantidade de saída do saldo atual
 - Caso o saldo seja insuficiente, **back-end bloqueia a operação** e retorna um objeto JSON com as informações dos produtos bloqueados para ser exibida ao usuário no front-end:
 
-![Estoque Negativo Backedn](docs/images/estoque-negativo-backend.PNG)
+![Estoque Negativo Backend](docs/images/estoque-negativo-backend.PNG)
+
 ![Estoque Negativo Fluxo](docs/images/estoque-negativo-venda.gif)
 
 - Se o estoque atual for o suficiente, finaliza a venda, atualiza o saldo de estoque e grava o histórico da movimentação.
 
-4. Após finalização da venda, a edição e exclusão da venda ficam bloqueadas para preservar o histórico
-- O back-end bloqueia a requisição:
-- O front-end bloqueia os campos:
-a
+
+![Estoque Venda Mov](docs/images/estoque-mov-venda.gif)
+
+4. Após finalização da venda, a edição de informações e exclusão da venda ficam bloqueadas para preservar o histórico
+
+- O back-end bloqueia alterar ou excluir a venda
+
+- Tentativa de alteração:
+
+![Alteração Venda Finalizada](docs/images/altera-venda-finalizada.PNG)
+
+- Tentativa de exclusão:
+
+![Exclusão Venda Finalizada](docs/images/exclui-venda-finalizada.PNG)
+
+
+- O front-end bloqueia os campos para reforço visual:
+
+![Bloqueio Front](docs/images/front-bloq-vendas.gif)
