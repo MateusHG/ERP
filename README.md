@@ -29,13 +29,18 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 
 **Banco de Dados:** PostgreSQL.  
 
-**Outras:** JWT para autenticação, bcrypt para hashing de senhas, cookie-parser para utilização de cookies e dotenv para configuração de ambiente.
+**Outras:**
+- JWT para autenticação
+- bcrypt para hashing de senhas
+- Cookie-parser para utilização de cookies
+- Dotenv para configuração de ambiente.
 
 ---
 
 ## 🏗 Arquitetura do Sistema
-O projeto adota arquitetura em camadas, onde os arquivos são separados por responsabilidade dentro de módulos de negócio.
-Cada pasta representa um módulo funcional do ERP (ex.: produtos, fornecedores, compras), e dentro dele os arquivos seguem a divisão por responsabilidade.
+O projeto adota **arquitetura em camadas**, com separação clara de responsabilidades.
+
+Cada pasta representa um **módulo de negócio** (ex.: produtos, fornecedores, compras), e dentro cada módulos os arquivos seguem a divisão por responsabilidade.
 
 ## Back-end
 
@@ -116,7 +121,8 @@ frontend
 
 ## 📂 Módulos e Regras de Negócio
 
-Esta seção descreve as **principais regras de negócio implementadas no sistema**, com destaque para aquelas que simulam **cenários reais e críticos de um ERP**, especialmente relacionadas a **controle de estoque e consistência de dados**.
+Esta seção descreve as **principais regras de negócio implementadas no sistema**, com destaque para aquelas que simulam **cenários reais e críticos de um ERP**, especialmente relacionadas a **controle de estoque, integridade de dados e histórico das operações**.
+
 
 ## 🔴 Regras Críticas de Estoque
 
@@ -144,35 +150,38 @@ No momento da finalização de uma venda, o sistema executa o seguinte fluxo:
 
 1. Front-end coleta os dados da venda e dos produtos e envia ao **back-end**
 
-2. **Back-end valida** se o status foi alterado de aberto para finalizado.
+2. O **Back-end valida** se o status foi alterado de *aberto* para *finalizado*.
 
-3. Caso seja uma finalização da venda:
+3. Caso seja uma finalização:
 - Consulta o saldo atual dos produtos
-- Calcula o resultado subtraindo a quantidade de saída do saldo atual
-- Caso o saldo seja insuficiente, **back-end bloqueia a operação** e retorna um objeto JSON com as informações dos produtos bloqueados para ser exibida ao usuário no front-end:
+- Calcula o saldo após a saída
+- Se algum produto ficar com saldo negativo, a operação é **bloqueada**
+- O back-end retorna um objeto JSON com as informações dos produtos bloqueados para ser exibida  no front-end:
 
 ![Estoque Negativo Backend](docs/images/estoque-negativo-backend.PNG)
 
 ![Estoque Negativo Fluxo](docs/images/estoque-negativo-venda.gif)
 
-- Se o estoque atual for o suficiente, finaliza a venda, atualiza o saldo de estoque e grava o histórico da movimentação.
+4. Se o estoque for suficiente:
+- A venda é finalizada
+- O saldo de estoque é atualizado
+- A movimentação é registrada no histórico
 
 
 ![Estoque Venda Mov](docs/images/estoque-mov-venda.gif)
 
-4. Após finalização da venda, a edição de informações e exclusão da venda ficam bloqueadas para preservar o histórico
+5. Após finalização:
+- A venda **não pode ser editada nem excluída**
+- O back-end bloqueia qualquer tentativa de alteração
+- O front-end bloqueia os campos e ações como reforço visual
 
-- O back-end bloqueia alterar ou excluir a venda
-
-- Tentativa de alteração:
+Tentativa de alteração:
 
 ![Alteração Venda Finalizada](docs/images/altera-venda-finalizada.PNG)
 
-- Tentativa de exclusão:
+Tentativa de exclusão:
 
 ![Exclusão Venda Finalizada](docs/images/exclui-venda-finalizada.PNG)
 
-
-- O front-end bloqueia os campos para reforço visual:
-
+Bloqueio visual no front-end:
 ![Bloqueio Front](docs/images/front-bloq-vendas.gif)

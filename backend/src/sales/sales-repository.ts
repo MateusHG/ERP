@@ -303,18 +303,10 @@ export const verifyClientId = async (id_cliente: number): Promise<salesModel | n
 
 export const verifySaleId = async (id: number): Promise<salesModel | null> => {
   const result = await db.query(
-    `SELECT * FROM vendas WHERE id = $1 limit 1`,
+    `SELECT * FROM vendas WHERE id = $1 LIMIT 1`,
     [id]
   );
 
-  return result.rows[0] || null;
-};
-
-export const getSaleStatusById = async (id: number) => {
-  const result = await db.query(
-    `SELECT status FROM vendas WHERE id = $1`, [id]
-  );
-    
   return result.rows[0] || null;
 };
 

@@ -234,12 +234,18 @@ export const deletePurchaseByIdService = async (id: number) => {
       return badRequest('ID Inválido.');
     }
 
-    const deleted = await purchasesRepository.deletePurchaseById(id);
+    const purchase = await purchasesRepository.verifyPurchaseId(id);
     
-    if (!deleted) {
+    if (!purchase) {
       return notFound('ID não encontrado.')
     }
-      return ok( { message:  'Compra deletada com sucesso.' });
+
+    if (purchase.status === 'recebido' || purchase.status === 'finalizado') {
+      return badRequest('Não é possível excluir uma compra finalizada ou recebida.');
+    }
+
+    await purchasesRepository.deletePurchaseById(id);
+    return ok( { message:  'Compra deletada com sucesso.' });
   
     } catch (err) {
       console.error(err);
