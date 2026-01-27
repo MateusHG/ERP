@@ -6,10 +6,10 @@ import authenticate from './auth-middleware';
 
 const authRouter = Router();
 
-authRouter.post('/register', registerController);
+authRouter.post('/register', authenticate, registerController);
 authRouter.post('/login', loginController);
 authRouter.post('/refresh-token', refreshTokenController);
-authRouter.post('/logout', logoutController);
+authRouter.post('/logout', authenticate, logoutController);
 authRouter.get('/me-info', authenticate,  getUserInfo)
 
 export default authRouter;

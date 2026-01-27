@@ -33,7 +33,6 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 - JWT para autenticação
 - bcrypt para hashing de senhas
 - Cookie-parser para utilização de cookies
-- Dotenv para configuração de ambiente.
 
 ---
 
@@ -62,18 +61,18 @@ backend
     │   └── .env               # Variáveis de ambiente
     |
     ├── products               # Módulo de produtos
-    │   ├── routes.ts
-    │   ├── controllers.ts
-    │   ├── services.ts
-    │   ├── repositories.ts
-    │   └── models.ts
+    │   ├── routes.ts          # Rotas do módulo
+    │   ├── controllers.ts     # Controladores
+    │   ├── services.ts        # Regras de negócio
+    │   ├── repositories.ts    # Interação com o Banco de Dados
+    │   └── models.ts          # Modelos de dados
     |
     ├── suppliers              # Módulo de fornecedores
-    │   ├── routes.ts
-    │   ├── controllers.ts
-    │   ├── services.ts
-    │   ├── repositories.ts
-    │   └── models.ts
+    │   ├── routes.ts          
+    │   ├── controllers.ts     
+    │   ├── services.ts        
+    │   ├── repositories.ts    
+    │   └── models.ts          
     |
     └── customers              # Módulo de clientes
         ├── routes.ts
@@ -99,7 +98,7 @@ frontend
     │   ├── script.ts                  # Script principal
     │   ├── product-events.ts          # Eventos específicos
     │   ├── product-dom.ts             # Manipulação do DOM
-    │   ├── new-purchase-modal.ts      # Modal de novo produto
+    │   ├── new-product-modal.ts       # Modal de novo produto
     │   ├── product-edit-modal.ts      # Modal de edição
     │   ├── product-service.ts         # Comunicação com a API
     │   └── product-model.ts           # Modelo de dados
@@ -185,3 +184,82 @@ Tentativa de exclusão:
 
 Bloqueio visual no front-end:
 ![Bloqueio Front](docs/images/front-bloq-vendas.gif)
+
+---
+
+### Estorno de Compras e Ajustes de Estoque
+O sistema trata **estornos de compras** e **ajustes manuais de estoque** como **operações críticas**, aplicando a **mesma lógica de validação, rastreabilidade e auditoria** utilizada na finalização de vendas.
+
+Todas essas operações:
+- Validam o impacto no saldo do estoque
+- Bloqueiam qualquer ação que resulte em **estoque negativo**
+- Geram registros completos de movimentação, contendo:
+  - ID da transação
+  - Tipo da operação
+  - Produto e quantidade
+  - Usuário responsável
+  - Data e hora da ação
+
+---
+
+### Estorno de Compras
+O estorno de compras representa a **ação reversa de uma compra finalizada**.
+
+Fluxo resumido:
+- A compra deve estar com status **finalizada**
+- O sistema calcula a reversão das quantidades previamente adicionadas ao estoque
+- Caso o estorno resulte em saldo negativo, a operação é **bloqueada**
+- Quando válido:
+  - O estoque é ajustado revertendo a entrada
+  - A movimentação é registrada no histórico
+  - O status da compra retorna para **aberta**
+
+Esse comportamento garante consistência entre compras, vendas e saldo atual dos produtos.
+
+---
+
+### Ajustes Manuais de Estoque
+Os ajustes manuais permitem correções administrativas, inventários ou perdas controladas.
+
+Regras aplicadas:
+- Ajustes de saída passam por validação de saldo
+- Não é permitido gerar estoque negativo
+- Todo ajuste é registrado como movimentação auditável
+
+Essa abordagem evita alterações silenciosas e mantém a integridade do estoque ao longo do tempo.
+
+----
+
+## 🔐 Segurança da Aplicação
+A aplicação foi projetada com foco em **segurança no back-end**, garantindo que os dados permaneçam protegidos **independentemente de qualquer tentativa de burlar o front-end**.
+
+### Proteção de Rotas
+Todas as rotas do **back-end são protegidas por middleware de autenticação**.  
+Isso significa que **nenhuma operação pode ser executada sem um usuário autenticado**.
+
+### Caso de uso
+
+Vamos supor que um atacante acesse a página inicial da aplicação (login), e através da ferramenta dev tools, o mesmo consiga visualizar a rota da API que é chamada ao fazer a autenticação, e também para qual página é redirecionada caso o login seja bem sucedido.
+
+Caso o mesmo tente realizar qualquer requisição direto para o back-end via POSTMAN/Insomnia, seja na própria rota de autenticação ou presumindo outras possíveis rotas dentro da aplicação, todas as requisições serão barradas pelo middleware:
+
+![Página Inicial Devtools](docs/images/login-tentativa-devtools.gif)
+
+### Proteção extra no front-end
+
+Caso o atacante tente acessar caminhos de outras páginas dentro da aplicação, as informações não irão ser carregadas devido á falta do JWT, mas ainda irá ter acesso á interface do sistema.
+
+Resolvemos isso da seguinte forma:
+
+- Criamos uma função chamada showNotAuthorizedMessage, essa função:
+- Limpa o body do HTML
+- Após limpar todo o HTML, cria uma div que bloqueia e cobre a tela inteira, informando sessão não autorizada
+- Redireciona para a página inicial de login
+- Acoplamos esta função no nosso fetch-helper, cujo objetivo é realizar requisições autorizadas ao back-end utilizando cookies.
+- Caso a requisição feita para o back-end retorne 401 (Not authorized), a função de fetch autorizada automaticamente chama a função showNotAuthorizedMessage, limpando todo o HTML, criando uma div e bloqueando qualquer interação via interface.
+
+![Tentativa Path Devtools](docs/images/login-tentativa-path.gif)
+
+## Cadastro de armazenamento de senhas
+
+[ Em construção ]
