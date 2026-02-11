@@ -1,0 +1,53 @@
+services:
+
+  database:
+    image: postgres:17
+    container_name: erp-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: erp
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_pass
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+
+    ports:
+      - "5432:5432"
+# ------------------------------------------------------------------------------------------------
+  
+  backend:
+    container_name: erp-backend
+    build:
+      context: ./backend
+    command: npm run start:watch
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./certs:/certs:ro
+    ports:
+      - "3000:3000"
+    env_file:
+      - backend/src/config/.env.docker
+    depends_on:
+      - database
+# ------------------------------------------------------------------------------------------------
+
+  frontend:
+    container_name: erp-frontend
+    build:
+      context: ./frontend
+    command: npm run dev -- --host
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+      - ./certs:/certs:ro
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

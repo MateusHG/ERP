@@ -14,14 +14,94 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 ---
 
 ## 📑 Sumário
-1. [Tecnologias Utilizadas](#tecnologias-utilizadas)
-2. [Arquitetura do Sistema](#arquitetura-do-sistema)
-3. [Módulos e Regras de Negócio](#módulos-e-regras-de-negócio)
-4. [Segurança e Boas Práticas](#segurança-e-boas-práticas)
-5. [Demonstração](#demonstração)
+1. [Como Rodar o Projeto](#como-rodar-projeto)
+2. [Tecnologias Utilizadas](#tecnologias-utilizadas)
+3. [Arquitetura do Sistema](#arquitetura-do-sistema)
+4. [Módulos e Regras de Negócio](#módulos-e-regras-de-negócio)
+5. [Segurança e Boas Práticas](#segurança-e-boas-práticas)
 
 ---
 
+## ⚙ Como Rodar o Projeto
+
+### 🐳 Docker
+
+- Clone o repositório
+```bash
+git clone https://github.com/MateusHG/ERP.git
+```
+
+- Na raiz do projeto, execute o comando docker compose
+```bash
+docker compose up --build
+```
+
+- Acesse o sistema pelo navegador utilizando o link abaixo:
+```bash
+https://localhost:5173/auth/login
+```
+
+- Login e senha para testes:
+```bash
+username: Visitor
+password: erp@1679
+```
+
+---
+
+### 👉 Rodar Manualmente
+- Clone o repositório
+```bash
+git clone https://github.com/MateusHG/ERP.git
+```
+
+### Backend
+- Crie uma database no Postgres (17) e restaure o backup, o mesmo está na pasta abaixo:
+```bash
+ERP\database\init\erp_backup_09022026.sql <- Backup
+```
+
+- Configure o .env para conectar ao banco de dados
+```bash
+ERP\backend\src\config\.env <- Variáveis de ambiente
+```
+
+- Com o banco de dados restaurado e o serviço do Postgres rodando, entre na pasta backend e suba a API
+```bash
+cd backend
+````
+```bash
+npm run
+```
+```bash
+npm run start:watch
+```
+- Se o processo foi concluído com sucesso, a mensagem abaixo aparecerá no terminal:
+```bash
+Server is running... Port:3000
+```
+
+### Frontend
+```bash
+cd frontend
+```
+```bash
+npm install
+```
+```bash
+npm run dev
+```
+- Será aberto automaticamente a página inicial da aplicação.
+```bash
+https://localhost:5173/auth/login.html
+```
+- Login e senha para testes:
+```bash
+username: Visitor
+password: erp@1679
+```
+
+---
 ## 🛠 Tecnologias Utilizadas
 **Frontend:** HTML, CSS, TypeScript e Vite.
 
@@ -33,7 +113,6 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 - JWT para autenticação
 - bcrypt para hashing de senhas
 - Cookie-parser para utilização de cookies
-
 ---
 
 ## 🏗 Arquitetura do Sistema
