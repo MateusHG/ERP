@@ -71,7 +71,7 @@ ERP\backend\src\config\.env <- Variáveis de ambiente
 cd backend
 ````
 ```bash
-npm run
+npm install
 ```
 ```bash
 npm run start:watch
