@@ -5,7 +5,7 @@
 -- Dumped from database version 17.4
 -- Dumped by pg_dump version 17.4
 
--- Started on 2026-02-09 17:59:01
+-- Started on 2026-02-12 16:44:55
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1291,6 +1291,7 @@ COPY public.produtos (id, codigo, nome, descricao, categoria, status, estoque_mi
 COPY public.refresh_tokens (id, user_id, token, expires_at) FROM stdin;
 163	5	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJBZG1pbjQyNDIxMjE0MSIsImlhdCI6MTc2OTUzNzgwMiwiZXhwIjoxNzcwMTQyNjAyfQ.aFQMeU47WWx78psTbeoqaNgC91_UcrYEPXHyXBrrCpg	2026-02-03 15:16:42.562
 164	3	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJBZG1pbiIsImlhdCI6MTc3MDU1NzA3NSwiZXhwIjoxNzcxMTYxODc1fQ.RIwKhjwCDOsWOaNbOpqc0MswbknFHVL--p6Za1r3sR8	2026-02-15 10:24:35.911
+165	5	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJBZG1pbjQyNDIxMjE0MSIsImlhdCI6MTc3MDc2ODU5NywiZXhwIjoxNzcxMzczMzk3fQ.87c7G-xJ9bOLpSQvri63NlLsSDb--M-mc1bahXx3fpY	2026-02-17 21:09:57.001
 \.
 
 
@@ -1306,6 +1307,7 @@ COPY public.users (id, username, password_hash) FROM stdin;
 3	Admin	$2b$10$JIEe0mP.rN.JorF1IgG7U.KRTFkit9iYkuh7OTJ2uofY4JpxzytEG
 4	loginteste1	$2b$10$yxpp/Of425YNrVtVG2VJ5uO5zgLUoXN1mrB45khMpbd/8Pd2lz7Nu
 5	Admin424212141	$2b$10$E7/o8./Yco7lIN1pVtE.WuiBBACLgmrzaN2rKtBSRzp4xoPXbHKPq
+8	Visitor	$2b$10$kJoKXHfFRbq0EJlHAHBpzOnneD27/Y8C/0kSMXnLB4SS87.1Z4k1y
 \.
 
 
@@ -1502,7 +1504,7 @@ SELECT pg_catalog.setval('public.produtos_id_seq', 70, true);
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 164, true);
+SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 166, true);
 
 
 --
@@ -1511,7 +1513,7 @@ SELECT pg_catalog.setval('public.refresh_tokens_id_seq', 164, true);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 7, true);
+SELECT pg_catalog.setval('public.users_id_seq', 8, true);
 
 
 --
@@ -1890,7 +1892,7 @@ ALTER TABLE ONLY public.vendas
     ADD CONSTRAINT vendas_updated_by_fk FOREIGN KEY (updated_by) REFERENCES public.users(id);
 
 
--- Completed on 2026-02-09 17:59:02
+-- Completed on 2026-02-12 16:44:56
 
 --
 -- PostgreSQL database dump complete

@@ -58,7 +58,7 @@ git clone https://github.com/MateusHG/ERP.git
 ### Backend
 - Crie uma database no Postgres (17) e restaure o backup, o mesmo está na pasta abaixo:
 ```bash
-ERP\database\init\erp_backup_09022026.sql <- Backup
+ERP\database\erp_backup_10022026.dmp <- Backup
 ```
 
 - Configure o .env para conectar ao banco de dados
