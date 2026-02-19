@@ -22,7 +22,7 @@ O objetivo é demonstrar habilidades em **análise de sistemas, arquitetura em c
 
 ---
 
-## ⚙ Como Rodar o Projeto
+## ⚙ 1. Como Rodar o Projeto
 
 ### 🐳 Docker
 
@@ -102,7 +102,7 @@ password: erp@1679
 ```
 
 ---
-## 🛠 Tecnologias Utilizadas
+## 🛠 2. Tecnologias Utilizadas
 **Frontend:** HTML, CSS, TypeScript e Vite.
 
 **Backend:** Node.js, Typescript e Express.
@@ -115,7 +115,7 @@ password: erp@1679
 - Cookie-parser para utilização de cookies
 ---
 
-## 🏗 Arquitetura do Sistema
+## 🏗 3. Arquitetura do Sistema
 O projeto adota **arquitetura em camadas**, com separação clara de responsabilidades.
 
 Cada pasta representa um **módulo de negócio** (ex.: produtos, fornecedores, compras), e dentro cada módulos os arquivos seguem a divisão por responsabilidade.
@@ -197,14 +197,24 @@ frontend
 ```
 ---
 
-## 📂 Módulos e Regras de Negócio
+## 📂 4. Módulos
+
+Atualmente a aplicação contempla os seguintes módulos:
+- Dashboards
+- Produtos
+- Fornecedores
+- Clientes
+- Estoque
+- Compras
+- Vendas
+
+## Regras de Negócio
 
 Esta seção descreve as **principais regras de negócio implementadas no sistema**, com destaque para aquelas que simulam **cenários reais e críticos de um ERP**, especialmente relacionadas a **controle de estoque, integridade de dados e histórico das operações**.
 
+---
 
-## 🔴 Regras Críticas de Estoque
-
-### Bloqueio de Estoque Negativo
+### 🚫 Bloqueio de Estoque Negativo
 O sistema **não permite que o estoque de um produto fique negativo** em nenhuma operação crítica.
 
 Essa regra é aplicada nos seguintes cenários:
@@ -243,7 +253,7 @@ No momento da finalização de uma venda, o sistema executa o seguinte fluxo:
 4. Se o estoque for suficiente:
 - A venda é finalizada
 - O saldo de estoque é atualizado
-- A movimentação é registrada no histórico
+- A movimentação é registrada no histórico, contendo data e hora da movimentação, assim como o usuário que realizou a finalização.
 
 
 ![Estoque Venda Mov](docs/images/estoque-mov-venda.gif)
@@ -266,23 +276,10 @@ Bloqueio visual no front-end:
 
 ---
 
-### Estorno de Compras e Ajustes de Estoque
-O sistema trata **estornos de compras** e **ajustes manuais de estoque** como **operações críticas**, aplicando a **mesma lógica de validação, rastreabilidade e auditoria** utilizada na finalização de vendas.
 
-Todas essas operações:
-- Validam o impacto no saldo do estoque
-- Bloqueiam qualquer ação que resulte em **estoque negativo**
-- Geram registros completos de movimentação, contendo:
-  - ID da transação
-  - Tipo da operação
-  - Produto e quantidade
-  - Usuário responsável
-  - Data e hora da ação
-
----
 
 ### Estorno de Compras
-O estorno de compras representa a **ação reversa de uma compra finalizada**.
+O estorno de compras representa a **ação reversa de uma compra finalizada**, ou seja, uma saída de estoque.
 
 Fluxo resumido:
 - A compra deve estar com status **finalizada**
@@ -303,13 +300,14 @@ Os ajustes manuais permitem correções administrativas, inventários ou perdas 
 Regras aplicadas:
 - Ajustes de saída passam por validação de saldo
 - Não é permitido gerar estoque negativo
-- Todo ajuste é registrado como movimentação auditável
+- Não é possível excluir ou estornar um ajuste
+- É obrigatório informar um motivo para o ajuste
 
 Essa abordagem evita alterações silenciosas e mantém a integridade do estoque ao longo do tempo.
 
 ----
 
-## 🔐 Segurança da Aplicação
+## 🔐 5. Segurança da Aplicação
 A aplicação foi projetada com foco em **segurança no back-end**, garantindo que os dados permaneçam protegidos **independentemente de qualquer tentativa de burlar o front-end**.
 
 ### Proteção de Rotas
@@ -341,4 +339,6 @@ Resolvemos isso da seguinte forma:
 
 ## Cadastro de armazenamento de senhas
 
-[ Em construção ]
+O sistema utiliza a biblioteca **bcrypt** para realizar o hashing das senhas. Essa algoritmo é amplamento adotado por oferecer uma grande dificuldade tanto para ataques de força bruta, quanto para ataques baseados em tabelas pré-computadas(rainbow tables), mesmo em cenários de vazamento da base de usuários.
+
+O bcrypt aplica automaticamente um salt aleatório e único para cada senha, garantindo que usuários com a mesma senha resultem em hashes diferentes. Além disso, o fator de custo (cost factor) define a complexidade computacional do algoritmo, permitindo ajustar o tempo de processamento do hash e aumentar a dificuldade de ataques conforme a capacidade de hardware evolui.
